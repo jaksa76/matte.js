@@ -21,6 +21,8 @@
   --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
   --radius-md: 8px;
   --radius-lg: 12px;
+  --nav-width: 240px;
+  --nav-collapsed-width: 64px;
 }
 
 * {
@@ -32,6 +34,136 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Multi-Entity App Layout */
+.multi-entity-app {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+}
+
+.entity-nav {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--nav-width);
+  background-color: white;
+  border-right: 1px solid var(--color-gray-200);
+  transition: width 0.3s ease;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.entity-nav.collapsed {
+  width: var(--nav-collapsed-width);
+}
+
+.nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--color-gray-200);
+  min-height: 70px;
+}
+
+.nav-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.nav-toggle {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--color-gray-600);
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.nav-toggle:hover {
+  background-color: var(--color-gray-100);
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-gray-700);
+  transition: background-color 0.2s;
+  gap: 12px;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.nav-link:hover {
+  background-color: var(--color-gray-50);
+}
+
+.nav-link.active {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.nav-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entity-nav.collapsed .nav-label {
+  display: none;
+}
+
+.entity-content {
+  margin-left: var(--nav-width);
+  flex: 1;
+  transition: margin-left 0.3s ease;
+}
+
+.entity-content.nav-collapsed {
+  margin-left: var(--nav-collapsed-width);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 18px;
+  color: var(--color-gray-600);
 }
 
 /* EntityApp styles */

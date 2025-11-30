@@ -23645,8 +23645,11 @@ Check the top-level render call using <` + parentName + ">.";
   });
 
   // src/framework/ui/client.tsx
-  var import_react6 = __toESM(require_react(), 1);
+  var import_react7 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
+
+  // src/framework/ui/MultiEntityApp.tsx
+  var import_react6 = __toESM(require_react(), 1);
 
   // src/framework/ui/EntityApp.tsx
   var import_react5 = __toESM(require_react(), 1);
@@ -24422,15 +24425,118 @@ Check the top-level render call using <` + parentName + ">.";
     }, undefined, true, undefined, this);
   }
 
-  // src/framework/ui/client.tsx
+  // src/framework/ui/MultiEntityApp.tsx
   var jsx_dev_runtime5 = __toESM(require_jsx_dev_runtime(), 1);
+  function toKebabCase2(str) {
+    return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, "");
+  }
+  function MultiEntityApp({ entities }) {
+    const [collapsed, setCollapsed] = import_react6.useState(false);
+    const [currentEntityName, setCurrentEntityName] = import_react6.useState("");
+    import_react6.useEffect(() => {
+      const path = window.location.pathname;
+      const entityFromPath = path.split("/")[1];
+      if (entityFromPath && entities.some((e) => toKebabCase2(e.name) === entityFromPath)) {
+        setCurrentEntityName(entityFromPath);
+      } else if (entities.length > 0) {
+        const defaultEntity = toKebabCase2(entities[0].name);
+        setCurrentEntityName(defaultEntity);
+        window.history.replaceState({}, "", `/${defaultEntity}`);
+      }
+    }, [entities]);
+    import_react6.useEffect(() => {
+      const handlePopState = () => {
+        const path = window.location.pathname;
+        const entityFromPath = path.split("/")[1];
+        if (entityFromPath && entities.some((e) => toKebabCase2(e.name) === entityFromPath)) {
+          setCurrentEntityName(entityFromPath);
+        }
+      };
+      window.addEventListener("popstate", handlePopState);
+      return () => window.removeEventListener("popstate", handlePopState);
+    }, [entities]);
+    const handleNavigate = (entityName) => {
+      const kebabName = toKebabCase2(entityName);
+      setCurrentEntityName(kebabName);
+      window.history.pushState({}, "", `/${kebabName}`);
+    };
+    const currentEntity = entities.find((e) => toKebabCase2(e.name) === currentEntityName);
+    if (!currentEntity) {
+      return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+        className: "multi-entity-app",
+        children: /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+          className: "loading-container",
+          children: "Loading..."
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this);
+    }
+    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+      className: "multi-entity-app",
+      children: [
+        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("nav", {
+          className: `entity-nav ${collapsed ? "collapsed" : ""}`,
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+              className: "nav-header",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("h1", {
+                  className: "nav-title",
+                  children: collapsed ? "M" : "Matte.js"
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("button", {
+                  className: "nav-toggle",
+                  onClick: () => setCollapsed(!collapsed),
+                  "aria-label": collapsed ? "Expand navigation" : "Collapse navigation",
+                  children: collapsed ? "→" : "←"
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("ul", {
+              className: "nav-list",
+              children: entities.map((entity) => {
+                const kebabName = toKebabCase2(entity.name);
+                const isActive = currentEntityName === kebabName;
+                return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("li", {
+                  className: "nav-item",
+                  children: /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("button", {
+                    className: `nav-link ${isActive ? "active" : ""}`,
+                    onClick: () => handleNavigate(entity.name),
+                    title: entity.name,
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("span", {
+                        className: "nav-icon",
+                        children: "\uD83D\uDCCB"
+                      }, undefined, false, undefined, this),
+                      !collapsed && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("span", {
+                        className: "nav-label",
+                        children: entity.name
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this)
+                }, entity.name, false, undefined, this);
+              })
+            }, undefined, false, undefined, this)
+          ]
+        }, undefined, true, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("main", {
+          className: `entity-content ${collapsed ? "nav-collapsed" : ""}`,
+          children: /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(EntityApp, {
+            entity: currentEntity,
+            apiUrl: `/api/${currentEntityName}`
+          }, undefined, false, undefined, this)
+        }, undefined, false, undefined, this)
+      ]
+    }, undefined, true, undefined, this);
+  }
+
+  // src/framework/ui/client.tsx
+  var jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
   var config = window.ENTITY_CONFIG;
-  if (config) {
+  if (config && config.entities) {
     const root = import_client.default.createRoot(document.getElementById("root"));
-    root.render(/* @__PURE__ */ jsx_dev_runtime5.jsxDEV(import_react6.default.StrictMode, {
-      children: /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(EntityApp, {
-        entity: config.entity,
-        apiUrl: config.apiUrl
+    root.render(/* @__PURE__ */ jsx_dev_runtime6.jsxDEV(import_react7.default.StrictMode, {
+      children: /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(MultiEntityApp, {
+        entities: config.entities
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this));
   }

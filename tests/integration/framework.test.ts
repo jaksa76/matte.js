@@ -4,7 +4,7 @@ import { EntityRegistry } from '../../src/framework/registry';
 import { t, ownedEntity, field, string, richtext, date, number, boolean } from '../../src/framework/entities';
 
 describe('Integration Tests', () => {
-  let framework: Matte;
+  let app: Matte;
   let baseUrl: string;
   const testPort = 3001;
 
@@ -29,22 +29,22 @@ describe('Integration Tests', () => {
       string('tags'),
     ]);
 
-    framework = new Matte({
+    app = new Matte({
       dbPath: ':memory:',
       port: testPort,
     });
 
-    framework.register(Task);
-    framework.register(Note);
+    app.register(Task);
+    app.register(Note);
 
-    await framework.start();
+    await app.start();
     
     baseUrl = `http://localhost:${testPort}`;
   });
 
   afterAll(() => {
-    if (framework) {
-      framework.close();
+    if (app) {
+      app.close();
     }
   });
 
@@ -363,9 +363,10 @@ describe('Integration Tests', () => {
 
       const html = await res.text();
       expect(html).toContain('<!DOCTYPE html>');
-      expect(html).toContain('Task Management');
-      expect(html).toContain('ENTITY_CONFIG');
-      expect(html).toContain('/client.js');
+      expect(html).toContain('Matte.js');
+      expect(html).toContain('Available Entities');
+      expect(html).toContain('Task');
+      expect(html).toContain('Note');
     });
 
     test('serves HTML at /index.html', async () => {
@@ -373,6 +374,18 @@ describe('Integration Tests', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers.get('Content-Type')).toBe('text/html');
+    });
+
+    test('serves entity app at entity path', async () => {
+      const res = await fetch(`${baseUrl}/task`);
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get('Content-Type')).toBe('text/html');
+
+      const html = await res.text();
+      expect(html).toContain('<!DOCTYPE html>');
+      expect(html).toContain('ENTITY_CONFIG');
+      expect(html).toContain('/client.js');
     });
   });
 

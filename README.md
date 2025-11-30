@@ -59,16 +59,16 @@ file("avatar").maxSize(5 * 1024 * 1024)
 ```typescript
 import { Matte } from './framework';
 
-const framework = new Matte({
+const app = new Matte({
   dbPath: './data.db',
   port: 3000,
 });
 
 // Register entities
-framework.register(Task);
+app.register(Task);
 
 // Start the framework (initialization happens automatically)
-await framework.start();
+await app.start();
 ```
 
 This automatically:

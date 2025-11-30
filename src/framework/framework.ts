@@ -77,8 +77,16 @@ export class Matte {
           });
         }
 
-        // Serve UI
+        // Serve landing page at root
         if (url.pathname === '/' || url.pathname === '/index.html') {
+          return new Response(self.renderLandingPage(), {
+            headers: { 'Content-Type': 'text/html' },
+          });
+        }
+
+        // Serve entity UI - handle entity-specific routes
+        if (entities.some(e => url.pathname === `/${self.toKebabCase(e.name)}` || 
+                               url.pathname.startsWith(`/${self.toKebabCase(e.name)}/`))) {
           return new Response(self.renderHTML(), {
             headers: { 'Content-Type': 'text/html' },
           });
@@ -128,24 +136,127 @@ export class Matte {
     this.cssBundle = await Bun.file('./src/framework/ui/styles.css').text();
   }
 
-  private renderHTML(): string {
+  private renderLandingPage(): string {
     const entities = EntityRegistry.getAll();
-    const entityName = entities[0]?.name || 'Entity';
     
     return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${entityName} Management - Matte.js</title>
+  <title>Matte.js</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .landing-page {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 60px 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .landing-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    .landing-title {
+      font-size: 48px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .landing-subtitle {
+      font-size: 18px;
+      color: #666;
+      margin: 0;
+    }
+    .entities-section {
+      margin-top: 40px;
+    }
+    .entities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .entity-card {
+      background: white;
+      border: 2px solid #e1e4e8;
+      border-radius: 8px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s ease;
+      display: block;
+    }
+    .entity-card:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    }
+    .entity-card-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: #24292e;
+    }
+    .entity-card-fields {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="landing-page">
+    <div class="landing-header">
+      <h1 class="landing-title">Matte.js</h1>
+      <p class="landing-subtitle">Full-stack entity management framework</p>
+    </div>
+    <div class="entities-section">
+      <h2>Available Entities</h2>
+      ${entities.length > 0 ? `
+      <div class="entities-grid">
+        ${entities.map(e => `
+        <a href="/${this.toKebabCase(e.name)}" class="entity-card">
+          <h3 class="entity-card-title">${e.name}</h3>
+          <p class="entity-card-fields">${e.fieldOrder.length} field${e.fieldOrder.length !== 1 ? 's' : ''}</p>
+        </a>
+        `).join('')}
+      </div>
+      ` : `
+      <div class="empty-state">
+        <p>No entities registered yet.</p>
+      </div>
+      `}
+    </div>
+  </div>
+</body>
+</html>`;
+  }
+
+  private renderHTML(): string {
+    const entities = EntityRegistry.getAll();
+    
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matte.js - Entity Management</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <div id="root"></div>
   <script>
     window.ENTITY_CONFIG = {
-      entity: ${JSON.stringify(entities[0])},
-      apiUrl: '/api/${this.toKebabCase(entityName)}'
+      entities: ${JSON.stringify(entities)}
     };
   </script>
   <script src="/client.js"></script>

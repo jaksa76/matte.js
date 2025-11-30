@@ -2,12 +2,13 @@
  * Comprehensive example showing all shortcuts and field customization
  */
 
+import { Matte } from '../framework';
 import { ownedEntity, t, field, string, number, date, richtext, file, boolean } from '../framework/entities';
 
 // ============================================================================
 // Example 1: Basic shortcuts
 // ============================================================================
-ownedEntity("Person", [
+const Person = ownedEntity("Person", [
   string("firstName"),
   string("lastName"),
   number("age"),
@@ -18,7 +19,7 @@ ownedEntity("Person", [
 // ============================================================================
 // Example 2: Shortcuts with modifiers
 // ============================================================================
-ownedEntity("Product", [
+const Product = ownedEntity("Product", [
   string("name").required().minLength(3).maxLength(100),
   string("sku").required(),
   number("price").required().min(0),
@@ -32,7 +33,7 @@ ownedEntity("Product", [
 // ============================================================================
 // Example 3: Using field() for complex types
 // ============================================================================
-ownedEntity("Task", [
+const Task = ownedEntity("Task", [
   string("title").required(),
   richtext("description"),
   field("status", t.enum(["open", "in_progress", "blocked", "done"]).default("open")),
@@ -45,7 +46,7 @@ ownedEntity("Task", [
 // ============================================================================
 // Example 4: Mixing shortcuts and field() helpers
 // ============================================================================
-ownedEntity("BlogPost", [
+const BlogPost = ownedEntity("BlogPost", [
   // Shortcuts for simple fields
   string("title").required().maxLength(200),
   string("slug").required(),
@@ -62,3 +63,10 @@ ownedEntity("BlogPost", [
   // File field
   file("coverImage"),
 ]);
+
+const app = new Matte();
+app.register(Person);
+app.register(Product);
+app.register(Task);
+app.register(BlogPost);
+app.start();
