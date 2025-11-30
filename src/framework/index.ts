@@ -3,8 +3,8 @@ export { Matte } from './framework';
 export type { MatteOptions } from './framework';
 
 // Entity definitions
-export { entity, ownedEntity, t, field, string, number, date, richtext, file, boolean } from './entities';
-export type { EntityDefinition, EntitySchema, EntitySchemaDefinition, FieldType, FieldDefinition } from './entities';
+export { entity, ownedEntity, t, field, string, number, date, richtext, file, boolean, group, hgroup } from './entities';
+export type { EntityDefinition, EntitySchema, EntitySchemaDefinition, FieldType, FieldDefinition, UIMetadata, FieldGroup } from './entities';
 
 // View wrappers
 export { View, listView, gridView } from './views';

@@ -93,20 +93,43 @@ export function FormView({ entity, initialData, apiUrl, onSuccess, onCancel }: F
       <h1 className="form-view-title">{initialData?.id ? 'Edit' : 'Create'} {entity.name}</h1>
 
       <form onSubmit={handleSubmit} className="form-card">
-        {Object.entries(entity.schema).map(([fieldName, field]) => (
-          <div key={fieldName} className="form-group">
-            <label className="form-label">
-              {fieldName}
-              {field.isRequired && <span className="required"> *</span>}
-            </label>
-            {renderField(fieldName, field, formData[fieldName], (value) => handleChange(fieldName, value))}
-            {errors[fieldName] && (
-              <div className="form-error">
-                {errors[fieldName]}
-              </div>
-            )}
-          </div>
-        ))}
+        {Object.entries(entity.schema).map(([fieldName, field]) => {
+          // Skip hidden fields
+          if (field.ui?.hidden) return null;
+
+          const ui = field.ui || {};
+          const labelText = ui.label !== undefined ? ui.label : fieldName;
+          const showLabel = !ui.hideLabel && labelText !== null;
+          
+          // Calculate field width style
+          const widthStyle = ui.width ? { gridColumn: `span ${Math.round(ui.width * 12)}` } : {};
+          
+          return (
+            <div 
+              key={fieldName} 
+              className="form-group"
+              style={widthStyle}
+            >
+              {showLabel && (
+                <label className={`form-label ${ui.floatingLabel ? 'floating' : ''}`}>
+                  {labelText}
+                  {field.isRequired && <span className="required"> *</span>}
+                </label>
+              )}
+              {renderField(fieldName, field, formData[fieldName], (value) => handleChange(fieldName, value))}
+              {ui.help && (
+                <div className="form-help">
+                  {ui.help}
+                </div>
+              )}
+              {errors[fieldName] && (
+                <div className="form-error">
+                  {errors[fieldName]}
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         <div className="form-actions">
           <button 
@@ -139,14 +162,54 @@ function renderField(
   value: any,
   onChange: (value: any) => void
 ): React.ReactNode {
-  if (field.type === 'enum') {
+  const ui = field.ui || {};
+  const isReadOnly = ui.readOnly || false;
+  const placeholderText = ui.placeholder || '';
+  
+  // Build class names
+  const baseClasses = ['form-input'];
+  if (ui.bold) baseClasses.push('bold');
+  if (ui.large) baseClasses.push('large');
+  
+  // Build inline styles
+  const inlineStyle: React.CSSProperties = {};
+  if (ui.alignLeft) inlineStyle.textAlign = 'left';
+  if (ui.alignRight) inlineStyle.textAlign = 'right';
+  if (ui.alignCenter) inlineStyle.textAlign = 'center';
+  
+  // Handle color (can be string or function)
+  const colorValue = typeof ui.color === 'function' ? ui.color(value) : ui.color;
+  if (colorValue) inlineStyle.color = colorValue;
+  
+  // Merge custom styles
+  const finalStyle = { ...inlineStyle, ...ui.style };
+  
+  // Helper to wrap value with prefix/suffix
+  const wrapValue = (displayValue: React.ReactNode): React.ReactNode => {
+    const prefixText = typeof ui.prefix === 'function' ? ui.prefix(value) : ui.prefix;
+    const suffixText = typeof ui.suffix === 'function' ? ui.suffix(value) : ui.suffix;
+    
+    if (!prefixText && !suffixText) return displayValue;
+    
     return (
+      <div className="input-wrapper">
+        {prefixText && <span className="input-prefix">{prefixText}</span>}
+        {displayValue}
+        {suffixText && <span className="input-suffix">{suffixText}</span>}
+      </div>
+    );
+  };
+
+  if (field.type === 'enum') {
+    return wrapValue(
       <select 
         value={value || ''} 
         onChange={(e) => onChange(e.target.value)}
-        className="form-input"
+        className={baseClasses.join(' ')}
+        style={finalStyle}
+        disabled={isReadOnly}
       >
-        <option value="">Select...</option>
+        <option value="">{placeholderText || 'Select...'}</option>
         {field.values.map((v) => (
           <option key={v} value={v}>{v}</option>
         ))}
@@ -155,54 +218,64 @@ function renderField(
   }
 
   if (field.type === 'number') {
-    return (
+    return wrapValue(
       <input
         type="number"
         value={value || ''}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="form-input"
+        className={baseClasses.join(' ')}
+        style={finalStyle}
         min={'_min' in field ? field._min : undefined}
         max={'_max' in field ? field._max : undefined}
+        placeholder={placeholderText}
+        readOnly={isReadOnly}
       />
     );
   }
 
   if (field.type === 'date') {
     const dateValue = value ? new Date(value).toISOString().split('T')[0] : '';
-    return (
+    return wrapValue(
       <input
         type="date"
         value={dateValue}
         onChange={(e) => onChange(e.target.value ? new Date(e.target.value).toISOString() : null)}
-        className="form-input"
+        className={baseClasses.join(' ')}
+        style={finalStyle}
+        readOnly={isReadOnly}
       />
     );
   }
 
   if (field.type === 'richtext') {
-    return (
+    return wrapValue(
       <textarea
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         rows={6}
-        className="form-input form-textarea"
+        className={baseClasses.concat('form-textarea').join(' ')}
+        style={finalStyle}
+        placeholder={placeholderText}
+        readOnly={isReadOnly}
       />
     );
   }
 
   if (field.type === 'boolean') {
-    return (
+    return wrapValue(
       <input
         type="checkbox"
         checked={value || false}
         onChange={(e) => onChange(e.target.checked)}
-        className="form-input"
+        className={baseClasses.join(' ')}
+        style={finalStyle}
+        disabled={isReadOnly}
       />
     );
   }
 
   if (field.type === 'file' && field.isArray) {
-    return (
+    return wrapValue(
       <input
         type="file"
         multiple
@@ -210,28 +283,35 @@ function renderField(
           const files = Array.from(e.target.files || []);
           onChange(files.map(f => f.name));
         }}
-        className="form-input"
+        className={baseClasses.join(' ')}
+        style={finalStyle}
+        disabled={isReadOnly}
       />
     );
   }
 
   if (field.type === 'file') {
-    return (
+    return wrapValue(
       <input
         type="file"
         onChange={(e) => onChange(e.target.files?.[0]?.name || null)}
-        className="form-input"
+        className={baseClasses.join(' ')}
+        style={finalStyle}
+        disabled={isReadOnly}
       />
     );
   }
 
   // Default: string input
-  return (
+  return wrapValue(
     <input
       type="text"
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
-      className="form-input"
+      className={baseClasses.join(' ')}
+      style={finalStyle}
+      placeholder={placeholderText}
+      readOnly={isReadOnly}
     />
   );
 }

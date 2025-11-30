@@ -91,14 +91,45 @@ export function GridView({ entity, apiUrl, onSelect, onEdit, onCreate }: GridVie
           {items.map(item => (
             <div key={item.id} className="grid-card">
               <div className="grid-card-content">
-                {Object.keys(entity.schema).slice(0, 4).map(field => (
-                  <div key={field} className="grid-card-field">
-                    <span className="grid-card-label">{field}:</span>
-                    <span className="grid-card-value">
-                      {formatValue(item[field], entity.schema[field]!)}
-                    </span>
-                  </div>
-                ))}
+                {Object.entries(entity.schema)
+                  .filter(([_, field]) => !field.ui?.hidden)
+                  .slice(0, 4)
+                  .map(([fieldName, field]) => {
+                    const ui = field.ui || {};
+                    const labelText = ui.label !== undefined ? ui.label : fieldName;
+                    const displayValue = formatValue(item[fieldName], field);
+                    
+                    // Build inline styles
+                    const style: React.CSSProperties = {};
+                    if (ui.alignLeft) style.textAlign = 'left';
+                    if (ui.alignRight) style.textAlign = 'right';
+                    if (ui.alignCenter) style.textAlign = 'center';
+                    if (ui.bold) style.fontWeight = 'bold';
+                    if (ui.large) style.fontSize = '1.1em';
+                    
+                    // Handle color
+                    const colorValue = typeof ui.color === 'function' ? ui.color(item[fieldName]) : ui.color;
+                    if (colorValue) style.color = colorValue;
+                    
+                    // Merge custom styles
+                    const finalStyle = { ...style, ...ui.style };
+                    
+                    // Wrap with prefix/suffix
+                    const prefixText = typeof ui.prefix === 'function' ? ui.prefix(item[fieldName]) : ui.prefix;
+                    const suffixText = typeof ui.suffix === 'function' ? ui.suffix(item[fieldName]) : ui.suffix;
+                    const wrappedValue = `${prefixText || ''}${displayValue}${suffixText || ''}`;
+                    
+                    return (
+                      <div key={fieldName} className="grid-card-field">
+                        {!ui.hideLabel && labelText && (
+                          <span className="grid-card-label">{labelText}:</span>
+                        )}
+                        <span className="grid-card-value" style={finalStyle}>
+                          {wrappedValue}
+                        </span>
+                      </div>
+                    );
+                  })}
               </div>
               <div className="grid-card-actions">
                 {onSelect && (

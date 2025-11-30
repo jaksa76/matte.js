@@ -23933,9 +23933,13 @@ Check the top-level render call using <` + parentName + ">.";
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("thead", {
                 children: /* @__PURE__ */ jsx_dev_runtime.jsxDEV("tr", {
                   children: [
-                    Object.keys(entity.schema).slice(0, 4).map((field) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("th", {
-                      children: field
-                    }, field, false, undefined, this)),
+                    Object.entries(entity.schema).filter(([_, field]) => !field.ui?.hidden).slice(0, 4).map(([fieldName, field]) => {
+                      const ui = field.ui || {};
+                      const labelText = ui.label !== undefined ? ui.label : fieldName;
+                      return /* @__PURE__ */ jsx_dev_runtime.jsxDEV("th", {
+                        children: labelText
+                      }, fieldName, false, undefined, this);
+                    }),
                     /* @__PURE__ */ jsx_dev_runtime.jsxDEV("th", {
                       className: "actions-header",
                       children: "Actions"
@@ -23946,9 +23950,29 @@ Check the top-level render call using <` + parentName + ">.";
               /* @__PURE__ */ jsx_dev_runtime.jsxDEV("tbody", {
                 children: items.map((item) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("tr", {
                   children: [
-                    Object.keys(entity.schema).slice(0, 4).map((field) => /* @__PURE__ */ jsx_dev_runtime.jsxDEV("td", {
-                      children: formatValue(item[field], entity.schema[field])
-                    }, field, false, undefined, this)),
+                    Object.entries(entity.schema).filter(([_, field]) => !field.ui?.hidden).slice(0, 4).map(([fieldName, field]) => {
+                      const ui = field.ui || {};
+                      const displayValue = formatValue(item[fieldName], field);
+                      const style = {};
+                      if (ui.alignLeft)
+                        style.textAlign = "left";
+                      if (ui.alignRight)
+                        style.textAlign = "right";
+                      if (ui.alignCenter)
+                        style.textAlign = "center";
+                      if (ui.bold)
+                        style.fontWeight = "bold";
+                      const colorValue = typeof ui.color === "function" ? ui.color(item[fieldName]) : ui.color;
+                      if (colorValue)
+                        style.color = colorValue;
+                      const prefixText = typeof ui.prefix === "function" ? ui.prefix(item[fieldName]) : ui.prefix;
+                      const suffixText = typeof ui.suffix === "function" ? ui.suffix(item[fieldName]) : ui.suffix;
+                      const wrappedValue = `${prefixText || ""}${displayValue}${suffixText || ""}`;
+                      return /* @__PURE__ */ jsx_dev_runtime.jsxDEV("td", {
+                        style,
+                        children: wrappedValue
+                      }, fieldName, false, undefined, this);
+                    }),
                     /* @__PURE__ */ jsx_dev_runtime.jsxDEV("td", {
                       className: "actions-cell",
                       children: [
@@ -24133,22 +24157,46 @@ Check the top-level render call using <` + parentName + ">.";
             children: [
               /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
                 className: "grid-card-content",
-                children: Object.keys(entity.schema).slice(0, 4).map((field) => /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
-                  className: "grid-card-field",
-                  children: [
-                    /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
-                      className: "grid-card-label",
-                      children: [
-                        field,
-                        ":"
-                      ]
-                    }, undefined, true, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
-                      className: "grid-card-value",
-                      children: formatValue2(item[field], entity.schema[field])
-                    }, undefined, false, undefined, this)
-                  ]
-                }, field, true, undefined, this))
+                children: Object.entries(entity.schema).filter(([_, field]) => !field.ui?.hidden).slice(0, 4).map(([fieldName, field]) => {
+                  const ui = field.ui || {};
+                  const labelText = ui.label !== undefined ? ui.label : fieldName;
+                  const displayValue = formatValue2(item[fieldName], field);
+                  const style = {};
+                  if (ui.alignLeft)
+                    style.textAlign = "left";
+                  if (ui.alignRight)
+                    style.textAlign = "right";
+                  if (ui.alignCenter)
+                    style.textAlign = "center";
+                  if (ui.bold)
+                    style.fontWeight = "bold";
+                  if (ui.large)
+                    style.fontSize = "1.1em";
+                  const colorValue = typeof ui.color === "function" ? ui.color(item[fieldName]) : ui.color;
+                  if (colorValue)
+                    style.color = colorValue;
+                  const finalStyle = { ...style, ...ui.style };
+                  const prefixText = typeof ui.prefix === "function" ? ui.prefix(item[fieldName]) : ui.prefix;
+                  const suffixText = typeof ui.suffix === "function" ? ui.suffix(item[fieldName]) : ui.suffix;
+                  const wrappedValue = `${prefixText || ""}${displayValue}${suffixText || ""}`;
+                  return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                    className: "grid-card-field",
+                    children: [
+                      !ui.hideLabel && labelText && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                        className: "grid-card-label",
+                        children: [
+                          labelText,
+                          ":"
+                        ]
+                      }, undefined, true, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                        className: "grid-card-value",
+                        style: finalStyle,
+                        children: wrappedValue
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, fieldName, true, undefined, this);
+                })
               }, undefined, false, undefined, this),
               /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
                 className: "grid-card-actions",
@@ -24430,26 +24478,39 @@ Check the top-level render call using <` + parentName + ">.";
           onSubmit: handleSubmit,
           className: "form-card",
           children: [
-            Object.entries(entity.schema).map(([fieldName, field]) => /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
-              className: "form-group",
-              children: [
-                /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("label", {
-                  className: "form-label",
-                  children: [
-                    fieldName,
-                    field.isRequired && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("span", {
-                      className: "required",
-                      children: " *"
-                    }, undefined, false, undefined, this)
-                  ]
-                }, undefined, true, undefined, this),
-                renderField(fieldName, field, formData[fieldName], (value) => handleChange(fieldName, value)),
-                errors[fieldName] && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
-                  className: "form-error",
-                  children: errors[fieldName]
-                }, undefined, false, undefined, this)
-              ]
-            }, fieldName, true, undefined, this)),
+            Object.entries(entity.schema).map(([fieldName, field]) => {
+              if (field.ui?.hidden)
+                return null;
+              const ui = field.ui || {};
+              const labelText = ui.label !== undefined ? ui.label : fieldName;
+              const showLabel = !ui.hideLabel && labelText !== null;
+              const widthStyle = ui.width ? { gridColumn: `span ${Math.round(ui.width * 12)}` } : {};
+              return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
+                className: "form-group",
+                style: widthStyle,
+                children: [
+                  showLabel && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("label", {
+                    className: `form-label ${ui.floatingLabel ? "floating" : ""}`,
+                    children: [
+                      labelText,
+                      field.isRequired && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("span", {
+                        className: "required",
+                        children: " *"
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this),
+                  renderField(fieldName, field, formData[fieldName], (value) => handleChange(fieldName, value)),
+                  ui.help && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
+                    className: "form-help",
+                    children: ui.help
+                  }, undefined, false, undefined, this),
+                  errors[fieldName] && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
+                    className: "form-error",
+                    children: errors[fieldName]
+                  }, undefined, false, undefined, this)
+                ]
+              }, fieldName, true, undefined, this);
+            }),
             /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
               className: "form-actions",
               children: [
@@ -24487,82 +24548,140 @@ Check the top-level render call using <` + parentName + ">.";
     }, undefined, true, undefined, this);
   }
   function renderField(fieldName, field, value, onChange) {
+    const ui = field.ui || {};
+    const isReadOnly = ui.readOnly || false;
+    const placeholderText = ui.placeholder || "";
+    const baseClasses = ["form-input"];
+    if (ui.bold)
+      baseClasses.push("bold");
+    if (ui.large)
+      baseClasses.push("large");
+    const inlineStyle = {};
+    if (ui.alignLeft)
+      inlineStyle.textAlign = "left";
+    if (ui.alignRight)
+      inlineStyle.textAlign = "right";
+    if (ui.alignCenter)
+      inlineStyle.textAlign = "center";
+    const colorValue = typeof ui.color === "function" ? ui.color(value) : ui.color;
+    if (colorValue)
+      inlineStyle.color = colorValue;
+    const finalStyle = { ...inlineStyle, ...ui.style };
+    const wrapValue = (displayValue) => {
+      const prefixText = typeof ui.prefix === "function" ? ui.prefix(value) : ui.prefix;
+      const suffixText = typeof ui.suffix === "function" ? ui.suffix(value) : ui.suffix;
+      if (!prefixText && !suffixText)
+        return displayValue;
+      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
+        className: "input-wrapper",
+        children: [
+          prefixText && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("span", {
+            className: "input-prefix",
+            children: prefixText
+          }, undefined, false, undefined, this),
+          displayValue,
+          suffixText && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("span", {
+            className: "input-suffix",
+            children: suffixText
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this);
+    };
     if (field.type === "enum") {
-      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("select", {
+      return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("select", {
         value: value || "",
         onChange: (e) => onChange(e.target.value),
-        className: "form-input",
+        className: baseClasses.join(" "),
+        style: finalStyle,
+        disabled: isReadOnly,
         children: [
           /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("option", {
             value: "",
-            children: "Select..."
+            children: placeholderText || "Select..."
           }, undefined, false, undefined, this),
           field.values.map((v) => /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("option", {
             value: v,
             children: v
           }, v, false, undefined, this))
         ]
-      }, undefined, true, undefined, this);
+      }, undefined, true, undefined, this));
     }
     if (field.type === "number") {
-      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+      return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "number",
         value: value || "",
         onChange: (e) => onChange(parseFloat(e.target.value)),
-        className: "form-input",
+        className: baseClasses.join(" "),
+        style: finalStyle,
         min: "_min" in field ? field._min : undefined,
-        max: "_max" in field ? field._max : undefined
-      }, undefined, false, undefined, this);
+        max: "_max" in field ? field._max : undefined,
+        placeholder: placeholderText,
+        readOnly: isReadOnly
+      }, undefined, false, undefined, this));
     }
     if (field.type === "date") {
       const dateValue = value ? new Date(value).toISOString().split("T")[0] : "";
-      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+      return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "date",
         value: dateValue,
         onChange: (e) => onChange(e.target.value ? new Date(e.target.value).toISOString() : null),
-        className: "form-input"
-      }, undefined, false, undefined, this);
+        className: baseClasses.join(" "),
+        style: finalStyle,
+        readOnly: isReadOnly
+      }, undefined, false, undefined, this));
     }
     if (field.type === "richtext") {
-      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("textarea", {
+      return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("textarea", {
         value: value || "",
         onChange: (e) => onChange(e.target.value),
         rows: 6,
-        className: "form-input form-textarea"
-      }, undefined, false, undefined, this);
+        className: baseClasses.concat("form-textarea").join(" "),
+        style: finalStyle,
+        placeholder: placeholderText,
+        readOnly: isReadOnly
+      }, undefined, false, undefined, this));
     }
     if (field.type === "boolean") {
-      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+      return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "checkbox",
         checked: value || false,
         onChange: (e) => onChange(e.target.checked),
-        className: "form-input"
-      }, undefined, false, undefined, this);
+        className: baseClasses.join(" "),
+        style: finalStyle,
+        disabled: isReadOnly
+      }, undefined, false, undefined, this));
     }
     if (field.type === "file" && field.isArray) {
-      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+      return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "file",
         multiple: true,
         onChange: (e) => {
           const files = Array.from(e.target.files || []);
           onChange(files.map((f) => f.name));
         },
-        className: "form-input"
-      }, undefined, false, undefined, this);
+        className: baseClasses.join(" "),
+        style: finalStyle,
+        disabled: isReadOnly
+      }, undefined, false, undefined, this));
     }
     if (field.type === "file") {
-      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+      return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "file",
         onChange: (e) => onChange(e.target.files?.[0]?.name || null),
-        className: "form-input"
-      }, undefined, false, undefined, this);
+        className: baseClasses.join(" "),
+        style: finalStyle,
+        disabled: isReadOnly
+      }, undefined, false, undefined, this));
     }
-    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+    return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
       type: "text",
       value: value || "",
       onChange: (e) => onChange(e.target.value),
-      className: "form-input"
-    }, undefined, false, undefined, this);
+      className: baseClasses.join(" "),
+      style: finalStyle,
+      placeholder: placeholderText,
+      readOnly: isReadOnly
+    }, undefined, false, undefined, this));
   }
   // src/framework/ui/EntityApp.tsx
   var jsx_dev_runtime5 = __toESM(require_jsx_dev_runtime(), 1);

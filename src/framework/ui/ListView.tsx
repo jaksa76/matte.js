@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import type { EntityDefinition } from './entities';
+import type { EntityDefinition } from '../entities';
 import { Plus, Eye, Pencil, Trash2, RefreshCw } from 'lucide-react';
 import './styles.css';
 
@@ -91,22 +91,53 @@ export function ListView({ entity, apiUrl, onSelect, onEdit, onCreate }: ListVie
           <table className="data-table">
             <thead>
               <tr>
-                {Object.keys(entity.schema).slice(0, 4).map(field => (
-                  <th key={field}>
-                    {field}
-                  </th>
-                ))}
+                {Object.entries(entity.schema)
+                  .filter(([_, field]) => !field.ui?.hidden)
+                  .slice(0, 4)
+                  .map(([fieldName, field]) => {
+                    const ui = field.ui || {};
+                    const labelText = ui.label !== undefined ? ui.label : fieldName;
+                    return (
+                      <th key={fieldName}>
+                        {labelText}
+                      </th>
+                    );
+                  })}
                 <th className="actions-header">Actions</th>
               </tr>
             </thead>
             <tbody>
               {items.map(item => (
                 <tr key={item.id}>
-                  {Object.keys(entity.schema).slice(0, 4).map(field => (
-                    <td key={field}>
-                      {formatValue(item[field], entity.schema[field]!)}
-                    </td>
-                  ))}
+                  {Object.entries(entity.schema)
+                    .filter(([_, field]) => !field.ui?.hidden)
+                    .slice(0, 4)
+                    .map(([fieldName, field]) => {
+                      const ui = field.ui || {};
+                      const displayValue = formatValue(item[fieldName], field);
+                      
+                      // Build inline styles
+                      const style: React.CSSProperties = {};
+                      if (ui.alignLeft) style.textAlign = 'left';
+                      if (ui.alignRight) style.textAlign = 'right';
+                      if (ui.alignCenter) style.textAlign = 'center';
+                      if (ui.bold) style.fontWeight = 'bold';
+                      
+                      // Handle color
+                      const colorValue = typeof ui.color === 'function' ? ui.color(item[fieldName]) : ui.color;
+                      if (colorValue) style.color = colorValue;
+                      
+                      // Wrap with prefix/suffix
+                      const prefixText = typeof ui.prefix === 'function' ? ui.prefix(item[fieldName]) : ui.prefix;
+                      const suffixText = typeof ui.suffix === 'function' ? ui.suffix(item[fieldName]) : ui.suffix;
+                      const wrappedValue = `${prefixText || ''}${displayValue}${suffixText || ''}`;
+                      
+                      return (
+                        <td key={fieldName} style={style}>
+                          {wrappedValue}
+                        </td>
+                      );
+                    })}
                   <td className="actions-cell">
                     {onSelect && (
                       <button 

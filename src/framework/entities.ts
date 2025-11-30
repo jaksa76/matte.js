@@ -8,13 +8,36 @@ export type FieldType =
   | EnumField
   | RichTextField
   | FileField
-  | BooleanField;
+  | BooleanField
+  | FieldGroup;
+
+// UI customization metadata
+export interface UIMetadata {
+  label?: string | null;
+  hideLabel?: boolean;
+  floatingLabel?: boolean;
+  width?: number;
+  alignLeft?: boolean;
+  alignRight?: boolean;
+  alignCenter?: boolean;
+  placeholder?: string;
+  help?: string;
+  prefix?: string | ((value: any) => string);
+  suffix?: string | ((value: any) => string);
+  hidden?: boolean;
+  readOnly?: boolean;
+  bold?: boolean;
+  large?: boolean;
+  color?: string | ((value: any) => string);
+  style?: Record<string, any>;
+}
 
 export interface BaseField {
   type: string;
   isRequired: boolean;
   default?: any;
   isArray: boolean;
+  ui?: UIMetadata;
 }
 
 export class StringField implements BaseField {
@@ -24,6 +47,7 @@ export class StringField implements BaseField {
   _default?: string;
   _minLength?: number;
   _maxLength?: number;
+  ui: UIMetadata = {};
 
   default(value: string): this {
     this._default = value;
@@ -46,7 +70,94 @@ export class StringField implements BaseField {
     field._default = this._default;
     field._minLength = this._minLength;
     field._maxLength = this._maxLength;
+    field.ui = { ...this.ui };
     return field;
+  }
+
+  // UI Customization methods
+  label(text: string): this {
+    this.ui.label = text;
+    return this;
+  }
+
+  hideLabel(): this {
+    this.ui.hideLabel = true;
+    return this;
+  }
+
+  floatingLabel(): this {
+    this.ui.floatingLabel = true;
+    return this;
+  }
+
+  width(value: number): this {
+    this.ui.width = value;
+    return this;
+  }
+
+  alignLeft(): this {
+    this.ui.alignLeft = true;
+    return this;
+  }
+
+  alignRight(): this {
+    this.ui.alignRight = true;
+    return this;
+  }
+
+  alignCenter(): this {
+    this.ui.alignCenter = true;
+    return this;
+  }
+
+  placeholder(text: string): this {
+    this.ui.placeholder = text;
+    return this;
+  }
+
+  help(text: string): this {
+    this.ui.help = text;
+    return this;
+  }
+
+  prefix(text: string | ((value: any) => string)): this {
+    this.ui.prefix = text;
+    return this;
+  }
+
+  suffix(text: string | ((value: any) => string)): this {
+    this.ui.suffix = text;
+    return this;
+  }
+
+  hidden(): this {
+    this.ui.hidden = true;
+    return this;
+  }
+
+  readOnly(): this {
+    this.ui.readOnly = true;
+    return this;
+  }
+
+  bold(): this {
+    this.ui.bold = true;
+    return this;
+  }
+
+  large(): this {
+    this.ui.large = true;
+    return this;
+  }
+
+  color(value: string | ((val: any) => string)): this {
+    this.ui.color = value;
+    return this;
+  }
+
+  style(css: Record<string, any>): this {
+    this.ui.style = css;
+    return this;
   }
 }
 
@@ -57,6 +168,7 @@ export class NumberField implements BaseField {
   _default?: number;
   _min?: number;
   _max?: number;
+  ui: UIMetadata = {};
 
   default(value: number): this {
     this._default = value;
@@ -79,8 +191,28 @@ export class NumberField implements BaseField {
     field._default = this._default;
     field._min = this._min;
     field._max = this._max;
+    field.ui = { ...this.ui };
     return field;
   }
+
+  // UI Customization methods
+  label(text: string): this { this.ui.label = text; return this; }
+  hideLabel(): this { this.ui.hideLabel = true; return this; }
+  floatingLabel(): this { this.ui.floatingLabel = true; return this; }
+  width(value: number): this { this.ui.width = value; return this; }
+  alignLeft(): this { this.ui.alignLeft = true; return this; }
+  alignRight(): this { this.ui.alignRight = true; return this; }
+  alignCenter(): this { this.ui.alignCenter = true; return this; }
+  placeholder(text: string): this { this.ui.placeholder = text; return this; }
+  help(text: string): this { this.ui.help = text; return this; }
+  prefix(text: string | ((value: any) => string)): this { this.ui.prefix = text; return this; }
+  suffix(text: string | ((value: any) => string)): this { this.ui.suffix = text; return this; }
+  hidden(): this { this.ui.hidden = true; return this; }
+  readOnly(): this { this.ui.readOnly = true; return this; }
+  bold(): this { this.ui.bold = true; return this; }
+  large(): this { this.ui.large = true; return this; }
+  color(value: string | ((val: any) => string)): this { this.ui.color = value; return this; }
+  style(css: Record<string, any>): this { this.ui.style = css; return this; }
 }
 
 export class DateField implements BaseField {
@@ -88,6 +220,7 @@ export class DateField implements BaseField {
   isRequired = false;
   isArray = false;
   _default?: Date;
+  ui: UIMetadata = {};
 
   default(value: Date): this {
     this._default = value;
@@ -98,8 +231,28 @@ export class DateField implements BaseField {
     const field = new DateField();
     field.isRequired = true;
     field._default = this._default;
+    field.ui = { ...this.ui };
     return field;
   }
+
+  // UI Customization methods
+  label(text: string): this { this.ui.label = text; return this; }
+  hideLabel(): this { this.ui.hideLabel = true; return this; }
+  floatingLabel(): this { this.ui.floatingLabel = true; return this; }
+  width(value: number): this { this.ui.width = value; return this; }
+  alignLeft(): this { this.ui.alignLeft = true; return this; }
+  alignRight(): this { this.ui.alignRight = true; return this; }
+  alignCenter(): this { this.ui.alignCenter = true; return this; }
+  placeholder(text: string): this { this.ui.placeholder = text; return this; }
+  help(text: string): this { this.ui.help = text; return this; }
+  prefix(text: string | ((value: any) => string)): this { this.ui.prefix = text; return this; }
+  suffix(text: string | ((value: any) => string)): this { this.ui.suffix = text; return this; }
+  hidden(): this { this.ui.hidden = true; return this; }
+  readOnly(): this { this.ui.readOnly = true; return this; }
+  bold(): this { this.ui.bold = true; return this; }
+  large(): this { this.ui.large = true; return this; }
+  color(value: string | ((val: any) => string)): this { this.ui.color = value; return this; }
+  style(css: Record<string, any>): this { this.ui.style = css; return this; }
 }
 
 export class EnumField implements BaseField {
@@ -108,6 +261,7 @@ export class EnumField implements BaseField {
   isArray = false;
   _default?: string;
   values: readonly string[];
+  ui: UIMetadata = {};
 
   constructor(values: readonly string[]) {
     this.values = values;
@@ -117,6 +271,7 @@ export class EnumField implements BaseField {
     const field = new EnumField(this.values);
     field._default = value;
     field.isRequired = this.isRequired;
+    field.ui = { ...this.ui };
     return field;
   }
 
@@ -124,8 +279,28 @@ export class EnumField implements BaseField {
     const field = new EnumField(this.values);
     field.isRequired = true;
     field._default = this._default;
+    field.ui = { ...this.ui };
     return field;
   }
+
+  // UI Customization methods
+  label(text: string): this { this.ui.label = text; return this; }
+  hideLabel(): this { this.ui.hideLabel = true; return this; }
+  floatingLabel(): this { this.ui.floatingLabel = true; return this; }
+  width(value: number): this { this.ui.width = value; return this; }
+  alignLeft(): this { this.ui.alignLeft = true; return this; }
+  alignRight(): this { this.ui.alignRight = true; return this; }
+  alignCenter(): this { this.ui.alignCenter = true; return this; }
+  placeholder(text: string): this { this.ui.placeholder = text; return this; }
+  help(text: string): this { this.ui.help = text; return this; }
+  prefix(text: string | ((value: any) => string)): this { this.ui.prefix = text; return this; }
+  suffix(text: string | ((value: any) => string)): this { this.ui.suffix = text; return this; }
+  hidden(): this { this.ui.hidden = true; return this; }
+  readOnly(): this { this.ui.readOnly = true; return this; }
+  bold(): this { this.ui.bold = true; return this; }
+  large(): this { this.ui.large = true; return this; }
+  color(value: string | ((val: any) => string)): this { this.ui.color = value; return this; }
+  style(css: Record<string, any>): this { this.ui.style = css; return this; }
 }
 
 export class RichTextField implements BaseField {
@@ -133,6 +308,7 @@ export class RichTextField implements BaseField {
   isRequired = false;
   isArray = false;
   _default?: string;
+  ui: UIMetadata = {};
 
   default(value: string): this {
     this._default = value;
@@ -143,8 +319,28 @@ export class RichTextField implements BaseField {
     const field = new RichTextField();
     field.isRequired = true;
     field._default = this._default;
+    field.ui = { ...this.ui };
     return field;
   }
+
+  // UI Customization methods
+  label(text: string): this { this.ui.label = text; return this; }
+  hideLabel(): this { this.ui.hideLabel = true; return this; }
+  floatingLabel(): this { this.ui.floatingLabel = true; return this; }
+  width(value: number): this { this.ui.width = value; return this; }
+  alignLeft(): this { this.ui.alignLeft = true; return this; }
+  alignRight(): this { this.ui.alignRight = true; return this; }
+  alignCenter(): this { this.ui.alignCenter = true; return this; }
+  placeholder(text: string): this { this.ui.placeholder = text; return this; }
+  help(text: string): this { this.ui.help = text; return this; }
+  prefix(text: string | ((value: any) => string)): this { this.ui.prefix = text; return this; }
+  suffix(text: string | ((value: any) => string)): this { this.ui.suffix = text; return this; }
+  hidden(): this { this.ui.hidden = true; return this; }
+  readOnly(): this { this.ui.readOnly = true; return this; }
+  bold(): this { this.ui.bold = true; return this; }
+  large(): this { this.ui.large = true; return this; }
+  color(value: string | ((val: any) => string)): this { this.ui.color = value; return this; }
+  style(css: Record<string, any>): this { this.ui.style = css; return this; }
 }
 
 export class FileField implements BaseField {
@@ -154,6 +350,7 @@ export class FileField implements BaseField {
   _default?: string;
   _maxSize?: number;
   _allowedTypes?: string[];
+  ui: UIMetadata = {};
 
   default(value: string): this {
     this._default = value;
@@ -171,7 +368,9 @@ export class FileField implements BaseField {
   }
 
   array(): FileFieldArray {
-    return new FileFieldArray();
+    const field = new FileFieldArray();
+    field.ui = { ...this.ui };
+    return field;
   }
 
   required(): FileField {
@@ -180,8 +379,28 @@ export class FileField implements BaseField {
     field._default = this._default;
     field._maxSize = this._maxSize;
     field._allowedTypes = this._allowedTypes;
+    field.ui = { ...this.ui };
     return field;
   }
+
+  // UI Customization methods
+  label(text: string): this { this.ui.label = text; return this; }
+  hideLabel(): this { this.ui.hideLabel = true; return this; }
+  floatingLabel(): this { this.ui.floatingLabel = true; return this; }
+  width(value: number): this { this.ui.width = value; return this; }
+  alignLeft(): this { this.ui.alignLeft = true; return this; }
+  alignRight(): this { this.ui.alignRight = true; return this; }
+  alignCenter(): this { this.ui.alignCenter = true; return this; }
+  placeholder(text: string): this { this.ui.placeholder = text; return this; }
+  help(text: string): this { this.ui.help = text; return this; }
+  prefix(text: string | ((value: any) => string)): this { this.ui.prefix = text; return this; }
+  suffix(text: string | ((value: any) => string)): this { this.ui.suffix = text; return this; }
+  hidden(): this { this.ui.hidden = true; return this; }
+  readOnly(): this { this.ui.readOnly = true; return this; }
+  bold(): this { this.ui.bold = true; return this; }
+  large(): this { this.ui.large = true; return this; }
+  color(value: string | ((val: any) => string)): this { this.ui.color = value; return this; }
+  style(css: Record<string, any>): this { this.ui.style = css; return this; }
 }
 
 export class FileFieldArray implements BaseField {
@@ -191,6 +410,7 @@ export class FileFieldArray implements BaseField {
   _default?: string[];
   _maxSize?: number;
   _allowedTypes?: string[];
+  ui: UIMetadata = {};
 
   default(value: string[]): this {
     this._default = value;
@@ -213,8 +433,28 @@ export class FileFieldArray implements BaseField {
     field._default = this._default;
     field._maxSize = this._maxSize;
     field._allowedTypes = this._allowedTypes;
+    field.ui = { ...this.ui };
     return field;
   }
+
+  // UI Customization methods
+  label(text: string): this { this.ui.label = text; return this; }
+  hideLabel(): this { this.ui.hideLabel = true; return this; }
+  floatingLabel(): this { this.ui.floatingLabel = true; return this; }
+  width(value: number): this { this.ui.width = value; return this; }
+  alignLeft(): this { this.ui.alignLeft = true; return this; }
+  alignRight(): this { this.ui.alignRight = true; return this; }
+  alignCenter(): this { this.ui.alignCenter = true; return this; }
+  placeholder(text: string): this { this.ui.placeholder = text; return this; }
+  help(text: string): this { this.ui.help = text; return this; }
+  prefix(text: string | ((value: any) => string)): this { this.ui.prefix = text; return this; }
+  suffix(text: string | ((value: any) => string)): this { this.ui.suffix = text; return this; }
+  hidden(): this { this.ui.hidden = true; return this; }
+  readOnly(): this { this.ui.readOnly = true; return this; }
+  bold(): this { this.ui.bold = true; return this; }
+  large(): this { this.ui.large = true; return this; }
+  color(value: string | ((val: any) => string)): this { this.ui.color = value; return this; }
+  style(css: Record<string, any>): this { this.ui.style = css; return this; }
 }
 
 export class BooleanField implements BaseField {
@@ -222,6 +462,7 @@ export class BooleanField implements BaseField {
   isRequired = false;
   isArray = false;
   _default?: boolean;
+  ui: UIMetadata = {};
 
   default(value: boolean): this {
     this._default = value;
@@ -232,7 +473,75 @@ export class BooleanField implements BaseField {
     const field = new BooleanField();
     field.isRequired = true;
     field._default = this._default;
+    field.ui = { ...this.ui };
     return field;
+  }
+
+  // UI Customization methods
+  label(text: string): this { this.ui.label = text; return this; }
+  hideLabel(): this { this.ui.hideLabel = true; return this; }
+  floatingLabel(): this { this.ui.floatingLabel = true; return this; }
+  width(value: number): this { this.ui.width = value; return this; }
+  alignLeft(): this { this.ui.alignLeft = true; return this; }
+  alignRight(): this { this.ui.alignRight = true; return this; }
+  alignCenter(): this { this.ui.alignCenter = true; return this; }
+  placeholder(text: string): this { this.ui.placeholder = text; return this; }
+  help(text: string): this { this.ui.help = text; return this; }
+  prefix(text: string | ((value: any) => string)): this { this.ui.prefix = text; return this; }
+  suffix(text: string | ((value: any) => string)): this { this.ui.suffix = text; return this; }
+  hidden(): this { this.ui.hidden = true; return this; }
+  readOnly(): this { this.ui.readOnly = true; return this; }
+  bold(): this { this.ui.bold = true; return this; }
+  large(): this { this.ui.large = true; return this; }
+  color(value: string | ((val: any) => string)): this { this.ui.color = value; return this; }
+  style(css: Record<string, any>): this { this.ui.style = css; return this; }
+}
+
+// Field Group for organizing fields
+export class FieldGroup implements BaseField {
+  type = 'group' as const;
+  isRequired = false;
+  isArray = false;
+  _default?: any;
+  ui: UIMetadata = {};
+  
+  label: string | null;
+  children: (FieldDefinition | FieldBuilder<any> | FieldGroup)[];
+  horizontal: boolean;
+  _collapsible?: boolean;
+  _id?: string;
+  _border?: string;
+  _padding?: string;
+
+  constructor(label: string | null, children: (FieldDefinition | FieldBuilder<any> | FieldGroup)[], horizontal = false) {
+    this.label = label;
+    this.children = children;
+    this.horizontal = horizontal;
+  }
+
+  collapsible(): this {
+    this._collapsible = true;
+    return this;
+  }
+
+  id(value: string): this {
+    this._id = value;
+    return this;
+  }
+
+  border(value: string): this {
+    this._border = value;
+    return this;
+  }
+
+  padding(value: string): this {
+    this._padding = value;
+    return this;
+  }
+
+  // Required method for BaseField interface (not really applicable to groups)
+  required(): FieldGroup {
+    return this;
   }
 }
 
@@ -269,7 +578,9 @@ class FieldBuilder<T extends FieldType> {
   }
 
   default(value: any): this {
-    this.fieldType = this.fieldType.default(value) as T;
+    if ('default' in this.fieldType && typeof this.fieldType.default === 'function') {
+      this.fieldType = this.fieldType.default(value) as T;
+    }
     return this;
   }
 
@@ -325,6 +636,126 @@ class FieldBuilder<T extends FieldType> {
     return this;
   }
 
+  // UI Customization methods
+  label(text: string): this {
+    if ('label' in this.fieldType) {
+      (this.fieldType as any).label(text);
+    }
+    return this;
+  }
+
+  hideLabel(): this {
+    if ('hideLabel' in this.fieldType) {
+      (this.fieldType as any).hideLabel();
+    }
+    return this;
+  }
+
+  floatingLabel(): this {
+    if ('floatingLabel' in this.fieldType) {
+      (this.fieldType as any).floatingLabel();
+    }
+    return this;
+  }
+
+  width(value: number): this {
+    if ('width' in this.fieldType) {
+      (this.fieldType as any).width(value);
+    }
+    return this;
+  }
+
+  alignLeft(): this {
+    if ('alignLeft' in this.fieldType) {
+      (this.fieldType as any).alignLeft();
+    }
+    return this;
+  }
+
+  alignRight(): this {
+    if ('alignRight' in this.fieldType) {
+      (this.fieldType as any).alignRight();
+    }
+    return this;
+  }
+
+  alignCenter(): this {
+    if ('alignCenter' in this.fieldType) {
+      (this.fieldType as any).alignCenter();
+    }
+    return this;
+  }
+
+  placeholder(text: string): this {
+    if ('placeholder' in this.fieldType) {
+      (this.fieldType as any).placeholder(text);
+    }
+    return this;
+  }
+
+  help(text: string): this {
+    if ('help' in this.fieldType) {
+      (this.fieldType as any).help(text);
+    }
+    return this;
+  }
+
+  prefix(text: string | ((value: any) => string)): this {
+    if ('prefix' in this.fieldType) {
+      (this.fieldType as any).prefix(text);
+    }
+    return this;
+  }
+
+  suffix(text: string | ((value: any) => string)): this {
+    if ('suffix' in this.fieldType) {
+      (this.fieldType as any).suffix(text);
+    }
+    return this;
+  }
+
+  hidden(): this {
+    if ('hidden' in this.fieldType) {
+      (this.fieldType as any).hidden();
+    }
+    return this;
+  }
+
+  readOnly(): this {
+    if ('readOnly' in this.fieldType) {
+      (this.fieldType as any).readOnly();
+    }
+    return this;
+  }
+
+  bold(): this {
+    if ('bold' in this.fieldType) {
+      (this.fieldType as any).bold();
+    }
+    return this;
+  }
+
+  large(): this {
+    if ('large' in this.fieldType) {
+      (this.fieldType as any).large();
+    }
+    return this;
+  }
+
+  color(value: string | ((val: any) => string)): this {
+    if ('color' in this.fieldType) {
+      (this.fieldType as any).color(value);
+    }
+    return this;
+  }
+
+  style(css: Record<string, any>): this {
+    if ('style' in this.fieldType) {
+      (this.fieldType as any).style(css);
+    }
+    return this;
+  }
+
   // Convert to FieldDefinition
   toFieldDefinition(): FieldDefinition {
     return { name: this.name, field: this.fieldType };
@@ -356,33 +787,62 @@ export function boolean(name: string): FieldBuilder<BooleanField> {
   return new FieldBuilder(name, t.boolean());
 }
 
+// Group helpers
+export function group(labelOrChildren: string | null | (FieldDefinition | FieldBuilder<any> | FieldGroup)[], children?: (FieldDefinition | FieldBuilder<any> | FieldGroup)[]): FieldGroup {
+  if (Array.isArray(labelOrChildren)) {
+    return new FieldGroup(null, labelOrChildren, false);
+  }
+  return new FieldGroup(labelOrChildren, children || [], false);
+}
+
+export function hgroup(labelOrChildren: string | null | (FieldDefinition | FieldBuilder<any> | FieldGroup)[], children?: (FieldDefinition | FieldBuilder<any> | FieldGroup)[]): FieldGroup {
+  if (Array.isArray(labelOrChildren)) {
+    return new FieldGroup(null, labelOrChildren, true);
+  }
+  return new FieldGroup(labelOrChildren, children || [], true);
+}
+
 // Entity definition
 export interface EntitySchema {
   [fieldName: string]: FieldType;
 }
 
-export type EntitySchemaDefinition = (FieldDefinition | FieldBuilder<any>)[];
+export type EntitySchemaDefinition = (FieldDefinition | FieldBuilder<any> | FieldGroup)[];
 
 export interface EntityDefinition {
   name: string;
   schema: EntitySchema;
   owned: boolean;
   fieldOrder: string[]; // Field order is always preserved
+  groups?: FieldGroup[]; // Groups for organizing fields
 }
 
 // Helper to convert array schema to object schema
-function normalizeSchema(schemaDefinition: EntitySchemaDefinition): { schema: EntitySchema; fieldOrder: string[] } {
+function normalizeSchema(schemaDefinition: EntitySchemaDefinition): { schema: EntitySchema; fieldOrder: string[]; groups: FieldGroup[] } {
   const schema: EntitySchema = {};
   const fieldOrder: string[] = [];
+  const groups: FieldGroup[] = [];
   
-  for (const item of schemaDefinition) {
-    // Handle both FieldDefinition and FieldBuilder
-    const fieldDef = item instanceof FieldBuilder ? item.toFieldDefinition() : item;
-    schema[fieldDef.name] = fieldDef.field;
-    fieldOrder.push(fieldDef.name);
+  function processItem(item: FieldDefinition | FieldBuilder<any> | FieldGroup) {
+    if (item instanceof FieldGroup) {
+      groups.push(item);
+      // Process children recursively
+      for (const child of item.children) {
+        processItem(child);
+      }
+    } else {
+      // Handle both FieldDefinition and FieldBuilder
+      const fieldDef = item instanceof FieldBuilder ? item.toFieldDefinition() : item;
+      schema[fieldDef.name] = fieldDef.field;
+      fieldOrder.push(fieldDef.name);
+    }
   }
   
-  return { schema, fieldOrder };
+  for (const item of schemaDefinition) {
+    processItem(item);
+  }
+  
+  return { schema, fieldOrder, groups };
 }
 
 // Entity definition functions
@@ -390,13 +850,14 @@ export function ownedEntity(
   name: string, 
   schemaDefinition: EntitySchemaDefinition
 ): EntityDefinition {
-  const { schema, fieldOrder } = normalizeSchema(schemaDefinition);
+  const { schema, fieldOrder, groups } = normalizeSchema(schemaDefinition);
   
   const definition: EntityDefinition = {
     name,
     schema,
     owned: true,
     fieldOrder,
+    groups: groups.length > 0 ? groups : undefined,
   };
   
   return definition;
@@ -406,13 +867,14 @@ export function entity(
   name: string, 
   schemaDefinition: EntitySchemaDefinition
 ): EntityDefinition {
-  const { schema, fieldOrder } = normalizeSchema(schemaDefinition);
+  const { schema, fieldOrder, groups } = normalizeSchema(schemaDefinition);
   
   const definition: EntityDefinition = {
     name,
     schema,
     owned: false,
     fieldOrder,
+    groups: groups.length > 0 ? groups : undefined,
   };
   
   return definition;

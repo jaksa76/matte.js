@@ -49,7 +49,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
     }
 
     const createTableSQL = `
-      CREATE TABLE IF NOT EXISTS ${tableName} (
+      CREATE TABLE IF NOT EXISTS ${this.quoteIdentifier(tableName)} (
         ${columns.join(',\n        ')}
       )
     `;
@@ -58,7 +58,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
 
     // Create indexes
     if (entity.owned) {
-      this.db.run(`CREATE INDEX IF NOT EXISTS idx_${tableName}_owner ON ${tableName}(owner_id)`);
+      this.db.run(`CREATE INDEX IF NOT EXISTS idx_${tableName}_owner ON ${this.quoteIdentifier(tableName)}(${this.quoteIdentifier('owner_id')})`);
     }
   }
 
@@ -91,7 +91,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
       }
     }
 
-    let definition = `${columnName} ${sqlType}`;
+    let definition = `${this.quoteIdentifier(columnName)} ${sqlType}`;
 
     if (field.isRequired) {
       definition += ' NOT NULL';
@@ -123,7 +123,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
     const values = Object.values(record).map(v => this.serializeValue(v));
     const placeholders = columns.map(() => '?').join(', ');
 
-    const sql = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders})`;
+    const sql = `INSERT INTO ${this.quoteIdentifier(tableName)} (${columns.map(c => this.quoteIdentifier(c)).join(', ')}) VALUES (${placeholders})`;
     
     this.db.run(sql, ...values);
 
@@ -131,24 +131,24 @@ export class SQLiteAdapter implements DatabaseAdapter {
   }
 
   async findById(tableName: string, id: string): Promise<any> {
-    const sql = `SELECT * FROM ${tableName} WHERE id = ?`;
+    const sql = `SELECT * FROM ${this.quoteIdentifier(tableName)} WHERE ${this.quoteIdentifier('id')} = ?`;
     const row = this.db.query(sql).get(id);
     return row ? this.deserializeRow(row) : null;
   }
 
   async findAll(tableName: string, filters?: Record<string, any>): Promise<any[]> {
-    let sql = `SELECT * FROM ${tableName}`;
+    let sql = `SELECT * FROM ${this.quoteIdentifier(tableName)}`;
     const params: any[] = [];
 
     if (filters && Object.keys(filters).length > 0) {
       const conditions = Object.entries(filters).map(([key, _]) => {
         params.push(filters[key]);
-        return `${key} = ?`;
+        return `${this.quoteIdentifier(key)} = ?`;
       });
       sql += ` WHERE ${conditions.join(' AND ')}`;
     }
 
-    sql += ' ORDER BY created_at DESC';
+    sql += ` ORDER BY ${this.quoteIdentifier('created_at')} DESC`;
 
     const rows = this.db.query(sql).all(...params);
     return rows.map(row => this.deserializeRow(row));
@@ -161,10 +161,10 @@ export class SQLiteAdapter implements DatabaseAdapter {
       updated_at: now,
     };
 
-    const setClauses = Object.keys(updateData).map(key => `${key} = ?`);
+    const setClauses = Object.keys(updateData).map(key => `${this.quoteIdentifier(key)} = ?`);
     const values = Object.values(updateData).map(v => this.serializeValue(v));
 
-    const sql = `UPDATE ${tableName} SET ${setClauses.join(', ')} WHERE id = ?`;
+    const sql = `UPDATE ${this.quoteIdentifier(tableName)} SET ${setClauses.join(', ')} WHERE ${this.quoteIdentifier('id')} = ?`;
     
     this.db.run(sql, ...values, id);
 
@@ -172,12 +172,18 @@ export class SQLiteAdapter implements DatabaseAdapter {
   }
 
   async delete(tableName: string, id: string): Promise<void> {
-    const sql = `DELETE FROM ${tableName} WHERE id = ?`;
+    const sql = `DELETE FROM ${this.quoteIdentifier(tableName)} WHERE ${this.quoteIdentifier('id')} = ?`;
     this.db.run(sql, id);
   }
 
   private toSnakeCase(str: string): string {
     return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`).replace(/^_/, '');
+  }
+
+  private quoteIdentifier(identifier: string): string {
+    // Use double quotes to escape SQL identifiers (table and column names)
+    // This handles reserved words like "order", "user", "group", "table", etc.
+    return `"${identifier}"`;
   }
 
   private generateId(): string {

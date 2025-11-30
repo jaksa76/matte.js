@@ -631,3 +631,55 @@ body {
   min-width: -moz-fit-content;
   min-width: fit-content;
 }
+
+.form-group {
+  display: contents;
+}
+
+.form-label.floating {
+  position: relative;
+  color: var(--color-gray-500);
+  font-size: 12px;
+  top: 8px;
+}
+
+.form-input.bold {
+  font-weight: bold;
+}
+
+.form-input.large {
+  padding: 10px 14px;
+  font-size: 1.1em;
+}
+
+.form-help {
+  color: var(--color-gray-500);
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items:  center;
+  gap: 8px;
+}
+
+.input-prefix, .input-suffix {
+  color: var(--color-gray-600);
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.input-wrapper .form-input {
+  flex: 1;
+}
+
+.form-card {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.form-card > .form-group {
+  grid-column: span 12;
+}
