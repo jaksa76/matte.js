@@ -57,9 +57,9 @@ file("avatar").maxSize(5 * 1024 * 1024)
 ### Run the Framework
 
 ```typescript
-import { Framework } from './framework';
+import { Matte } from './framework';
 
-const framework = new Framework({
+const framework = new Matte({
   dbPath: './data.db',
   port: 3000,
 });

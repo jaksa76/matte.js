@@ -1,4 +1,4 @@
-import { Framework } from '../framework';
+import { Matte } from '../framework';
 import { ownedEntity, t, field, string, richtext, date, number, file } from '../framework/entities';
 
 // Define the Task entity (entities are no longer auto-registered)
@@ -12,7 +12,7 @@ const Task = ownedEntity("Task", [
   file("attachments").array(),
 ]);
 
-// To use this entity, register it with a Framework instance:
-const app = new Framework();
+// To use this entity, register it with a Matte instance:
+const app = new Matte();
 app.register(Task);
 await app.start();

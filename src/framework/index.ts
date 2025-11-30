@@ -1,6 +1,6 @@
 // Core framework
-export { Framework as Framework } from './framework';
-export type { FrameworkOptions } from './framework';
+export { Matte } from './framework';
+export type { MatteOptions } from './framework';
 
 // Entity definitions
 export { entity, ownedEntity, t, field, string, number, date, richtext, file, boolean } from './entities';

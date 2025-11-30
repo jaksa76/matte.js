@@ -1,4 +1,4 @@
-import { Framework } from './src/framework';
+import { Matte } from './src/framework';
 import { ownedEntity, string, richtext, field, t, date, number, file } from './src/framework/entities';
 
 // Define the Task entity
@@ -13,7 +13,7 @@ const Task = ownedEntity("Task", [
 ]);
 
 // Create the framework
-const app = new Framework({
+const app = new Matte({
   dbPath: './data.db',
   port: 3000,
 });

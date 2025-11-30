@@ -1,10 +1,10 @@
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test';
-import { Framework } from '../../src/framework/framework';
+import { Matte } from '../../src/framework/framework';
 import { EntityRegistry } from '../../src/framework/registry';
 import { t, ownedEntity, field, string, richtext, date, number, boolean } from '../../src/framework/entities';
 
 describe('Integration Tests', () => {
-  let framework: Framework;
+  let framework: Matte;
   let baseUrl: string;
   const testPort = 3001;
 
@@ -29,7 +29,7 @@ describe('Integration Tests', () => {
       string('tags'),
     ]);
 
-    framework = new Framework({
+    framework = new Matte({
       dbPath: ':memory:',
       port: testPort,
     });

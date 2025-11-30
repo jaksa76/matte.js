@@ -4,12 +4,12 @@ import { RepositoryFactory } from './repository';
 import { APIServer } from './api';
 import type { EntityDefinition } from './entities';
 
-export interface FrameworkOptions {
+export interface MatteOptions {
   dbPath?: string;
   port?: number;
 }
 
-export class Framework {
+export class Matte {
   private db: SQLiteAdapter;
   private repositoryFactory: RepositoryFactory;
   private apiServer: APIServer;
@@ -19,7 +19,7 @@ export class Framework {
   private clientBundle?: string; // Cache the bundled client code
   private cssBundle?: string; // Cache the CSS
 
-  constructor(options: FrameworkOptions = {}) {
+  constructor(options: MatteOptions = {}) {
     this.db = new SQLiteAdapter(options.dbPath);
     this.repositoryFactory = new RepositoryFactory(this.db);
     this.apiServer = new APIServer();
