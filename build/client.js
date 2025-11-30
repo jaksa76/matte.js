@@ -23645,14 +23645,14 @@ Check the top-level render call using <` + parentName + ">.";
   });
 
   // src/framework/ui/client.tsx
-  var import_react7 = __toESM(require_react(), 1);
+  var import_react8 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
 
   // src/framework/ui/MultiEntityApp.tsx
-  var import_react6 = __toESM(require_react(), 1);
+  var import_react7 = __toESM(require_react(), 1);
 
   // src/framework/ui/EntityApp.tsx
-  var import_react5 = __toESM(require_react(), 1);
+  var import_react6 = __toESM(require_react(), 1);
 
   // src/framework/ui/ListView.tsx
   var import_react3 = __toESM(require_react(), 1);
@@ -24010,44 +24010,245 @@ Check the top-level render call using <` + parentName + ">.";
       return value.substring(0, 50) + (value.length > 50 ? "..." : "");
     return String(value);
   }
-  // src/framework/ui/DetailView.tsx
+  // src/framework/ui/GridView.tsx
+  var import_react4 = __toESM(require_react(), 1);
   var jsx_dev_runtime2 = __toESM(require_jsx_dev_runtime(), 1);
-  function DetailView({ entity, item, onEdit, onBack }) {
+  function GridView({ entity, apiUrl, onSelect, onEdit, onCreate }) {
+    const [items, setItems] = import_react4.useState([]);
+    const [loading, setLoading] = import_react4.useState(true);
+    const [error, setError] = import_react4.useState(null);
+    import_react4.useEffect(() => {
+      fetchItems();
+    }, [apiUrl]);
+    const fetchItems = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(apiUrl);
+        if (!response.ok)
+          throw new Error("Failed to fetch items");
+        const data = await response.json();
+        setItems(Array.isArray(data) ? data : []);
+        setError(null);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    const handleDelete = async (id) => {
+      if (!confirm("Are you sure you want to delete this item?"))
+        return;
+      try {
+        const response = await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
+        if (!response.ok)
+          throw new Error("Failed to delete item");
+        await fetchItems();
+      } catch (err) {
+        alert(`Error: ${err.message}`);
+      }
+    };
+    if (loading) {
+      return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+        className: "list-view-loading",
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+            className: "spinner"
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("p", {
+            className: "loading-text",
+            children: "Loading..."
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this);
+    }
+    if (error) {
+      return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+        className: "error-container",
+        children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+          className: "error-box",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("p", {
+              className: "error-message",
+              children: [
+                "Error: ",
+                error
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+              onClick: fetchItems,
+              className: "btn btn-danger",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(RefreshCw, {
+                  size: 16
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                  children: "Retry"
+                }, undefined, false, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this);
+    }
     return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
-      className: "detail-view-container",
+      className: "grid-view-container",
       children: [
         /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
-          className: "detail-view-header",
+          className: "grid-view-header",
           children: [
             /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("h1", {
+              className: "grid-view-title",
+              children: [
+                entity.name,
+                "s"
+              ]
+            }, undefined, true, undefined, this),
+            onCreate && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+              onClick: onCreate,
+              className: "btn btn-primary",
+              children: [
+                /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Plus, {
+                  size: 16
+                }, undefined, false, undefined, this),
+                /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                  children: [
+                    "Create New ",
+                    entity.name
+                  ]
+                }, undefined, true, undefined, this)
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this),
+        items.length === 0 ? /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+          className: "empty-state",
+          children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("p", {
+            className: "empty-text",
+            children: "No items found."
+          }, undefined, false, undefined, this)
+        }, undefined, false, undefined, this) : /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+          className: "grid-cards",
+          children: items.map((item) => /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+            className: "grid-card",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                className: "grid-card-content",
+                children: Object.keys(entity.schema).slice(0, 4).map((field) => /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                  className: "grid-card-field",
+                  children: [
+                    /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                      className: "grid-card-label",
+                      children: [
+                        field,
+                        ":"
+                      ]
+                    }, undefined, true, undefined, this),
+                    /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                      className: "grid-card-value",
+                      children: formatValue2(item[field], entity.schema[field])
+                    }, undefined, false, undefined, this)
+                  ]
+                }, field, true, undefined, this))
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                className: "grid-card-actions",
+                children: [
+                  onSelect && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+                    onClick: () => onSelect(item),
+                    className: "btn btn-secondary btn-sm",
+                    title: "View",
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Eye, {
+                        size: 14
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                        children: "View"
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this),
+                  onEdit && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+                    onClick: () => onEdit(item),
+                    className: "btn btn-info btn-sm",
+                    title: "Edit",
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Pencil, {
+                        size: 14
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                        children: "Edit"
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+                    onClick: () => handleDelete(item.id),
+                    className: "btn btn-danger btn-sm",
+                    title: "Delete",
+                    children: [
+                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Trash2, {
+                        size: 14
+                      }, undefined, false, undefined, this),
+                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                        children: "Delete"
+                      }, undefined, false, undefined, this)
+                    ]
+                  }, undefined, true, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
+            ]
+          }, item.id, true, undefined, this))
+        }, undefined, false, undefined, this)
+      ]
+    }, undefined, true, undefined, this);
+  }
+  function formatValue2(value, field) {
+    if (value === null || value === undefined)
+      return "-";
+    if (Array.isArray(value))
+      return `${value.length} items`;
+    if (field.type === "date")
+      return new Date(value).toLocaleDateString();
+    if (field.type === "richtext")
+      return value.substring(0, 50) + (value.length > 50 ? "..." : "");
+    return String(value);
+  }
+  // src/framework/ui/DetailView.tsx
+  var jsx_dev_runtime3 = __toESM(require_jsx_dev_runtime(), 1);
+  function DetailView({ entity, item, onEdit, onBack }) {
+    return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
+      className: "detail-view-container",
+      children: [
+        /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
+          className: "detail-view-header",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("h1", {
               className: "detail-view-title",
               children: [
                 entity.name,
                 " Details"
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
               children: [
-                onBack && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+                onBack && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("button", {
                   onClick: onBack,
                   className: "btn btn-secondary",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(ArrowLeft, {
+                    /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(ArrowLeft, {
                       size: 16
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                    /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
                       children: "Back"
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                onEdit && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+                onEdit && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("button", {
                   onClick: onEdit,
                   className: "btn btn-primary",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Pencil, {
+                    /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Pencil, {
                       size: 16
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                    /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
                       children: "Edit"
                     }, undefined, false, undefined, this)
                   ]
@@ -24056,30 +24257,30 @@ Check the top-level render call using <` + parentName + ">.";
             }, undefined, true, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+        /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
           className: "detail-card",
           children: [
-            Object.entries(entity.schema).map(([fieldName, field]) => /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+            Object.entries(entity.schema).map(([fieldName, field]) => /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
               className: "detail-field",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("label", {
+                /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("label", {
                   className: "detail-field-label",
                   children: fieldName
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
                   className: "detail-field-value",
                   children: formatDetailValue(item[fieldName], field)
                 }, undefined, false, undefined, this)
               ]
             }, fieldName, true, undefined, this)),
-            /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
               className: "detail-metadata",
-              children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+              children: /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
                 className: "detail-metadata-content",
                 children: [
-                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                  /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
                         className: "detail-metadata-label",
                         children: "ID:"
                       }, undefined, false, undefined, this),
@@ -24087,9 +24288,9 @@ Check the top-level render call using <` + parentName + ">.";
                       item.id
                     ]
                   }, undefined, true, undefined, this),
-                  item.createdAt && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                  item.createdAt && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
                         className: "detail-metadata-label",
                         children: "Created:"
                       }, undefined, false, undefined, this),
@@ -24097,9 +24298,9 @@ Check the top-level render call using <` + parentName + ">.";
                       new Date(item.createdAt).toLocaleString()
                     ]
                   }, undefined, true, undefined, this),
-                  item.updatedAt && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                  item.updatedAt && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
                         className: "detail-metadata-label",
                         children: "Updated:"
                       }, undefined, false, undefined, this),
@@ -24117,20 +24318,20 @@ Check the top-level render call using <` + parentName + ">.";
   }
   function formatDetailValue(value, field) {
     if (value === null || value === undefined) {
-      return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
         className: "detail-field-empty",
         children: "Not set"
       }, undefined, false, undefined, this);
     }
     if (Array.isArray(value)) {
       if (value.length === 0) {
-        return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("span", {
+        return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
           className: "detail-field-empty",
           children: "Empty list"
         }, undefined, false, undefined, this);
       }
-      return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("ul", {
-        children: value.map((item, i) => /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("li", {
+      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("ul", {
+        children: value.map((item, i) => /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("li", {
           children: String(item)
         }, i, false, undefined, this))
       }, undefined, false, undefined, this);
@@ -24139,7 +24340,7 @@ Check the top-level render call using <` + parentName + ">.";
       return new Date(value).toLocaleString();
     }
     if (field.type === "richtext") {
-      return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
         style: { whiteSpace: "pre-wrap" },
         children: value
       }, undefined, false, undefined, this);
@@ -24150,12 +24351,12 @@ Check the top-level render call using <` + parentName + ">.";
     return String(value);
   }
   // src/framework/ui/FormView.tsx
-  var import_react4 = __toESM(require_react(), 1);
-  var jsx_dev_runtime3 = __toESM(require_jsx_dev_runtime(), 1);
+  var import_react5 = __toESM(require_react(), 1);
+  var jsx_dev_runtime4 = __toESM(require_jsx_dev_runtime(), 1);
   function FormView({ entity, initialData, apiUrl, onSuccess, onCancel }) {
-    const [formData, setFormData] = import_react4.useState(initialData || {});
-    const [errors, setErrors] = import_react4.useState({});
-    const [submitting, setSubmitting] = import_react4.useState(false);
+    const [formData, setFormData] = import_react5.useState(initialData || {});
+    const [errors, setErrors] = import_react5.useState({});
+    const [submitting, setSubmitting] = import_react5.useState(false);
     const handleChange = (fieldName, value) => {
       setFormData((prev) => ({ ...prev, [fieldName]: value }));
       if (errors[fieldName]) {
@@ -24214,10 +24415,10 @@ Check the top-level render call using <` + parentName + ">.";
         setSubmitting(false);
       }
     };
-    return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
       className: "form-view-container",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("h1", {
+        /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("h1", {
           className: "form-view-title",
           children: [
             initialData?.id ? "Edit" : "Create",
@@ -24225,55 +24426,55 @@ Check the top-level render call using <` + parentName + ">.";
             entity.name
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("form", {
+        /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("form", {
           onSubmit: handleSubmit,
           className: "form-card",
           children: [
-            Object.entries(entity.schema).map(([fieldName, field]) => /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
+            Object.entries(entity.schema).map(([fieldName, field]) => /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
               className: "form-group",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("label", {
+                /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("label", {
                   className: "form-label",
                   children: [
                     fieldName,
-                    field.isRequired && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
+                    field.isRequired && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("span", {
                       className: "required",
                       children: " *"
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
                 renderField(fieldName, field, formData[fieldName], (value) => handleChange(fieldName, value)),
-                errors[fieldName] && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
+                errors[fieldName] && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
                   className: "form-error",
                   children: errors[fieldName]
                 }, undefined, false, undefined, this)
               ]
             }, fieldName, true, undefined, this)),
-            /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
               className: "form-actions",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("button", {
+                /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("button", {
                   type: "submit",
                   disabled: submitting,
                   className: "btn btn-primary",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Save, {
+                    /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(Save, {
                       size: 16
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
+                    /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("span", {
                       children: submitting ? "Saving..." : "Save"
                     }, undefined, false, undefined, this)
                   ]
                 }, undefined, true, undefined, this),
-                onCancel && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("button", {
+                onCancel && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("button", {
                   type: "button",
                   onClick: onCancel,
                   className: "btn btn-secondary",
                   children: [
-                    /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(X, {
+                    /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(X, {
                       size: 16
                     }, undefined, false, undefined, this),
-                    /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("span", {
+                    /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("span", {
                       children: "Cancel"
                     }, undefined, false, undefined, this)
                   ]
@@ -24287,16 +24488,16 @@ Check the top-level render call using <` + parentName + ">.";
   }
   function renderField(fieldName, field, value, onChange) {
     if (field.type === "enum") {
-      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("select", {
+      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("select", {
         value: value || "",
         onChange: (e) => onChange(e.target.value),
         className: "form-input",
         children: [
-          /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("option", {
+          /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("option", {
             value: "",
             children: "Select..."
           }, undefined, false, undefined, this),
-          field.values.map((v) => /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("option", {
+          field.values.map((v) => /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("option", {
             value: v,
             children: v
           }, v, false, undefined, this))
@@ -24304,7 +24505,7 @@ Check the top-level render call using <` + parentName + ">.";
       }, undefined, true, undefined, this);
     }
     if (field.type === "number") {
-      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("input", {
+      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "number",
         value: value || "",
         onChange: (e) => onChange(parseFloat(e.target.value)),
@@ -24315,7 +24516,7 @@ Check the top-level render call using <` + parentName + ">.";
     }
     if (field.type === "date") {
       const dateValue = value ? new Date(value).toISOString().split("T")[0] : "";
-      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("input", {
+      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "date",
         value: dateValue,
         onChange: (e) => onChange(e.target.value ? new Date(e.target.value).toISOString() : null),
@@ -24323,7 +24524,7 @@ Check the top-level render call using <` + parentName + ">.";
       }, undefined, false, undefined, this);
     }
     if (field.type === "richtext") {
-      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("textarea", {
+      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("textarea", {
         value: value || "",
         onChange: (e) => onChange(e.target.value),
         rows: 6,
@@ -24331,7 +24532,7 @@ Check the top-level render call using <` + parentName + ">.";
       }, undefined, false, undefined, this);
     }
     if (field.type === "boolean") {
-      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("input", {
+      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "checkbox",
         checked: value || false,
         onChange: (e) => onChange(e.target.checked),
@@ -24339,7 +24540,7 @@ Check the top-level render call using <` + parentName + ">.";
       }, undefined, false, undefined, this);
     }
     if (field.type === "file" && field.isArray) {
-      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("input", {
+      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "file",
         multiple: true,
         onChange: (e) => {
@@ -24350,13 +24551,13 @@ Check the top-level render call using <` + parentName + ">.";
       }, undefined, false, undefined, this);
     }
     if (field.type === "file") {
-      return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("input", {
+      return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
         type: "file",
         onChange: (e) => onChange(e.target.files?.[0]?.name || null),
         className: "form-input"
       }, undefined, false, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("input", {
+    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
       type: "text",
       value: value || "",
       onChange: (e) => onChange(e.target.value),
@@ -24364,10 +24565,10 @@ Check the top-level render call using <` + parentName + ">.";
     }, undefined, false, undefined, this);
   }
   // src/framework/ui/EntityApp.tsx
-  var jsx_dev_runtime4 = __toESM(require_jsx_dev_runtime(), 1);
-  function EntityApp({ entity, apiUrl }) {
-    const [mode, setMode] = import_react5.useState("list");
-    const [selectedItem, setSelectedItem] = import_react5.useState(null);
+  var jsx_dev_runtime5 = __toESM(require_jsx_dev_runtime(), 1);
+  function EntityApp({ entity, apiUrl, viewType = "grid" }) {
+    const [mode, setMode] = import_react6.useState("list");
+    const [selectedItem, setSelectedItem] = import_react6.useState(null);
     const handleSelect = (item) => {
       setSelectedItem(item);
       setMode("detail");
@@ -24392,29 +24593,30 @@ Check the top-level render call using <` + parentName + ">.";
       setMode("list");
       setSelectedItem(null);
     };
-    return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
+    const ViewComponent = viewType === "list" ? ListView : GridView;
+    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
       className: "entity-app",
       children: [
-        mode === "list" && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(ListView, {
+        mode === "list" && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(ViewComponent, {
           entity,
           apiUrl,
           onSelect: handleSelect,
           onEdit: handleEdit,
           onCreate: handleCreate
         }, undefined, false, undefined, this),
-        mode === "detail" && selectedItem && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(DetailView, {
+        mode === "detail" && selectedItem && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(DetailView, {
           entity,
           item: selectedItem,
           onEdit: () => setMode("edit"),
           onBack: handleBack
         }, undefined, false, undefined, this),
-        mode === "create" && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(FormView, {
+        mode === "create" && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(FormView, {
           entity,
           apiUrl,
           onSuccess: handleSuccess,
           onCancel: handleCancel
         }, undefined, false, undefined, this),
-        mode === "edit" && selectedItem && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV(FormView, {
+        mode === "edit" && selectedItem && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(FormView, {
           entity,
           initialData: selectedItem,
           apiUrl,
@@ -24426,29 +24628,29 @@ Check the top-level render call using <` + parentName + ">.";
   }
 
   // src/framework/ui/MultiEntityApp.tsx
-  var jsx_dev_runtime5 = __toESM(require_jsx_dev_runtime(), 1);
+  var jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
   function toKebabCase2(str) {
     return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, "");
   }
   function MultiEntityApp({ entities }) {
-    const [collapsed, setCollapsed] = import_react6.useState(false);
-    const [currentEntityName, setCurrentEntityName] = import_react6.useState("");
-    import_react6.useEffect(() => {
+    const [collapsed, setCollapsed] = import_react7.useState(false);
+    const [currentEntityName, setCurrentEntityName] = import_react7.useState("");
+    import_react7.useEffect(() => {
       const path = window.location.pathname;
       const entityFromPath = path.split("/")[1];
-      if (entityFromPath && entities.some((e) => toKebabCase2(e.name) === entityFromPath)) {
+      if (entityFromPath && entities.some((r) => toKebabCase2(r.entity.name) === entityFromPath)) {
         setCurrentEntityName(entityFromPath);
       } else if (entities.length > 0) {
-        const defaultEntity = toKebabCase2(entities[0].name);
+        const defaultEntity = toKebabCase2(entities[0].entity.name);
         setCurrentEntityName(defaultEntity);
         window.history.replaceState({}, "", `/${defaultEntity}`);
       }
     }, [entities]);
-    import_react6.useEffect(() => {
+    import_react7.useEffect(() => {
       const handlePopState = () => {
         const path = window.location.pathname;
         const entityFromPath = path.split("/")[1];
-        if (entityFromPath && entities.some((e) => toKebabCase2(e.name) === entityFromPath)) {
+        if (entityFromPath && entities.some((r) => toKebabCase2(r.entity.name) === entityFromPath)) {
           setCurrentEntityName(entityFromPath);
         }
       };
@@ -24460,30 +24662,30 @@ Check the top-level render call using <` + parentName + ">.";
       setCurrentEntityName(kebabName);
       window.history.pushState({}, "", `/${kebabName}`);
     };
-    const currentEntity = entities.find((e) => toKebabCase2(e.name) === currentEntityName);
-    if (!currentEntity) {
-      return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+    const currentRegistration = entities.find((r) => toKebabCase2(r.entity.name) === currentEntityName);
+    if (!currentRegistration) {
+      return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
         className: "multi-entity-app",
-        children: /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+        children: /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
           className: "loading-container",
           children: "Loading..."
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
       className: "multi-entity-app",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("nav", {
+        /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("nav", {
           className: `entity-nav ${collapsed ? "collapsed" : ""}`,
           children: [
-            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
               className: "nav-header",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("h1", {
+                /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("h1", {
                   className: "nav-title",
                   children: collapsed ? "M" : "Matte.js"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("button", {
+                /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("button", {
                   className: "nav-toggle",
                   onClick: () => setCollapsed(!collapsed),
                   "aria-label": collapsed ? "Expand navigation" : "Collapse navigation",
@@ -24491,37 +24693,38 @@ Check the top-level render call using <` + parentName + ">.";
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("ul", {
+            /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("ul", {
               className: "nav-list",
-              children: entities.map((entity) => {
-                const kebabName = toKebabCase2(entity.name);
+              children: entities.map((registration) => {
+                const kebabName = toKebabCase2(registration.entity.name);
                 const isActive = currentEntityName === kebabName;
-                return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("li", {
+                return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("li", {
                   className: "nav-item",
-                  children: /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("button", {
+                  children: /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("button", {
                     className: `nav-link ${isActive ? "active" : ""}`,
-                    onClick: () => handleNavigate(entity.name),
-                    title: entity.name,
+                    onClick: () => handleNavigate(registration.entity.name),
+                    title: registration.entity.name,
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("span", {
                         className: "nav-icon",
                         children: "\uD83D\uDCCB"
                       }, undefined, false, undefined, this),
-                      !collapsed && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("span", {
+                      !collapsed && /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("span", {
                         className: "nav-label",
-                        children: entity.name
+                        children: registration.entity.name
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this)
-                }, entity.name, false, undefined, this);
+                }, registration.entity.name, false, undefined, this);
               })
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("main", {
+        /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("main", {
           className: `entity-content ${collapsed ? "nav-collapsed" : ""}`,
-          children: /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(EntityApp, {
-            entity: currentEntity,
+          children: /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(EntityApp, {
+            entity: currentRegistration.entity,
+            viewType: currentRegistration.viewType,
             apiUrl: `/api/${currentEntityName}`
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this)
@@ -24530,12 +24733,12 @@ Check the top-level render call using <` + parentName + ">.";
   }
 
   // src/framework/ui/client.tsx
-  var jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
+  var jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
   var config = window.ENTITY_CONFIG;
   if (config && config.entities) {
     const root = import_client.default.createRoot(document.getElementById("root"));
-    root.render(/* @__PURE__ */ jsx_dev_runtime6.jsxDEV(import_react7.default.StrictMode, {
-      children: /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(MultiEntityApp, {
+    root.render(/* @__PURE__ */ jsx_dev_runtime7.jsxDEV(import_react8.default.StrictMode, {
+      children: /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(MultiEntityApp, {
         entities: config.entities
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this));

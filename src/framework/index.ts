@@ -6,6 +6,9 @@ export type { MatteOptions } from './framework';
 export { entity, ownedEntity, t, field, string, number, date, richtext, file, boolean } from './entities';
 export type { EntityDefinition, EntitySchema, EntitySchemaDefinition, FieldType, FieldDefinition } from './entities';
 
+// View wrappers
+export { View, listView, gridView } from './views';
+
 // Database
 export { SQLiteAdapter } from './database';
 export type { DatabaseAdapter } from './database';

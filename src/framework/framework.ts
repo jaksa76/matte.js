@@ -3,6 +3,7 @@ import { SQLiteAdapter } from './database';
 import { RepositoryFactory } from './repository';
 import { APIServer } from './api';
 import type { EntityDefinition } from './entities';
+import { View } from './views';
 
 export interface MatteOptions {
   dbPath?: string;
@@ -26,8 +27,12 @@ export class Matte {
     this.port = options.port || 3000;
   }
 
-  register(entity: EntityDefinition): void {
-    EntityRegistry.register(entity);
+  register(entityOrView: EntityDefinition | View): void {
+    if (entityOrView instanceof View) {
+      EntityRegistry.register(entityOrView.entity, entityOrView.viewType);
+    } else {
+      EntityRegistry.register(entityOrView); // defaults to 'grid'
+    }
   }
 
   async start(): Promise<void> {
@@ -39,7 +44,8 @@ export class Matte {
     await this.buildClient();
 
     // Get all registered entities
-    const entities = EntityRegistry.getAll();
+    const registrations = EntityRegistry.getAll();
+    const entities = registrations.map(reg => reg.entity);
 
     // Create tables for all entities
     for (const entity of entities) {
@@ -97,7 +103,7 @@ export class Matte {
     });
 
     console.log(`🚀 Server running at http://localhost:${this.server.port}`);
-    console.log(`📊 Registered entities: ${EntityRegistry.getAll().map(e => e.name).join(', ')}`);
+    console.log(`📊 Registered entities: ${EntityRegistry.getAll().map(r => r.entity.name).join(', ')}`);
   }
 
   stop(): void {
@@ -137,7 +143,8 @@ export class Matte {
   }
 
   private renderLandingPage(): string {
-    const entities = EntityRegistry.getAll();
+    const registrations = EntityRegistry.getAll();
+    const entities = registrations.map(r => r.entity);
     
     return `<!DOCTYPE html>
 <html>
@@ -242,7 +249,7 @@ export class Matte {
   }
 
   private renderHTML(): string {
-    const entities = EntityRegistry.getAll();
+    const registrations = EntityRegistry.getAll();
     
     return `<!DOCTYPE html>
 <html>
@@ -256,7 +263,7 @@ export class Matte {
   <div id="root"></div>
   <script>
     window.ENTITY_CONFIG = {
-      entities: ${JSON.stringify(entities)}
+      entities: ${JSON.stringify(registrations)}
     };
   </script>
   <script src="/client.js"></script>
@@ -269,7 +276,7 @@ export class Matte {
   }
 
   getRepository<T = any>(entityName: string): any {
-    const entity = EntityRegistry.get(entityName);
+    const entity = EntityRegistry.getEntity(entityName);
     if (!entity) {
       throw new Error(`Entity ${entityName} not found`);
     }

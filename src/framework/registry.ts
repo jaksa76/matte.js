@@ -1,21 +1,36 @@
 import type { EntityDefinition } from './entities';
 
+export type ViewType = 'grid' | 'list';
+
+export interface EntityRegistration {
+  entity: EntityDefinition;
+  viewType: ViewType;
+}
+
 /**
  * Central registry for all entity definitions
  */
 class Registry {
-  private entities = new Map<string, EntityDefinition>();
+  private entities = new Map<string, EntityRegistration>();
 
-  register(definition: EntityDefinition): void {
-    this.entities.set(definition.name, definition);
+  register(definition: EntityDefinition, viewType: ViewType = 'grid'): void {
+    this.entities.set(definition.name, { entity: definition, viewType });
   }
 
-  get(name: string): EntityDefinition | undefined {
+  get(name: string): EntityRegistration | undefined {
     return this.entities.get(name);
   }
 
-  getAll(): EntityDefinition[] {
+  getEntity(name: string): EntityDefinition | undefined {
+    return this.entities.get(name)?.entity;
+  }
+
+  getAll(): EntityRegistration[] {
     return Array.from(this.entities.values());
+  }
+
+  getAllEntities(): EntityDefinition[] {
+    return Array.from(this.entities.values()).map(reg => reg.entity);
   }
 
   clear(): void {

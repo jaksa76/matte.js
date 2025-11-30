@@ -3,8 +3,13 @@ import type { EntityDefinition } from '../entities';
 import { EntityApp } from './EntityApp';
 import './styles.css';
 
+export interface EntityRegistration {
+  entity: EntityDefinition;
+  viewType: 'grid' | 'list';
+}
+
 export interface MultiEntityAppProps {
-  entities: EntityDefinition[];
+  entities: EntityRegistration[];
 }
 
 function toKebabCase(str: string): string {
@@ -20,11 +25,11 @@ export function MultiEntityApp({ entities }: MultiEntityAppProps) {
     const path = window.location.pathname;
     const entityFromPath = path.split('/')[1];
     
-    if (entityFromPath && entities.some(e => toKebabCase(e.name) === entityFromPath)) {
+    if (entityFromPath && entities.some(r => toKebabCase(r.entity.name) === entityFromPath)) {
       setCurrentEntityName(entityFromPath);
     } else if (entities.length > 0) {
       // Default to first entity and update URL
-      const defaultEntity = toKebabCase(entities[0].name);
+      const defaultEntity = toKebabCase(entities[0].entity.name);
       setCurrentEntityName(defaultEntity);
       window.history.replaceState({}, '', `/${defaultEntity}`);
     }
@@ -36,7 +41,7 @@ export function MultiEntityApp({ entities }: MultiEntityAppProps) {
       const path = window.location.pathname;
       const entityFromPath = path.split('/')[1];
       
-      if (entityFromPath && entities.some(e => toKebabCase(e.name) === entityFromPath)) {
+      if (entityFromPath && entities.some(r => toKebabCase(r.entity.name) === entityFromPath)) {
         setCurrentEntityName(entityFromPath);
       }
     };
@@ -51,9 +56,9 @@ export function MultiEntityApp({ entities }: MultiEntityAppProps) {
     window.history.pushState({}, '', `/${kebabName}`);
   };
 
-  const currentEntity = entities.find(e => toKebabCase(e.name) === currentEntityName);
+  const currentRegistration = entities.find(r => toKebabCase(r.entity.name) === currentEntityName);
 
-  if (!currentEntity) {
+  if (!currentRegistration) {
     return (
       <div className="multi-entity-app">
         <div className="loading-container">Loading...</div>
@@ -75,18 +80,18 @@ export function MultiEntityApp({ entities }: MultiEntityAppProps) {
           </button>
         </div>
         <ul className="nav-list">
-          {entities.map((entity) => {
-            const kebabName = toKebabCase(entity.name);
+          {entities.map((registration) => {
+            const kebabName = toKebabCase(registration.entity.name);
             const isActive = currentEntityName === kebabName;
             return (
-              <li key={entity.name} className="nav-item">
+              <li key={registration.entity.name} className="nav-item">
                 <button
                   className={`nav-link ${isActive ? 'active' : ''}`}
-                  onClick={() => handleNavigate(entity.name)}
-                  title={entity.name}
+                  onClick={() => handleNavigate(registration.entity.name)}
+                  title={registration.entity.name}
                 >
                   <span className="nav-icon">📋</span>
-                  {!collapsed && <span className="nav-label">{entity.name}</span>}
+                  {!collapsed && <span className="nav-label">{registration.entity.name}</span>}
                 </button>
               </li>
             );
@@ -95,7 +100,8 @@ export function MultiEntityApp({ entities }: MultiEntityAppProps) {
       </nav>
       <main className={`entity-content ${collapsed ? 'nav-collapsed' : ''}`}>
         <EntityApp 
-          entity={currentEntity} 
+          entity={currentRegistration.entity}
+          viewType={currentRegistration.viewType}
           apiUrl={`/api/${currentEntityName}`} 
         />
       </main>

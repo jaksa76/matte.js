@@ -549,3 +549,85 @@ body {
 .btn svg {
   flex-shrink: 0;
 }
+
+.grid-view-container {
+  padding: 24px;
+}
+
+.grid-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items:  center;
+  margin-bottom: 24px;
+}
+
+.grid-view-title {
+  color: var(--color-gray-900);
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.grid-card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  background: #fff;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  transition: transform .2s, box-shadow .2s;
+}
+
+.grid-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px #0000001a;
+}
+
+.grid-card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 12px;
+}
+
+.grid-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.grid-card-label {
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.grid-card-value {
+  color: var(--color-gray-900);
+  word-break: break-word;
+  font-size: 14px;
+}
+
+.grid-card-actions {
+  display: flex;
+  border-top: 1px solid var(--color-gray-200);
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+.grid-card-actions .btn {
+  flex: 1;
+  justify-content: center;
+  min-width: -moz-fit-content;
+  min-width: fit-content;
+}

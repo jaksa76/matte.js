@@ -386,7 +386,10 @@ function normalizeSchema(schemaDefinition: EntitySchemaDefinition): { schema: En
 }
 
 // Entity definition functions
-export function ownedEntity(name: string, schemaDefinition: EntitySchemaDefinition): EntityDefinition {
+export function ownedEntity(
+  name: string, 
+  schemaDefinition: EntitySchemaDefinition
+): EntityDefinition {
   const { schema, fieldOrder } = normalizeSchema(schemaDefinition);
   
   const definition: EntityDefinition = {
@@ -399,7 +402,10 @@ export function ownedEntity(name: string, schemaDefinition: EntitySchemaDefiniti
   return definition;
 }
 
-export function entity(name: string, schemaDefinition: EntitySchemaDefinition): EntityDefinition {
+export function entity(
+  name: string, 
+  schemaDefinition: EntitySchemaDefinition
+): EntityDefinition {
   const { schema, fieldOrder } = normalizeSchema(schemaDefinition);
   
   const definition: EntityDefinition = {

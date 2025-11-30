@@ -1,9 +1,11 @@
 export { ListView } from './ListView';
+export { GridView } from './GridView';
 export { DetailView } from './DetailView';
 export { FormView } from './FormView';
 export { EntityApp } from './EntityApp';
 export { MultiEntityApp } from './MultiEntityApp';
 export type { ListViewProps } from './ListView';
+export type { GridViewProps } from './GridView';
 export type { DetailViewProps } from './DetailView';
 export type { FormViewProps } from './FormView';
 export type { EntityAppProps } from './EntityApp';
