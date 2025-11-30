@@ -3,8 +3,8 @@ export { Framework } from './framework';
 export type { FrameworkOptions } from './framework';
 
 // Entity definitions
-export { entity, ownedEntity, t } from './entities';
-export type { EntityDefinition, EntitySchema, FieldType } from './entities';
+export { entity, ownedEntity, t, field, string, number, date, richtext, file, boolean } from './entities';
+export type { EntityDefinition, EntitySchema, EntitySchemaDefinition, FieldType, FieldDefinition } from './entities';
 
 // Database
 export { SQLiteAdapter } from './database';

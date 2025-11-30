@@ -247,23 +247,153 @@ export const t = {
   boolean: () => new BooleanField(),
 };
 
+// Field definition with name (for array-based schemas)
+export interface FieldDefinition {
+  name: string;
+  field: FieldType;
+}
+
+// Helper function to create a field definition
+export function field(name: string, fieldType: FieldType): FieldDefinition {
+  return { name, field: fieldType };
+}
+
+// Wrapper class to allow method chaining on shortcut helpers
+class FieldBuilder<T extends FieldType> {
+  constructor(public name: string, public fieldType: T) {}
+
+  // Proxy all field type methods
+  required(): this {
+    this.fieldType = this.fieldType.required() as T;
+    return this;
+  }
+
+  default(value: any): this {
+    this.fieldType = this.fieldType.default(value) as T;
+    return this;
+  }
+
+  // StringField methods
+  minLength(length: number): this {
+    if ('minLength' in this.fieldType) {
+      (this.fieldType as any).minLength(length);
+    }
+    return this;
+  }
+
+  maxLength(length: number): this {
+    if ('maxLength' in this.fieldType) {
+      (this.fieldType as any).maxLength(length);
+    }
+    return this;
+  }
+
+  // NumberField methods
+  min(value: number): this {
+    if ('min' in this.fieldType) {
+      (this.fieldType as any).min(value);
+    }
+    return this;
+  }
+
+  max(value: number): this {
+    if ('max' in this.fieldType) {
+      (this.fieldType as any).max(value);
+    }
+    return this;
+  }
+
+  // FileField methods
+  array(): this {
+    if ('array' in this.fieldType) {
+      this.fieldType = (this.fieldType as any).array();
+    }
+    return this;
+  }
+
+  maxSize(bytes: number): this {
+    if ('maxSize' in this.fieldType) {
+      (this.fieldType as any).maxSize(bytes);
+    }
+    return this;
+  }
+
+  allowedTypes(types: string[]): this {
+    if ('allowedTypes' in this.fieldType) {
+      (this.fieldType as any).allowedTypes(types);
+    }
+    return this;
+  }
+
+  // Convert to FieldDefinition
+  toFieldDefinition(): FieldDefinition {
+    return { name: this.name, field: this.fieldType };
+  }
+}
+
+// Shortcut helpers for common field types
+export function string(name: string): FieldBuilder<StringField> {
+  return new FieldBuilder(name, t.string());
+}
+
+export function number(name: string): FieldBuilder<NumberField> {
+  return new FieldBuilder(name, t.number());
+}
+
+export function date(name: string): FieldBuilder<DateField> {
+  return new FieldBuilder(name, t.date());
+}
+
+export function richtext(name: string): FieldBuilder<RichTextField> {
+  return new FieldBuilder(name, t.richtext());
+}
+
+export function file(name: string): FieldBuilder<FileField> {
+  return new FieldBuilder(name, t.file());
+}
+
+export function boolean(name: string): FieldBuilder<BooleanField> {
+  return new FieldBuilder(name, t.boolean());
+}
+
 // Entity definition
 export interface EntitySchema {
   [fieldName: string]: FieldType;
 }
 
+export type EntitySchemaDefinition = (FieldDefinition | FieldBuilder<any>)[];
+
 export interface EntityDefinition {
   name: string;
   schema: EntitySchema;
   owned: boolean;
+  fieldOrder: string[]; // Field order is always preserved
+}
+
+// Helper to convert array schema to object schema
+function normalizeSchema(schemaDefinition: EntitySchemaDefinition): { schema: EntitySchema; fieldOrder: string[] } {
+  const schema: EntitySchema = {};
+  const fieldOrder: string[] = [];
+  
+  for (const item of schemaDefinition) {
+    // Handle both FieldDefinition and FieldBuilder
+    const fieldDef = item instanceof FieldBuilder ? item.toFieldDefinition() : item;
+    schema[fieldDef.name] = fieldDef.field;
+    fieldOrder.push(fieldDef.name);
+  }
+  
+  return { schema, fieldOrder };
 }
 
 // Entity definition functions
-export function ownedEntity(name: string, schema: EntitySchema): EntityDefinition {
+export function ownedEntity(name: string, schemaDefinition: EntitySchemaDefinition): EntityDefinition {
+  const { schema, fieldOrder } = normalizeSchema(schemaDefinition);
+  
   const definition: EntityDefinition = {
     name,
     schema,
     owned: true,
+    fieldOrder,
   };
   
   // Register the entity
@@ -272,11 +402,14 @@ export function ownedEntity(name: string, schema: EntitySchema): EntityDefinitio
   return definition;
 }
 
-export function entity(name: string, schema: EntitySchema): EntityDefinition {
+export function entity(name: string, schemaDefinition: EntitySchemaDefinition): EntityDefinition {
+  const { schema, fieldOrder } = normalizeSchema(schemaDefinition);
+  
   const definition: EntityDefinition = {
     name,
     schema,
     owned: false,
+    fieldOrder,
   };
   
   // Register the entity

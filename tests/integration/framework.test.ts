@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { Framework } from '../../src/framework/framework';
 import { EntityRegistry } from '../../src/framework/registry';
-import { t, ownedEntity } from '../../src/framework/entities';
+import { t, ownedEntity, field, string, richtext, date, number, boolean } from '../../src/framework/entities';
 
 describe('Integration Tests', () => {
   let framework: Framework;
@@ -16,21 +16,21 @@ describe('Integration Tests', () => {
     EntityRegistry.clear();
 
     // Define test entities
-    ownedEntity('Task', {
-      title: t.string().required(),
-      description: t.richtext(),
-      status: t.enum(['open', 'in_progress', 'blocked', 'done']).default('open'),
-      priority: t.enum(['low', 'medium', 'high', 'urgent']).default('medium'),
-      dueDate: t.date(),
-      estimate: t.number().min(0),
-      completed: t.boolean().default(false),
-    });
+    ownedEntity('Task', [
+      string('title').required(),
+      richtext('description'),
+      field('status', t.enum(['open', 'in_progress', 'blocked', 'done']).default('open')),
+      field('priority', t.enum(['low', 'medium', 'high', 'urgent']).default('medium')),
+      date('dueDate'),
+      number('estimate').min(0),
+      boolean('completed').default(false),
+    ]);
 
-    ownedEntity('Note', {
-      title: t.string().required(),
-      content: t.richtext(),
-      tags: t.string(),
-    });
+    ownedEntity('Note', [
+      string('title').required(),
+      richtext('content'),
+      string('tags'),
+    ]);
 
     framework = new Framework({
       dbPath: ':memory:',

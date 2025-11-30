@@ -1,5 +1,5 @@
 import { describe, test, expect, beforeEach } from 'bun:test';
-import { t, entity, ownedEntity } from '../../src/framework/entities';
+import { t, entity, ownedEntity, field, string, number, richtext, boolean, date } from '../../src/framework/entities';
 import { EntityRegistry } from '../../src/framework/registry';
 
 describe('Field Types', () => {
@@ -140,33 +140,33 @@ describe('Entity Definitions', () => {
   });
 
   test('creates basic entity', () => {
-    const def = entity('User', {
-      name: t.string().required(),
-      email: t.string().required(),
-      age: t.number(),
-    });
+    const def = entity('User', [
+      string('name').required(),
+      string('email').required(),
+      number('age'),
+    ]);
 
     expect(def.name).toBe('User');
     expect(def.owned).toBe(false);
-    expect(Object.keys(def.schema)).toEqual(['name', 'email', 'age']);
+    expect(def.fieldOrder).toEqual(['name', 'email', 'age']);
   });
 
   test('creates owned entity', () => {
-    const def = ownedEntity('Task', {
-      title: t.string().required(),
-      status: t.enum(['open', 'done']).default('open'),
-    });
+    const def = ownedEntity('Task', [
+      string('title').required(),
+      field('status', t.enum(['open', 'done']).default('open')),
+    ]);
 
     expect(def.name).toBe('Task');
     expect(def.owned).toBe(true);
-    expect(Object.keys(def.schema)).toEqual(['title', 'status']);
+    expect(def.fieldOrder).toEqual(['title', 'status']);
   });
 
   test('registers entity in registry', () => {
-    entity('Product', {
-      name: t.string().required(),
-      price: t.number().min(0).required(),
-    });
+    entity('Product', [
+      string('name').required(),
+      number('price').min(0).required(),
+    ]);
 
     const registered = EntityRegistry.get('Product');
     expect(registered).toBeDefined();
@@ -174,18 +174,18 @@ describe('Entity Definitions', () => {
   });
 
   test('supports complex schema', () => {
-    const def = ownedEntity('BlogPost', {
-      title: t.string().required(),
-      slug: t.string().required(),
-      content: t.richtext(),
-      status: t.enum(['draft', 'published', 'archived']).default('draft'),
-      publishedAt: t.date(),
-      viewCount: t.number().min(0).default(0),
-      tags: t.string(),
-      featured: t.boolean().default(false),
-    });
+    const def = ownedEntity('BlogPost', [
+      string('title').required(),
+      string('slug').required(),
+      richtext('content'),
+      field('status', t.enum(['draft', 'published', 'archived']).default('draft')),
+      date('publishedAt'),
+      number('viewCount').min(0).default(0),
+      string('tags'),
+      boolean('featured').default(false),
+    ]);
 
-    expect(Object.keys(def.schema).length).toBe(8);
+    expect(def.fieldOrder.length).toBe(8);
     expect(def.schema.status._default).toBe('draft');
     expect(def.schema.viewCount._default).toBe(0);
   });
@@ -197,7 +197,7 @@ describe('Entity Registry', () => {
   });
 
   test('registers and retrieves entity', () => {
-    const def = entity('User', { name: t.string() });
+    const def = entity('User', [string('name')]);
     
     const retrieved = EntityRegistry.get('User');
     expect(retrieved).toBe(def);
@@ -209,9 +209,9 @@ describe('Entity Registry', () => {
   });
 
   test('gets all entities', () => {
-    entity('User', { name: t.string() });
-    entity('Product', { name: t.string() });
-    ownedEntity('Task', { title: t.string() });
+    entity('User', [string('name')]);
+    entity('Product', [string('name')]);
+    ownedEntity('Task', [string('title')]);
 
     const all = EntityRegistry.getAll();
     expect(all.length).toBe(3);
@@ -219,8 +219,8 @@ describe('Entity Registry', () => {
   });
 
   test('clears all entities', () => {
-    entity('User', { name: t.string() });
-    entity('Product', { name: t.string() });
+    entity('User', [string('name')]);
+    entity('Product', [string('name')]);
 
     expect(EntityRegistry.getAll().length).toBe(2);
 
