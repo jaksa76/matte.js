@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { EntityDefinition, FieldType } from '../entities';
 import { Save, X } from 'lucide-react';
 import './styles.css';

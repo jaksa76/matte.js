@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { EntityDefinition } from '../entities';
 import { ListView, DetailView, FormView } from './index';
 import './styles.css';

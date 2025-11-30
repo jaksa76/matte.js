@@ -1,4 +1,3 @@
-import React from 'react';
 import type { EntityDefinition } from '../entities';
 import { ArrowLeft, Pencil } from 'lucide-react';
 import './styles.css';

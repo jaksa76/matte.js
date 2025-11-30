@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test';
 import { Framework } from '../../src/framework/framework';
 import { EntityRegistry } from '../../src/framework/registry';
 import { t, ownedEntity, field, string, richtext, date, number, boolean } from '../../src/framework/entities';
@@ -6,13 +6,10 @@ import { t, ownedEntity, field, string, richtext, date, number, boolean } from '
 describe('Integration Tests', () => {
   let framework: Framework;
   let baseUrl: string;
-  let testPort = 3001;
+  const testPort = 3001;
 
-  beforeEach(async () => {
-    // Use a different port for each test to avoid port reuse issues
-    testPort++;
-    
-    // Clear registry before each test
+  beforeAll(async () => {
+    // Clear registry and define entities once
     EntityRegistry.clear();
 
     // Define test entities
@@ -38,22 +35,31 @@ describe('Integration Tests', () => {
     });
 
     await framework.initialize();
-    
-    // Start server in background
     framework.start();
     
     baseUrl = `http://localhost:${testPort}`;
-    
-    // Wait for server to be ready
-    await new Promise(resolve => setTimeout(resolve, 100));
   });
 
-  afterEach(async () => {
-    // Stop server and clean up
+  afterAll(() => {
     if (framework) {
       framework.close();
-      // Add small delay to ensure port is fully released
-      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  });
+
+  beforeEach(async () => {
+    // Clear all data between tests
+    await fetch(`${baseUrl}/api/task`, { method: 'DELETE' }).catch(() => {});
+    await fetch(`${baseUrl}/api/note`, { method: 'DELETE' }).catch(() => {});
+    
+    // Delete all existing tasks and notes
+    const tasks = await fetch(`${baseUrl}/api/task`).then(r => r.json()).catch(() => []);
+    for (const task of tasks) {
+      await fetch(`${baseUrl}/api/task/${task.id}`, { method: 'DELETE' });
+    }
+    
+    const notes = await fetch(`${baseUrl}/api/note`).then(r => r.json()).catch(() => []);
+    for (const note of notes) {
+      await fetch(`${baseUrl}/api/note/${note.id}`, { method: 'DELETE' });
     }
   });
 
