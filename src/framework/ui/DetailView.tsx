@@ -1,5 +1,7 @@
 import React from 'react';
 import type { EntityDefinition } from '../entities';
+import { ArrowLeft, Pencil } from 'lucide-react';
+import './styles.css';
 
 export interface DetailViewProps {
   entity: EntityDefinition;
@@ -10,40 +12,42 @@ export interface DetailViewProps {
 
 export function DetailView({ entity, item, onEdit, onBack }: DetailViewProps) {
   return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>{entity.name} Details</h1>
+    <div className="detail-view-container">
+      <div className="detail-view-header">
+        <h1 className="detail-view-title">{entity.name} Details</h1>
         <div>
           {onBack && (
-            <button onClick={onBack} style={{ marginRight: '8px', padding: '8px 16px', cursor: 'pointer' }}>
-              Back
+            <button onClick={onBack} className="btn btn-secondary">
+              <ArrowLeft size={16} />
+              <span>Back</span>
             </button>
           )}
           {onEdit && (
-            <button onClick={onEdit} style={{ padding: '8px 16px', cursor: 'pointer' }}>
-              Edit
+            <button onClick={onEdit} className="btn btn-primary">
+              <Pencil size={16} />
+              <span>Edit</span>
             </button>
           )}
         </div>
       </div>
 
-      <div style={{ maxWidth: '600px' }}>
+      <div className="detail-card">
         {Object.entries(entity.schema).map(([fieldName, field]) => (
-          <div key={fieldName} style={{ marginBottom: '16px', padding: '12px', backgroundColor: '#f9f9f9', borderRadius: '4px' }}>
-            <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px' }}>
+          <div key={fieldName} className="detail-field">
+            <label className="detail-field-label">
               {fieldName}
             </label>
-            <div style={{ color: '#555' }}>
+            <div className="detail-field-value">
               {formatDetailValue(item[fieldName], field)}
             </div>
           </div>
         ))}
 
-        <div style={{ marginTop: '24px', padding: '12px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
-          <div style={{ fontSize: '12px', color: '#666' }}>
-            <div>ID: {item.id}</div>
-            {item.createdAt && <div>Created: {new Date(item.createdAt).toLocaleString()}</div>}
-            {item.updatedAt && <div>Updated: {new Date(item.updatedAt).toLocaleString()}</div>}
+        <div className="detail-metadata">
+          <div className="detail-metadata-content">
+            <div><span className="detail-metadata-label">ID:</span> {item.id}</div>
+            {item.createdAt && <div><span className="detail-metadata-label">Created:</span> {new Date(item.createdAt).toLocaleString()}</div>}
+            {item.updatedAt && <div><span className="detail-metadata-label">Updated:</span> {new Date(item.updatedAt).toLocaleString()}</div>}
           </div>
         </div>
       </div>
@@ -53,15 +57,15 @@ export function DetailView({ entity, item, onEdit, onBack }: DetailViewProps) {
 
 function formatDetailValue(value: any, field: any): React.ReactNode {
   if (value === null || value === undefined) {
-    return <span style={{ color: '#999', fontStyle: 'italic' }}>Not set</span>;
+    return <span className="detail-field-empty">Not set</span>;
   }
 
   if (Array.isArray(value)) {
     if (value.length === 0) {
-      return <span style={{ color: '#999', fontStyle: 'italic' }}>Empty list</span>;
+      return <span className="detail-field-empty">Empty list</span>;
     }
     return (
-      <ul style={{ margin: 0, paddingLeft: '20px' }}>
+      <ul>
         {value.map((item, i) => (
           <li key={i}>{String(item)}</li>
         ))}

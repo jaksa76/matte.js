@@ -356,7 +356,8 @@ describe('Integration Tests', () => {
       const html = await res.text();
       expect(html).toContain('<!DOCTYPE html>');
       expect(html).toContain('Task Management');
-      expect(html).toContain('React');
+      expect(html).toContain('ENTITY_CONFIG');
+      expect(html).toContain('/client.js');
     });
 
     test('serves HTML at /index.html', async () => {

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import type { EntityDefinition, FieldType } from '../entities';
+import { Save, X } from 'lucide-react';
+import './styles.css';
 
 export interface FormViewProps {
   entity: EntityDefinition;
@@ -87,40 +89,42 @@ export function FormView({ entity, initialData, apiUrl, onSuccess, onCancel }: F
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>{initialData?.id ? 'Edit' : 'Create'} {entity.name}</h1>
+    <div className="form-view-container">
+      <h1 className="form-view-title">{initialData?.id ? 'Edit' : 'Create'} {entity.name}</h1>
 
-      <form onSubmit={handleSubmit} style={{ maxWidth: '600px' }}>
+      <form onSubmit={handleSubmit} className="form-card">
         {Object.entries(entity.schema).map(([fieldName, field]) => (
-          <div key={fieldName} style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: 'bold' }}>
+          <div key={fieldName} className="form-group">
+            <label className="form-label">
               {fieldName}
-              {field.isRequired && <span style={{ color: 'red' }}> *</span>}
+              {field.isRequired && <span className="required"> *</span>}
             </label>
             {renderField(fieldName, field, formData[fieldName], (value) => handleChange(fieldName, value))}
             {errors[fieldName] && (
-              <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
+              <div className="form-error">
                 {errors[fieldName]}
               </div>
             )}
           </div>
         ))}
 
-        <div style={{ marginTop: '24px', display: 'flex', gap: '8px' }}>
+        <div className="form-actions">
           <button 
             type="submit" 
             disabled={submitting}
-            style={{ padding: '8px 16px', cursor: submitting ? 'not-allowed' : 'pointer' }}
+            className="btn btn-primary"
           >
-            {submitting ? 'Saving...' : 'Save'}
+            <Save size={16} />
+            <span>{submitting ? 'Saving...' : 'Save'}</span>
           </button>
           {onCancel && (
             <button 
               type="button" 
               onClick={onCancel}
-              style={{ padding: '8px 16px', cursor: 'pointer' }}
+              className="btn btn-secondary"
             >
-              Cancel
+              <X size={16} />
+              <span>Cancel</span>
             </button>
           )}
         </div>
@@ -135,19 +139,12 @@ function renderField(
   value: any,
   onChange: (value: any) => void
 ): React.ReactNode {
-  const inputStyle = {
-    width: '100%',
-    padding: '8px',
-    border: '1px solid #ddd',
-    borderRadius: '4px',
-  };
-
   if (field.type === 'enum') {
     return (
       <select 
         value={value || ''} 
         onChange={(e) => onChange(e.target.value)}
-        style={inputStyle}
+        className="form-input"
       >
         <option value="">Select...</option>
         {field.values.map((v) => (
@@ -163,7 +160,7 @@ function renderField(
         type="number"
         value={value || ''}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        style={inputStyle}
+        className="form-input"
         min={'_min' in field ? field._min : undefined}
         max={'_max' in field ? field._max : undefined}
       />
@@ -177,7 +174,7 @@ function renderField(
         type="date"
         value={dateValue}
         onChange={(e) => onChange(e.target.value ? new Date(e.target.value).toISOString() : null)}
-        style={inputStyle}
+        className="form-input"
       />
     );
   }
@@ -188,7 +185,7 @@ function renderField(
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         rows={6}
-        style={inputStyle}
+        className="form-input form-textarea"
       />
     );
   }
@@ -199,7 +196,7 @@ function renderField(
         type="checkbox"
         checked={value || false}
         onChange={(e) => onChange(e.target.checked)}
-        style={{ width: 'auto' }}
+        className="form-input"
       />
     );
   }
@@ -213,7 +210,7 @@ function renderField(
           const files = Array.from(e.target.files || []);
           onChange(files.map(f => f.name));
         }}
-        style={inputStyle}
+        className="form-input"
       />
     );
   }
@@ -223,7 +220,7 @@ function renderField(
       <input
         type="file"
         onChange={(e) => onChange(e.target.files?.[0]?.name || null)}
-        style={inputStyle}
+        className="form-input"
       />
     );
   }
@@ -234,7 +231,7 @@ function renderField(
       type="text"
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
-      style={inputStyle}
+      className="form-input"
     />
   );
 }

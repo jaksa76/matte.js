@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { EntityDefinition } from './entities';
+import { Plus, Eye, Pencil, Trash2, RefreshCw } from 'lucide-react';
+import './styles.css';
 
 export interface ListViewProps {
   entity: EntityDefinition;
@@ -47,82 +49,96 @@ export function ListView({ entity, apiUrl, onSelect, onEdit, onCreate }: ListVie
 
   if (loading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <p>Loading...</p>
+      <div className="list-view-loading">
+        <div className="spinner"></div>
+        <p className="loading-text">Loading...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div style={{ padding: '20px', color: 'red' }}>
-        <p>Error: {error}</p>
-        <button onClick={fetchItems}>Retry</button>
+      <div className="error-container">
+        <div className="error-box">
+          <p className="error-message">Error: {error}</p>
+          <button onClick={fetchItems} className="btn btn-danger">
+            <RefreshCw size={16} />
+            <span>Retry</span>
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h1>{entity.name}s</h1>
+    <div className="list-view-container">
+      <div className="list-view-header">
+        <h1 className="list-view-title">{entity.name}s</h1>
         {onCreate && (
-          <button onClick={onCreate} style={{ padding: '8px 16px', cursor: 'pointer' }}>
-            Create New {entity.name}
+          <button onClick={onCreate} className="btn btn-primary">
+            <Plus size={16} />
+            <span>Create New {entity.name}</span>
           </button>
         )}
       </div>
 
       {items.length === 0 ? (
-        <p>No items found.</p>
+        <div className="empty-state">
+          <p className="empty-text">No items found.</p>
+        </div>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid #ddd' }}>
-              {Object.keys(entity.schema).slice(0, 4).map(field => (
-                <th key={field} style={{ padding: '12px', textAlign: 'left' }}>
-                  {field}
-                </th>
-              ))}
-              <th style={{ padding: '12px', textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(item => (
-              <tr key={item.id} style={{ borderBottom: '1px solid #eee' }}>
+        <div className="table-wrapper">
+          <table className="data-table">
+            <thead>
+              <tr>
                 {Object.keys(entity.schema).slice(0, 4).map(field => (
-                  <td key={field} style={{ padding: '12px' }}>
-                    {formatValue(item[field], entity.schema[field]!)}
-                  </td>
+                  <th key={field}>
+                    {field}
+                  </th>
                 ))}
-                <td style={{ padding: '12px', textAlign: 'right' }}>
-                  {onSelect && (
-                    <button 
-                      onClick={() => onSelect(item)} 
-                      style={{ marginRight: '8px', padding: '4px 8px', cursor: 'pointer' }}
-                    >
-                      View
-                    </button>
-                  )}
-                  {onEdit && (
-                    <button 
-                      onClick={() => onEdit(item)} 
-                      style={{ marginRight: '8px', padding: '4px 8px', cursor: 'pointer' }}
-                    >
-                      Edit
-                    </button>
-                  )}
-                  <button 
-                    onClick={() => handleDelete(item.id)} 
-                    style={{ padding: '4px 8px', cursor: 'pointer', color: 'red' }}
-                  >
-                    Delete
-                  </button>
-                </td>
+                <th className="actions-header">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {items.map(item => (
+                <tr key={item.id}>
+                  {Object.keys(entity.schema).slice(0, 4).map(field => (
+                    <td key={field}>
+                      {formatValue(item[field], entity.schema[field]!)}
+                    </td>
+                  ))}
+                  <td className="actions-cell">
+                    {onSelect && (
+                      <button 
+                        onClick={() => onSelect(item)} 
+                        className="btn btn-secondary btn-sm"
+                      >
+                        <Eye size={14} />
+                        <span>View</span>
+                      </button>
+                    )}
+                    {onEdit && (
+                      <button 
+                        onClick={() => onEdit(item)} 
+                        className="btn btn-info btn-sm"
+                      >
+                        <Pencil size={14} />
+                        <span>Edit</span>
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => handleDelete(item.id)} 
+                      className="btn btn-danger btn-sm"
+                    >
+                      <Trash2 size={14} />
+                      <span>Delete</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

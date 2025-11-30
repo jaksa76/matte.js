@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { EntityDefinition } from '../entities';
 import { ListView, DetailView, FormView } from './index';
+import './styles.css';
 
 type ViewMode = 'list' | 'detail' | 'create' | 'edit';
 
@@ -44,7 +45,7 @@ export function EntityApp({ entity, apiUrl }: EntityAppProps) {
   };
 
   return (
-    <div>
+    <div className="entity-app">
       {mode === 'list' && (
         <ListView
           entity={entity}
