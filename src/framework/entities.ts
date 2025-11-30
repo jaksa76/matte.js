@@ -506,14 +506,14 @@ export class FieldGroup implements BaseField {
   ui: UIMetadata = {};
   
   label: string | null;
-  children: (FieldDefinition | FieldBuilder<any> | FieldGroup)[];
+  children: (FieldDefinition | FieldBuilder<any> | FieldGroup | any)[]; // 'any' allows FieldSelector from views.ts
   horizontal: boolean;
   _collapsible?: boolean;
   _id?: string;
   _border?: string;
   _padding?: string;
 
-  constructor(label: string | null, children: (FieldDefinition | FieldBuilder<any> | FieldGroup)[], horizontal = false) {
+  constructor(label: string | null, children: (FieldDefinition | FieldBuilder<any> | FieldGroup | any)[], horizontal = false) {
     this.label = label;
     this.children = children;
     this.horizontal = horizontal;
@@ -788,14 +788,14 @@ export function boolean(name: string): FieldBuilder<BooleanField> {
 }
 
 // Group helpers
-export function group(labelOrChildren: string | null | (FieldDefinition | FieldBuilder<any> | FieldGroup)[], children?: (FieldDefinition | FieldBuilder<any> | FieldGroup)[]): FieldGroup {
+export function group(labelOrChildren: string | null | (FieldDefinition | FieldBuilder<any> | FieldGroup | any)[], children?: (FieldDefinition | FieldBuilder<any> | FieldGroup | any)[]): FieldGroup {
   if (Array.isArray(labelOrChildren)) {
     return new FieldGroup(null, labelOrChildren, false);
   }
   return new FieldGroup(labelOrChildren, children || [], false);
 }
 
-export function hgroup(labelOrChildren: string | null | (FieldDefinition | FieldBuilder<any> | FieldGroup)[], children?: (FieldDefinition | FieldBuilder<any> | FieldGroup)[]): FieldGroup {
+export function hgroup(labelOrChildren: string | null | (FieldDefinition | FieldBuilder<any> | FieldGroup | any)[], children?: (FieldDefinition | FieldBuilder<any> | FieldGroup | any)[]): FieldGroup {
   if (Array.isArray(labelOrChildren)) {
     return new FieldGroup(null, labelOrChildren, true);
   }

@@ -7,7 +7,8 @@ export { entity, ownedEntity, t, field, string, number, date, richtext, file, bo
 export type { EntityDefinition, EntitySchema, EntitySchemaDefinition, FieldType, FieldDefinition, UIMetadata, FieldGroup } from './entities';
 
 // View wrappers
-export { View, listView, gridView } from './views';
+export { View, listView, gridView, customGridView, show, FieldSelector } from './views';
+export type { } from './views';
 
 // Database
 export { SQLiteAdapter } from './database';

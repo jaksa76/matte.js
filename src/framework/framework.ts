@@ -29,7 +29,11 @@ export class Matte {
 
   register(entityOrView: EntityDefinition | View): void {
     if (entityOrView instanceof View) {
-      EntityRegistry.register(entityOrView.entity, entityOrView.viewType);
+      // For custom views, use the customized entity with applied field configurations
+      const entity = entityOrView.customFields 
+        ? entityOrView.getCustomizedEntity() 
+        : entityOrView.entity;
+      EntityRegistry.register(entity, entityOrView.viewType);
     } else {
       EntityRegistry.register(entityOrView); // defaults to 'grid'
     }

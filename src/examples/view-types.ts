@@ -2,49 +2,52 @@
  * Example demonstrating different view types for entities
  */
 
-import { Matte, listView, gridView } from '../framework';
-import { ownedEntity, string, number, date, richtext } from '../framework/entities';
+import { Matte, listView, gridView, customGridView, show } from '../framework';
+import { ownedEntity, string, number, date, richtext, hgroup, field } from '../framework/entities';
 
-// ============================================================================
-// Example 1: Grid View (Default)
-// ============================================================================
-// Grid view displays entities as cards in a responsive grid layout
-const Product = ownedEntity("Product", [
+const app = new Matte();
+
+// Default view (grid)
+app.register(ownedEntity("Product", [
   string("name").required(),
   string("category"),
   number("price").required().min(0),
   date("releaseDate"),
   richtext("description"),
-]);
+]));
 
-// ============================================================================
-// Example 2: List View (Explicit)
-// ============================================================================
-// List view displays entities in a traditional table format
-const Task = ownedEntity("Task", [
+// Override to use list view
+app.register(listView(ownedEntity("Task", [
   string("title").required(),
   string("assignee"),
   string("status"),
   date("dueDate"),
-]);
+])));
 
-// ============================================================================
-// Example 3: Grid View (Explicit)
-// ============================================================================
-// You can also explicitly set grid view using gridView()
-const Article = ownedEntity("Article", [
+// Explicitly use grid view
+app.register(gridView(ownedEntity("Article", [
   string("title").required(),
   string("author"),
   richtext("content"),
   date("publishedAt"),
+])));
+
+// Custom view definition
+const Event = ownedEntity("Event", [
+  string("name").required(),
+  date("date").required(),
+  string("location"),
+  richtext("details"),
 ]);
 
-// Initialize the app
-const app = new Matte();
-
-// Register entities with different views
-app.register(Product);              // Defaults to grid view
-app.register(listView(Task));       // Explicitly use list view
-app.register(gridView(Article));    // Explicitly use grid view
+const EventSimpleView = customGridView(Event, [
+  show("name").large().bold().alignCenter().hideLabel(),
+  hgroup(null, [
+    show("date").alignLeft(),
+    show("location").alignRight(),
+  ]),
+  // details are hidden in this view
+]);
+app.register(EventSimpleView);
 
 app.start();
