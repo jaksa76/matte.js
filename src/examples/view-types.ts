@@ -41,11 +41,12 @@ const Event = ownedEntity("Event", [
 ]);
 
 const EventSimpleView = customGridView(Event, [
-  show("name").large().bold().alignCenter().hideLabel(),
+  // change the structure and styling of fields
   hgroup(null, [
-    show("date").alignLeft(),
-    show("location").alignRight(),
+    show("date").alignLeft().hideLabel(),
+    show("location").alignRight().hideLabel(),
   ]),
+  show("name").large().bold().alignCenter().hideLabel(), // change the order and style
   // details are hidden in this view
 ]);
 app.register(EventSimpleView);
