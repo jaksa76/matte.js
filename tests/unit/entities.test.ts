@@ -163,10 +163,12 @@ describe('Entity Definitions', () => {
   });
 
   test('registers entity in registry', () => {
-    entity('Product', [
+    const def = entity('Product', [
       string('name').required(),
       number('price').min(0).required(),
     ]);
+
+    EntityRegistry.register(def);
 
     const registered = EntityRegistry.get('Product');
     expect(registered).toBeDefined();
@@ -198,6 +200,7 @@ describe('Entity Registry', () => {
 
   test('registers and retrieves entity', () => {
     const def = entity('User', [string('name')]);
+    EntityRegistry.register(def);
     
     const retrieved = EntityRegistry.get('User');
     expect(retrieved).toBe(def);
@@ -209,9 +212,13 @@ describe('Entity Registry', () => {
   });
 
   test('gets all entities', () => {
-    entity('User', [string('name')]);
-    entity('Product', [string('name')]);
-    ownedEntity('Task', [string('title')]);
+    const user = entity('User', [string('name')]);
+    const product = entity('Product', [string('name')]);
+    const task = ownedEntity('Task', [string('title')]);
+
+    EntityRegistry.register(user);
+    EntityRegistry.register(product);
+    EntityRegistry.register(task);
 
     const all = EntityRegistry.getAll();
     expect(all.length).toBe(3);
@@ -219,8 +226,11 @@ describe('Entity Registry', () => {
   });
 
   test('clears all entities', () => {
-    entity('User', [string('name')]);
-    entity('Product', [string('name')]);
+    const user = entity('User', [string('name')]);
+    const product = entity('Product', [string('name')]);
+
+    EntityRegistry.register(user);
+    EntityRegistry.register(product);
 
     expect(EntityRegistry.getAll().length).toBe(2);
 

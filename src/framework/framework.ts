@@ -26,7 +26,11 @@ export class Framework {
     this.port = options.port || 3000;
   }
 
-  async initialize(): Promise<void> {
+  register(entity: EntityDefinition): void {
+    EntityRegistry.register(entity);
+  }
+
+  async start(): Promise<void> {
     if (this.initialized) return;
 
     await this.db.initialize();
@@ -47,12 +51,6 @@ export class Framework {
     }
 
     this.initialized = true;
-  }
-
-  async start(): Promise<void> {
-    if (!this.initialized) {
-      await this.initialize();
-    }
 
     const self = this;
     this.server = Bun.serve({

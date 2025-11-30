@@ -13,7 +13,7 @@ describe('Integration Tests', () => {
     EntityRegistry.clear();
 
     // Define test entities
-    ownedEntity('Task', [
+    const Task = ownedEntity('Task', [
       string('title').required(),
       richtext('description'),
       field('status', t.enum(['open', 'in_progress', 'blocked', 'done']).default('open')),
@@ -23,7 +23,7 @@ describe('Integration Tests', () => {
       boolean('completed').default(false),
     ]);
 
-    ownedEntity('Note', [
+    const Note = ownedEntity('Note', [
       string('title').required(),
       richtext('content'),
       string('tags'),
@@ -34,8 +34,10 @@ describe('Integration Tests', () => {
       port: testPort,
     });
 
-    await framework.initialize();
-    framework.start();
+    framework.register(Task);
+    framework.register(Note);
+
+    await framework.start();
     
     baseUrl = `http://localhost:${testPort}`;
   });

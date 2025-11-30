@@ -396,9 +396,6 @@ export function ownedEntity(name: string, schemaDefinition: EntitySchemaDefiniti
     fieldOrder,
   };
   
-  // Register the entity
-  EntityRegistry.register(definition);
-  
   return definition;
 }
 
@@ -411,9 +408,6 @@ export function entity(name: string, schemaDefinition: EntitySchemaDefinition): 
     owned: false,
     fieldOrder,
   };
-  
-  // Register the entity
-  EntityRegistry.register(definition);
   
   return definition;
 }

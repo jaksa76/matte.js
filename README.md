@@ -25,7 +25,7 @@ bun install
 ```typescript
 import { ownedEntity, field, string, richtext, date, number, file, t } from './framework';
 
-ownedEntity("Task", [
+const Task = ownedEntity("Task", [
   string("title").required(),
   richtext("description"),
   field("status", t.enum(["open", "in_progress", "done"]).default("open")),
@@ -64,11 +64,15 @@ const framework = new Framework({
   port: 3000,
 });
 
-await framework.initialize();
-framework.start();
+// Register entities
+framework.register(Task);
+
+// Start the framework (initialization happens automatically)
+await framework.start();
 ```
 
 This automatically:
+- Initializes the database
 - Creates database tables
 - Generates REST API endpoints
 - Serves a UI at `http://localhost:3000`

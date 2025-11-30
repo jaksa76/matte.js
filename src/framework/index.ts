@@ -1,5 +1,5 @@
 // Core framework
-export { Framework } from './framework';
+export { Framework as Framework } from './framework';
 export type { FrameworkOptions } from './framework';
 
 // Entity definitions

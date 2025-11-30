@@ -1,13 +1,25 @@
 import { Framework } from './src/framework';
+import { ownedEntity, string, richtext, field, t, date, number, file } from './src/framework/entities';
 
-// Import the Task entity definition (this registers it)
-import './src/examples/simple-entity';
+// Define the Task entity
+const Task = ownedEntity("Task", [
+  string("title").required(),
+  richtext("description"),
+  field("status", t.enum(["open", "in_progress", "blocked", "done"]).default("open")),
+  field("priority", t.enum(["low", "medium", "high", "urgent"]).default("medium")),
+  date("dueDate"),
+  number("estimate").min(0),
+  file("attachments").array(),
+]);
 
-// Create and start the framework
+// Create the framework
 const app = new Framework({
   dbPath: './data.db',
   port: 3000,
 });
 
-await app.initialize();
+// Register the entity
+app.register(Task);
+
+// Start the framework (initialize is now called internally)
 await app.start();
