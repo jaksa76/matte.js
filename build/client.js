@@ -24484,7 +24484,15 @@ Check the top-level render call using <` + parentName + ">.";
               const ui = field.ui || {};
               const labelText = ui.label !== undefined ? ui.label : fieldName;
               const showLabel = !ui.hideLabel && labelText !== null;
-              const widthStyle = ui.width ? { gridColumn: `span ${Math.round(ui.width * 12)}` } : {};
+              const widthStyle = {};
+              if (ui.width !== undefined) {
+                widthStyle.width = `${ui.width * 100}%`;
+                widthStyle.display = "inline-block";
+                widthStyle.verticalAlign = "top";
+                if (ui.width < 1) {
+                  widthStyle.paddingRight = "12px";
+                }
+              }
               return /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("div", {
                 className: "form-group",
                 style: widthStyle,

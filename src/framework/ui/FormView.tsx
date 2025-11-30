@@ -101,8 +101,16 @@ export function FormView({ entity, initialData, apiUrl, onSuccess, onCancel }: F
           const labelText = ui.label !== undefined ? ui.label : fieldName;
           const showLabel = !ui.hideLabel && labelText !== null;
           
-          // Calculate field width style
-          const widthStyle = ui.width ? { gridColumn: `span ${Math.round(ui.width * 12)}` } : {};
+          // Calculate field width style - use percentage width instead of grid
+          const widthStyle: React.CSSProperties = {};
+          if (ui.width !== undefined) {
+            widthStyle.width = `${ui.width * 100}%`;
+            widthStyle.display = 'inline-block';
+            widthStyle.verticalAlign = 'top';
+            if (ui.width < 1) {
+              widthStyle.paddingRight = '12px';
+            }
+          }
           
           return (
             <div 

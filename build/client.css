@@ -632,10 +632,6 @@ body {
   min-width: fit-content;
 }
 
-.form-group {
-  display: contents;
-}
-
 .form-label.floating {
   position: relative;
   color: var(--color-gray-500);
@@ -672,14 +668,4 @@ body {
 
 .input-wrapper .form-input {
   flex: 1;
-}
-
-.form-card {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 20px;
-}
-
-.form-card > .form-group {
-  grid-column: span 12;
 }

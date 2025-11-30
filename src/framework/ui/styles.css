@@ -635,10 +635,6 @@ body {
 }
 
 /* UI Customization Styles */
-.form-group {
-  display: contents;
-}
-
 .form-label.floating {
   position: relative;
   top: 8px;
@@ -676,16 +672,5 @@ body {
 
 .input-wrapper .form-input {
   flex: 1;
-}
-
-/* Grid layout for form fields with width support */
-.form-card {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 20px;
-}
-
-.form-card > .form-group {
-  grid-column: span 12;
 }
 
