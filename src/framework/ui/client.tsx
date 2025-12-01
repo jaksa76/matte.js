@@ -1,24 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { MultiEntityApp } from './MultiEntityApp';
+import { MultiPageApp } from './MultiPageApp';
 import './styles.css';
 
-// Get entity definitions from window (injected by server)
+// Get page configurations from window (injected by server)
 declare global {
   interface Window {
-    ENTITY_CONFIG: {
-      entities: any[];
+    MATTE_CONFIG: {
+      pages: any[];
     };
   }
 }
 
-const config = window.ENTITY_CONFIG;
+const config = window.MATTE_CONFIG;
 
-if (config && config.entities) {
+if (config && config.pages) {
   const root = ReactDOM.createRoot(document.getElementById('root')!);
   root.render(
     <React.StrictMode>
-      <MultiEntityApp entities={config.entities} />
+      <MultiPageApp pages={config.pages} />
     </React.StrictMode>
   );
 }

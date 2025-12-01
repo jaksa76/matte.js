@@ -2,12 +2,12 @@
  * Example demonstrating different view types for entities
  */
 
-import { Matte, listView, gridView, customGridView, show } from '../framework';
-import { ownedEntity, string, number, date, richtext, hgroup, field } from '../framework/entities';
+import { Matte, listView, gridView, show, hgroup } from '../framework';
+import { ownedEntity, string, number, date, richtext } from '../framework/entities';
 
 const app = new Matte();
 
-// Default view (grid)
+// Register entity with default view (grid)
 app.register(ownedEntity("Product", [
   string("name").required(),
   string("category"),
@@ -16,23 +16,25 @@ app.register(ownedEntity("Product", [
   richtext("description"),
 ]));
 
-// Override to use list view
-app.register(listView(ownedEntity("Task", [
+// Register entity with list view
+const Task = ownedEntity("Task", [
   string("title").required(),
   string("assignee"),
   string("status"),
   date("dueDate"),
-])));
+]);
+app.register(listView(Task));
 
-// Explicitly use grid view
-app.register(gridView(ownedEntity("Article", [
+// Register entity with explicit grid view
+const Article = ownedEntity("Article", [
   string("title").required(),
   string("author"),
   richtext("content"),
   date("publishedAt"),
-])));
+]);
+app.register(gridView(Article));
 
-// Custom view definition
+// Custom view with field customization
 const Event = ownedEntity("Event", [
   string("name").required(),
   date("date").required(),
@@ -40,15 +42,18 @@ const Event = ownedEntity("Event", [
   richtext("details"),
 ]);
 
-const EventSimpleView = customGridView(Event, [
-  // change the structure and styling of fields
-  hgroup(null, [
-    show("date").alignLeft().hideLabel(),
-    show("location").alignRight().hideLabel(),
-  ]),
-  show("name").large().bold().alignCenter().hideLabel(), // change the order and style
-  // details are hidden in this view
-]);
+const EventSimpleView = gridView(Event, {
+  pageName: "Events",
+  customFields: [
+    // Change the structure and styling of fields
+    hgroup(null, [
+      show("date").alignLeft().hideLabel(),
+      show("location").alignRight().hideLabel(),
+    ]),
+    show("name").large().bold().alignCenter().hideLabel(),
+    // details are hidden in this view
+  ],
+});
 app.register(EventSimpleView);
 
 app.start();

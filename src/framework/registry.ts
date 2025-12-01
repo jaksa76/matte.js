@@ -1,40 +1,60 @@
 import type { EntityDefinition } from './entities';
 
-export type ViewType = 'grid' | 'list';
-
-export interface EntityRegistration {
-  entity: EntityDefinition;
-  viewType: ViewType;
-}
-
 /**
  * Central registry for all entity definitions
+ * Note: This registry only stores entity definitions, not view configurations.
+ * Views are managed separately through the Page system.
  */
 class Registry {
-  private entities = new Map<string, EntityRegistration>();
+  private entities = new Map<string, EntityDefinition>();
 
-  register(definition: EntityDefinition, viewType: ViewType = 'grid'): void {
-    this.entities.set(definition.name, { entity: definition, viewType });
+  /**
+   * Register an entity definition
+   */
+  register(definition: EntityDefinition): void {
+    this.entities.set(definition.name, definition);
   }
 
-  get(name: string): EntityRegistration | undefined {
+  /**
+   * Get an entity by name
+   */
+  get(name: string): EntityDefinition | undefined {
     return this.entities.get(name);
   }
 
-  getEntity(name: string): EntityDefinition | undefined {
-    return this.entities.get(name)?.entity;
-  }
-
-  getAll(): EntityRegistration[] {
+  /**
+   * Get all registered entities
+   */
+  getAll(): EntityDefinition[] {
     return Array.from(this.entities.values());
   }
 
-  getAllEntities(): EntityDefinition[] {
-    return Array.from(this.entities.values()).map(reg => reg.entity);
+  /**
+   * Check if an entity is registered
+   */
+  has(name: string): boolean {
+    return this.entities.has(name);
   }
 
+  /**
+   * Remove an entity
+   */
+  remove(name: string): boolean {
+    return this.entities.delete(name);
+  }
+
+  /**
+   * Clear all entities
+   */
   clear(): void {
     this.entities.clear();
+  }
+
+  /**
+   * Get the number of registered entities
+   */
+  get size(): number {
+    return this.entities.size;
   }
 }
 

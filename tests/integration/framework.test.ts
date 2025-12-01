@@ -364,7 +364,7 @@ describe('Integration Tests', () => {
       const html = await res.text();
       expect(html).toContain('<!DOCTYPE html>');
       expect(html).toContain('Matte.js');
-      expect(html).toContain('Available Entities');
+      expect(html).toContain('Available Pages');
       expect(html).toContain('Task');
       expect(html).toContain('Note');
     });
@@ -384,7 +384,7 @@ describe('Integration Tests', () => {
 
       const html = await res.text();
       expect(html).toContain('<!DOCTYPE html>');
-      expect(html).toContain('ENTITY_CONFIG');
+      expect(html).toContain('MATTE_CONFIG');
       expect(html).toContain('/client.js');
     });
   });

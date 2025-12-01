@@ -1,73 +1,68 @@
-import type { EntityDefinition, UIMetadata, FieldType, EntitySchema } from './entities';
+import type { EntityDefinition, UIMetadata } from './entities';
 import { FieldGroup } from './entities';
-import type { ViewType } from './registry';
+import type { EntityView, InstanceView, Page } from './view-system';
+import { createEntityView, createInstanceView, createPage } from './view-system';
 
 /**
- * Base class for entity views
+ * Helper function to get entity with custom field configurations applied
  */
-export class View {
-  constructor(
-    public entity: EntityDefinition,
-    public viewType: ViewType,
-    public customFields?: FieldSelector[]
-  ) {}
+export function getCustomizedEntity(
+  entity: EntityDefinition,
+  customFields?: FieldSelector[]
+): EntityDefinition {
+  if (!customFields) {
+    return entity;
+  }
 
-  /**
-   * Get the entity with custom field configurations applied
-   */
-  getCustomizedEntity(): EntityDefinition {
-    if (!this.customFields) {
-      return this.entity;
-    }
+  // Create a modified copy of the entity with custom UI metadata
+  const customizedEntity: EntityDefinition = {
+    ...entity,
+    schema: { ...entity.schema },
+    groups: entity.groups ? [...entity.groups] : undefined,
+  };
 
-    // Create a modified copy of the entity with custom UI metadata
-    const customizedEntity: EntityDefinition = {
-      ...this.entity,
-      schema: { ...this.entity.schema },
-      groups: this.entity.groups ? [...this.entity.groups] : undefined,
-    };
+  // First, hide all fields by default in custom views
+  const allFieldNames = new Set<string>();
+  for (const fieldName of Object.keys(customizedEntity.schema)) {
+    allFieldNames.add(fieldName);
+    const field = customizedEntity.schema[fieldName];
+    customizedEntity.schema[fieldName] = {
+      ...field,
+      ui: {
+        ...(field.ui || {}),
+        hidden: true,
+      },
+    } as any; // Type assertion needed due to complex field types
+  }
 
-    // First, hide all fields by default in custom views
-    const allFieldNames = new Set<string>();
-    for (const fieldName of Object.keys(customizedEntity.schema)) {
-      allFieldNames.add(fieldName);
-      customizedEntity.schema[fieldName] = {
-        ...customizedEntity.schema[fieldName],
-        ui: {
-          ...(customizedEntity.schema[fieldName].ui || {}),
-          hidden: true,
-        },
-      };
-    }
-
-    // Process custom field selectors
-    function applySelector(selector: FieldSelector | FieldGroup) {
-      if (selector instanceof FieldGroup) {
-        // Process group children recursively
-        for (const child of selector.children) {
-          applySelector(child); // Recursively process all children (FieldSelector or FieldGroup)
-        }
-      } else if (selector instanceof FieldSelector) {
-        const fieldName = selector.fieldName;
-        if (allFieldNames.has(fieldName) && customizedEntity.schema[fieldName]) {
-          customizedEntity.schema[fieldName] = {
-            ...customizedEntity.schema[fieldName],
-            ui: {
-              ...(customizedEntity.schema[fieldName].ui || {}),
-              ...selector.uiMetadata,
-              hidden: false, // Un-hide selected fields
-            },
-          };
-        }
+  // Process custom field selectors
+  function applySelector(selector: FieldSelector | FieldGroup) {
+    if (selector instanceof FieldGroup) {
+      // Process group children recursively
+      for (const child of selector.children) {
+        applySelector(child); // Recursively process all children (FieldSelector or FieldGroup)
+      }
+    } else if (selector instanceof FieldSelector) {
+      const fieldName = selector.fieldName;
+      if (allFieldNames.has(fieldName) && customizedEntity.schema[fieldName]) {
+        const field = customizedEntity.schema[fieldName];
+        customizedEntity.schema[fieldName] = {
+          ...field,
+          ui: {
+            ...(field.ui || {}),
+            ...selector.uiMetadata,
+            hidden: false, // Un-hide selected fields
+          },
+        } as any; // Type assertion needed due to complex field types
       }
     }
-
-    for (const selector of this.customFields) {
-      applySelector(selector);
-    }
-
-    return customizedEntity;
   }
+
+  for (const selector of customFields) {
+    applySelector(selector);
+  }
+
+  return customizedEntity;
 }
 
 /**
@@ -157,23 +152,103 @@ export function show(fieldName: string): FieldSelector {
   return new FieldSelector(fieldName);
 }
 
+// ============================================================================
+// View Factory Functions
+// ============================================================================
+
 /**
- * Wrap an entity to use list view
+ * Create a page with list view for an entity
  */
-export function listView(entity: EntityDefinition): View {
-  return new View(entity, 'list');
+export function listView(entity: EntityDefinition, options?: {
+  pageName?: string;
+  pagePath?: string;
+  customFields?: FieldSelector[];
+}): Page {
+  const entityForView = options?.customFields 
+    ? getCustomizedEntity(entity, options.customFields)
+    : entity;
+    
+  const view = createEntityView('list', entityForView, {
+    displayName: options?.pageName || `${entity.name} List`,
+  });
+
+  return createPage(
+    `${entity.name}-list`,
+    options?.pageName || entity.name,
+    options?.pagePath || toKebabCase(entity.name),
+    view
+  );
 }
 
 /**
- * Wrap an entity to use grid view
+ * Create a page with grid view for an entity
  */
-export function gridView(entity: EntityDefinition): View {
-  return new View(entity, 'grid');
+export function gridView(entity: EntityDefinition, options?: {
+  pageName?: string;
+  pagePath?: string;
+  customFields?: FieldSelector[];
+}): Page {
+  const entityForView = options?.customFields 
+    ? getCustomizedEntity(entity, options.customFields)
+    : entity;
+    
+  const view = createEntityView('grid', entityForView, {
+    displayName: options?.pageName || `${entity.name} Grid`,
+  });
+
+  return createPage(
+    `${entity.name}-grid`,
+    options?.pageName || entity.name,
+    options?.pagePath || toKebabCase(entity.name),
+    view
+  );
 }
 
 /**
  * Create a custom grid view with specific field configurations
+ * @deprecated Use gridView with customFields option instead
  */
-export function customGridView(entity: EntityDefinition, fields: (FieldSelector | FieldGroup)[]): View {
-  return new View(entity, 'grid', fields as FieldSelector[]);
+export function customGridView(
+  entity: EntityDefinition, 
+  fields: (FieldSelector | FieldGroup)[]
+): Page {
+  return gridView(entity, { customFields: fields as FieldSelector[] });
+}
+
+/**
+ * Create a detail view (InstanceView) for an entity
+ */
+export function detailView(entity: EntityDefinition, options?: {
+  customFields?: FieldSelector[];
+}): InstanceView {
+  const entityForView = options?.customFields 
+    ? getCustomizedEntity(entity, options.customFields)
+    : entity;
+    
+  return createInstanceView('detail', entityForView, {
+    displayName: `${entity.name} Detail`,
+  });
+}
+
+/**
+ * Create a form view (InstanceView) for an entity
+ */
+export function formView(entity: EntityDefinition, options?: {
+  customFields?: FieldSelector[];
+}): InstanceView {
+  const entityForView = options?.customFields 
+    ? getCustomizedEntity(entity, options.customFields)
+    : entity;
+    
+  return createInstanceView('form', entityForView, {
+    displayName: `${entity.name} Form`,
+  });
+}
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
+function toKebabCase(str: string): string {
+  return str.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`).replace(/^-/, '');
 }

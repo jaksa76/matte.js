@@ -23645,14 +23645,14 @@ Check the top-level render call using <` + parentName + ">.";
   });
 
   // src/framework/ui/client.tsx
-  var import_react8 = __toESM(require_react(), 1);
+  var import_react10 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
 
-  // src/framework/ui/MultiEntityApp.tsx
-  var import_react7 = __toESM(require_react(), 1);
+  // src/framework/ui/MultiPageApp.tsx
+  var import_react9 = __toESM(require_react(), 1);
 
-  // src/framework/ui/EntityApp.tsx
-  var import_react6 = __toESM(require_react(), 1);
+  // src/framework/ui/ViewRenderer.tsx
+  var import_react8 = __toESM(require_react(), 1);
 
   // src/framework/ui/ListView.tsx
   var import_react3 = __toESM(require_react(), 1);
@@ -24692,10 +24692,45 @@ Check the top-level render call using <` + parentName + ">.";
     }, undefined, false, undefined, this));
   }
   // src/framework/ui/EntityApp.tsx
+  var import_react6 = __toESM(require_react(), 1);
   var jsx_dev_runtime5 = __toESM(require_jsx_dev_runtime(), 1);
-  function EntityApp({ entity, apiUrl, viewType = "grid" }) {
-    const [mode, setMode] = import_react6.useState("list");
-    const [selectedItem, setSelectedItem] = import_react6.useState(null);
+  // src/framework/ui/MultiEntityApp.tsx
+  var import_react7 = __toESM(require_react(), 1);
+  var jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
+  // src/framework/ui/ViewRenderer.tsx
+  var jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
+  function ViewRenderer({ page }) {
+    const view = page.view;
+    if (view.viewType === "entity") {
+      return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(EntityViewRenderer, {
+        view
+      }, undefined, false, undefined, this);
+    } else if (view.viewType === "instance") {
+      return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(InstanceViewRenderer, {
+        view
+      }, undefined, false, undefined, this);
+    }
+    return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
+      className: "view-error",
+      children: [
+        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("h2", {
+          children: "Unknown View Type"
+        }, undefined, false, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
+          children: [
+            'View type "',
+            view.viewType,
+            '" is not supported.'
+          ]
+        }, undefined, true, undefined, this)
+      ]
+    }, undefined, true, undefined, this);
+  }
+  function EntityViewRenderer({ view }) {
+    const [mode, setMode] = import_react8.useState("list");
+    const [selectedItem, setSelectedItem] = import_react8.useState(null);
+    const entity = view.entity;
+    const apiUrl = `/api/${toKebabCase2(entity.name)}`;
     const handleSelect = (item) => {
       setSelectedItem(item);
       setMode("detail");
@@ -24720,30 +24755,64 @@ Check the top-level render call using <` + parentName + ">.";
       setMode("list");
       setSelectedItem(null);
     };
-    const ViewComponent = viewType === "list" ? ListView : GridView;
-    return /* @__PURE__ */ jsx_dev_runtime5.jsxDEV("div", {
+    const renderCollectionView = () => {
+      const viewId = view.viewId;
+      const componentName = view.componentName || viewId;
+      switch (componentName) {
+        case "grid":
+          return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(GridView, {
+            entity,
+            apiUrl,
+            onSelect: handleSelect,
+            onEdit: handleEdit,
+            onCreate: handleCreate
+          }, undefined, false, undefined, this);
+        case "list":
+          return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(ListView, {
+            entity,
+            apiUrl,
+            onSelect: handleSelect,
+            onEdit: handleEdit,
+            onCreate: handleCreate
+          }, undefined, false, undefined, this);
+        default:
+          return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
+            className: "view-error",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("h2", {
+                children: "Unknown Entity View"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
+                children: [
+                  'View component "',
+                  componentName,
+                  '" is not registered.'
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
+                children: "Available views: grid, list"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this);
+      }
+    };
+    return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
       className: "entity-app",
       children: [
-        mode === "list" && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(ViewComponent, {
-          entity,
-          apiUrl,
-          onSelect: handleSelect,
-          onEdit: handleEdit,
-          onCreate: handleCreate
-        }, undefined, false, undefined, this),
-        mode === "detail" && selectedItem && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(DetailView, {
+        mode === "list" && renderCollectionView(),
+        mode === "detail" && selectedItem && /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(DetailView, {
           entity,
           item: selectedItem,
           onEdit: () => setMode("edit"),
           onBack: handleBack
         }, undefined, false, undefined, this),
-        mode === "create" && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(FormView, {
+        mode === "create" && /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(FormView, {
           entity,
           apiUrl,
           onSuccess: handleSuccess,
           onCancel: handleCancel
         }, undefined, false, undefined, this),
-        mode === "edit" && selectedItem && /* @__PURE__ */ jsx_dev_runtime5.jsxDEV(FormView, {
+        mode === "edit" && selectedItem && /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(FormView, {
           entity,
           initialData: selectedItem,
           apiUrl,
@@ -24753,66 +24822,91 @@ Check the top-level render call using <` + parentName + ">.";
       ]
     }, undefined, true, undefined, this);
   }
-
-  // src/framework/ui/MultiEntityApp.tsx
-  var jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
+  function InstanceViewRenderer({ view }) {
+    const entity = view.entity;
+    const viewId = view.viewId;
+    const componentName = view.componentName || viewId;
+    return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
+      className: "view-error",
+      children: [
+        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("h2", {
+          children: "Instance View"
+        }, undefined, false, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
+          children: [
+            'Instance views ("',
+            componentName,
+            '") require additional routing context.'
+          ]
+        }, undefined, true, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
+          children: "Instance views are typically rendered as part of an EntityView workflow."
+        }, undefined, false, undefined, this)
+      ]
+    }, undefined, true, undefined, this);
+  }
   function toKebabCase2(str) {
     return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, "");
   }
-  function MultiEntityApp({ entities }) {
-    const [collapsed, setCollapsed] = import_react7.useState(false);
-    const [currentEntityName, setCurrentEntityName] = import_react7.useState("");
-    import_react7.useEffect(() => {
-      const path = window.location.pathname;
-      const entityFromPath = path.split("/")[1];
-      if (entityFromPath && entities.some((r) => toKebabCase2(r.entity.name) === entityFromPath)) {
-        setCurrentEntityName(entityFromPath);
-      } else if (entities.length > 0) {
-        const defaultEntity = toKebabCase2(entities[0].entity.name);
-        setCurrentEntityName(defaultEntity);
-        window.history.replaceState({}, "", `/${defaultEntity}`);
+
+  // src/framework/ui/MultiPageApp.tsx
+  var jsx_dev_runtime8 = __toESM(require_jsx_dev_runtime(), 1);
+  function MultiPageApp({ pages }) {
+    const [collapsed, setCollapsed] = import_react9.useState(false);
+    const [currentPageId, setCurrentPageId] = import_react9.useState("");
+    import_react9.useEffect(() => {
+      const path = window.location.pathname.substring(1);
+      const pageFromPath = pages.find((p) => p.path === path);
+      if (pageFromPath) {
+        setCurrentPageId(pageFromPath.id);
+      } else if (pages.length > 0) {
+        setCurrentPageId(pages[0].id);
+        window.history.replaceState({}, "", `/${pages[0].path}`);
       }
-    }, [entities]);
-    import_react7.useEffect(() => {
+    }, [pages]);
+    import_react9.useEffect(() => {
       const handlePopState = () => {
-        const path = window.location.pathname;
-        const entityFromPath = path.split("/")[1];
-        if (entityFromPath && entities.some((r) => toKebabCase2(r.entity.name) === entityFromPath)) {
-          setCurrentEntityName(entityFromPath);
+        const path = window.location.pathname.substring(1);
+        const pageFromPath = pages.find((p) => p.path === path);
+        if (pageFromPath) {
+          setCurrentPageId(pageFromPath.id);
         }
       };
       window.addEventListener("popstate", handlePopState);
       return () => window.removeEventListener("popstate", handlePopState);
-    }, [entities]);
-    const handleNavigate = (entityName) => {
-      const kebabName = toKebabCase2(entityName);
-      setCurrentEntityName(kebabName);
-      window.history.pushState({}, "", `/${kebabName}`);
+    }, [pages]);
+    const handleNavigate = (pageId) => {
+      const page = pages.find((p) => p.id === pageId);
+      if (page) {
+        setCurrentPageId(pageId);
+        window.history.pushState({}, "", `/${page.path}`);
+      }
     };
-    const currentRegistration = entities.find((r) => toKebabCase2(r.entity.name) === currentEntityName);
-    if (!currentRegistration) {
-      return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
+    const currentPage = pages.find((p) => p.id === currentPageId);
+    const navPages = pages.filter((p) => p.showInNav !== false);
+    if (!currentPage) {
+      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
         className: "multi-entity-app",
-        children: /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
+        children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
           className: "loading-container",
           children: "Loading..."
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
       className: "multi-entity-app",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("nav", {
+        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("nav", {
           className: `entity-nav ${collapsed ? "collapsed" : ""}`,
           children: [
-            /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
               className: "nav-header",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("h1", {
+                /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("h1", {
                   className: "nav-title",
                   children: collapsed ? "M" : "Matte.js"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("button", {
+                /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("button", {
                   className: "nav-toggle",
                   onClick: () => setCollapsed(!collapsed),
                   "aria-label": collapsed ? "Expand navigation" : "Collapse navigation",
@@ -24820,39 +24914,36 @@ Check the top-level render call using <` + parentName + ">.";
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("ul", {
+            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("ul", {
               className: "nav-list",
-              children: entities.map((registration) => {
-                const kebabName = toKebabCase2(registration.entity.name);
-                const isActive = currentEntityName === kebabName;
-                return /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("li", {
+              children: navPages.map((page) => {
+                const isActive = currentPageId === page.id;
+                return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("li", {
                   className: "nav-item",
-                  children: /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("button", {
+                  children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("button", {
                     className: `nav-link ${isActive ? "active" : ""}`,
-                    onClick: () => handleNavigate(registration.entity.name),
-                    title: registration.entity.name,
+                    onClick: () => handleNavigate(page.id),
+                    title: page.name,
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("span", {
                         className: "nav-icon",
-                        children: "\uD83D\uDCCB"
+                        children: page.icon || "\uD83D\uDCCB"
                       }, undefined, false, undefined, this),
-                      !collapsed && /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("span", {
+                      !collapsed && /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("span", {
                         className: "nav-label",
-                        children: registration.entity.name
+                        children: page.name
                       }, undefined, false, undefined, this)
                     ]
                   }, undefined, true, undefined, this)
-                }, registration.entity.name, false, undefined, this);
+                }, page.id, false, undefined, this);
               })
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime6.jsxDEV("main", {
+        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("main", {
           className: `entity-content ${collapsed ? "nav-collapsed" : ""}`,
-          children: /* @__PURE__ */ jsx_dev_runtime6.jsxDEV(EntityApp, {
-            entity: currentRegistration.entity,
-            viewType: currentRegistration.viewType,
-            apiUrl: `/api/${currentEntityName}`
+          children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(ViewRenderer, {
+            page: currentPage
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this)
       ]
@@ -24860,13 +24951,13 @@ Check the top-level render call using <` + parentName + ">.";
   }
 
   // src/framework/ui/client.tsx
-  var jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
-  var config = window.ENTITY_CONFIG;
-  if (config && config.entities) {
+  var jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
+  var config = window.MATTE_CONFIG;
+  if (config && config.pages) {
     const root = import_client.default.createRoot(document.getElementById("root"));
-    root.render(/* @__PURE__ */ jsx_dev_runtime7.jsxDEV(import_react8.default.StrictMode, {
-      children: /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(MultiEntityApp, {
-        entities: config.entities
+    root.render(/* @__PURE__ */ jsx_dev_runtime9.jsxDEV(import_react10.default.StrictMode, {
+      children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(MultiPageApp, {
+        pages: config.pages
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this));
   }

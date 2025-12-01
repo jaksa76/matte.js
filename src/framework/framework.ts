@@ -1,13 +1,16 @@
 import { EntityRegistry } from './registry';
+import { PageRegistry } from './page-registry';
 import { SQLiteAdapter } from './database';
 import { RepositoryFactory } from './repository';
 import { APIServer } from './api';
 import type { EntityDefinition } from './entities';
-import { View } from './views';
+import type { Page, View, EntityView } from './view-system';
+import { createPage, createEntityView } from './view-system';
 
 export interface MatteOptions {
   dbPath?: string;
   port?: number;
+  defaultView?: 'grid' | 'list';
 }
 
 export class Matte {
@@ -15,6 +18,7 @@ export class Matte {
   private repositoryFactory: RepositoryFactory;
   private apiServer: APIServer;
   private port: number;
+  private defaultView: 'grid' | 'list';
   private initialized = false;
   private server?: any; // Store server reference for cleanup
   private clientBundle?: string; // Cache the bundled client code
@@ -25,18 +29,47 @@ export class Matte {
     this.repositoryFactory = new RepositoryFactory(this.db);
     this.apiServer = new APIServer();
     this.port = options.port || 3000;
+    this.defaultView = options.defaultView || 'grid';
   }
 
-  register(entityOrView: EntityDefinition | View): void {
-    if (entityOrView instanceof View) {
-      // For custom views, use the customized entity with applied field configurations
-      const entity = entityOrView.customFields 
-        ? entityOrView.getCustomizedEntity() 
-        : entityOrView.entity;
-      EntityRegistry.register(entity, entityOrView.viewType);
+  /**
+   * Register a page or entity with the framework.
+   * - If a Page is provided, it's registered directly
+   * - If an EntityDefinition is provided, a default page is created with the configured default view
+   */
+  register(pageOrEntity: Page | EntityDefinition): void {
+    if (this.isPage(pageOrEntity)) {
+      // Register the page
+      PageRegistry.register(pageOrEntity);
+      
+      // Extract and register the entity from the view
+      const view = pageOrEntity.view;
+      if (view.viewType === 'entity' || view.viewType === 'instance') {
+        EntityRegistry.register(view.entity);
+      }
     } else {
-      EntityRegistry.register(entityOrView); // defaults to 'grid'
+      // Create a default page for the entity
+      const entity = pageOrEntity;
+      EntityRegistry.register(entity);
+      
+      // Create default page with configured default view
+      const view = createEntityView(this.defaultView, entity, {
+        displayName: `${entity.name} ${this.defaultView === 'grid' ? 'Grid' : 'List'}`,
+      });
+      
+      const page = createPage(
+        `${entity.name}-${this.defaultView}`,
+        entity.name,
+        this.toKebabCase(entity.name),
+        view
+      );
+      
+      PageRegistry.register(page);
     }
+  }
+
+  private isPage(obj: any): obj is Page {
+    return obj && typeof obj === 'object' && 'id' in obj && 'path' in obj && 'view' in obj;
   }
 
   async start(): Promise<void> {
@@ -48,8 +81,7 @@ export class Matte {
     await this.buildClient();
 
     // Get all registered entities
-    const registrations = EntityRegistry.getAll();
-    const entities = registrations.map(reg => reg.entity);
+    const entities = EntityRegistry.getAll();
 
     // Create tables for all entities
     for (const entity of entities) {
@@ -94,9 +126,10 @@ export class Matte {
           });
         }
 
-        // Serve entity UI - handle entity-specific routes
-        if (entities.some(e => url.pathname === `/${self.toKebabCase(e.name)}` || 
-                               url.pathname.startsWith(`/${self.toKebabCase(e.name)}/`))) {
+        // Serve page routes - check if path matches a registered page
+        const path = url.pathname.substring(1); // Remove leading slash
+        const page = PageRegistry.getByPath(path);
+        if (page) {
           return new Response(self.renderHTML(), {
             headers: { 'Content-Type': 'text/html' },
           });
@@ -107,7 +140,8 @@ export class Matte {
     });
 
     console.log(`🚀 Server running at http://localhost:${this.server.port}`);
-    console.log(`📊 Registered entities: ${EntityRegistry.getAll().map(r => r.entity.name).join(', ')}`);
+    console.log(`📊 Registered entities: ${entities.map(e => e.name).join(', ')}`);
+    console.log(`📄 Registered pages: ${PageRegistry.getAll().map(p => p.name).join(', ')}`);
   }
 
   stop(): void {
@@ -147,8 +181,7 @@ export class Matte {
   }
 
   private renderLandingPage(): string {
-    const registrations = EntityRegistry.getAll();
-    const entities = registrations.map(r => r.entity);
+    const pages = PageRegistry.getNavigationPages();
     
     return `<!DOCTYPE html>
 <html>
@@ -182,16 +215,16 @@ export class Matte {
       color: #666;
       margin: 0;
     }
-    .entities-section {
+    .pages-section {
       margin-top: 40px;
     }
-    .entities-grid {
+    .pages-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 20px;
       margin-top: 20px;
     }
-    .entity-card {
+    .page-card {
       background: white;
       border: 2px solid #e1e4e8;
       border-radius: 8px;
@@ -201,18 +234,18 @@ export class Matte {
       transition: all 0.2s ease;
       display: block;
     }
-    .entity-card:hover {
+    .page-card:hover {
       border-color: #667eea;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
     }
-    .entity-card-title {
+    .page-card-title {
       font-size: 20px;
       font-weight: 600;
       margin: 0 0 8px 0;
       color: #24292e;
     }
-    .entity-card-fields {
+    .page-card-info {
       font-size: 14px;
       color: #666;
       margin: 0;
@@ -230,20 +263,20 @@ export class Matte {
       <h1 class="landing-title">Matte.js</h1>
       <p class="landing-subtitle">Full-stack entity management framework</p>
     </div>
-    <div class="entities-section">
-      <h2>Available Entities</h2>
-      ${entities.length > 0 ? `
-      <div class="entities-grid">
-        ${entities.map(e => `
-        <a href="/${this.toKebabCase(e.name)}" class="entity-card">
-          <h3 class="entity-card-title">${e.name}</h3>
-          <p class="entity-card-fields">${e.fieldOrder.length} field${e.fieldOrder.length !== 1 ? 's' : ''}</p>
+    <div class="pages-section">
+      <h2>Available Pages</h2>
+      ${pages.length > 0 ? `
+      <div class="pages-grid">
+        ${pages.map(p => `
+        <a href="/${p.path}" class="page-card">
+          <h3 class="page-card-title">${p.icon || '📋'} ${p.name}</h3>
+          <p class="page-card-info">${p.view.viewId} view</p>
         </a>
         `).join('')}
       </div>
       ` : `
       <div class="empty-state">
-        <p>No entities registered yet.</p>
+        <p>No pages registered yet.</p>
       </div>
       `}
     </div>
@@ -253,7 +286,7 @@ export class Matte {
   }
 
   private renderHTML(): string {
-    const registrations = EntityRegistry.getAll();
+    const pages = PageRegistry.getAll();
     
     return `<!DOCTYPE html>
 <html>
@@ -266,8 +299,8 @@ export class Matte {
 <body>
   <div id="root"></div>
   <script>
-    window.ENTITY_CONFIG = {
-      entities: ${JSON.stringify(registrations)}
+    window.MATTE_CONFIG = {
+      pages: ${JSON.stringify(pages)}
     };
   </script>
   <script src="/client.js"></script>
@@ -280,7 +313,7 @@ export class Matte {
   }
 
   getRepository<T = any>(entityName: string): any {
-    const entity = EntityRegistry.getEntity(entityName);
+    const entity = EntityRegistry.get(entityName);
     if (!entity) {
       throw new Error(`Entity ${entityName} not found`);
     }

@@ -172,8 +172,7 @@ describe('Entity Definitions', () => {
 
     const registered = EntityRegistry.get('Product');
     expect(registered).toBeDefined();
-    expect(registered?.entity.name).toBe('Product');
-    expect(registered?.viewType).toBe('grid'); // Default view type
+    expect(registered?.name).toBe('Product');
   });
 
   test('supports complex schema', () => {
@@ -204,8 +203,7 @@ describe('Entity Registry', () => {
     EntityRegistry.register(def);
     
     const retrieved = EntityRegistry.get('User');
-    expect(retrieved?.entity).toBe(def);
-    expect(retrieved?.viewType).toBe('grid'); // Default view type
+    expect(retrieved).toBe(def);
   });
 
   test('returns undefined for non-existent entity', () => {
@@ -224,7 +222,7 @@ describe('Entity Registry', () => {
 
     const all = EntityRegistry.getAll();
     expect(all.length).toBe(3);
-    expect(all.map(r => r.entity.name).sort()).toEqual(['Product', 'Task', 'User']);
+    expect(all.map(e => e.name).sort()).toEqual(['Product', 'Task', 'User']);
   });
 
   test('clears all entities', () => {

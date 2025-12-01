@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
 import { EntityRegistry } from '../../src/framework/registry';
+import { PageRegistry } from '../../src/framework/page-registry';
 import { ownedEntity, string, number, date, richtext, hgroup } from '../../src/framework/entities';
-import { listView, gridView, customGridView, show, View, FieldSelector } from '../../src/framework/views';
+import { listView, gridView, customGridView, show, FieldSelector, getCustomizedEntity } from '../../src/framework/views';
 
 describe('Custom Views', () => {
   beforeEach(() => {
     EntityRegistry.clear();
+    PageRegistry.clear();
   });
 
   describe('FieldSelector', () => {
@@ -86,49 +88,63 @@ describe('Custom Views', () => {
   });
 
   describe('View Types', () => {
-    it('should create a list view', () => {
+    it('should create a list view page', () => {
       const entity = ownedEntity('Task', [
         string('title').required(),
         string('status'),
       ]);
 
-      const view = listView(entity);
-      expect(view).toBeInstanceOf(View);
-      expect(view.viewType).toBe('list');
-      expect(view.entity).toBe(entity);
-      expect(view.customFields).toBeUndefined();
+      const page = listView(entity);
+      expect(page.view.viewType).toBe('entity');
+      expect(page.view.viewId).toBe('list');
+      expect(page.view.entity).toBe(entity);
+      expect(page.path).toBe('task');
     });
 
-    it('should create a grid view', () => {
+    it('should create a grid view page', () => {
       const entity = ownedEntity('Product', [
         string('name').required(),
         number('price'),
       ]);
 
-      const view = gridView(entity);
-      expect(view).toBeInstanceOf(View);
-      expect(view.viewType).toBe('grid');
-      expect(view.entity).toBe(entity);
-      expect(view.customFields).toBeUndefined();
+      const page = gridView(entity);
+      expect(page.view.viewType).toBe('entity');
+      expect(page.view.viewId).toBe('grid');
+      expect(page.view.entity).toBe(entity);
+      expect(page.path).toBe('product');
     });
 
-    it('should create a custom grid view', () => {
+    it('should create a custom grid view page', () => {
       const entity = ownedEntity('Event', [
         string('name').required(),
         date('date'),
         string('location'),
       ]);
 
-      const view = customGridView(entity, [
+      const page = customGridView(entity, [
         show('name').bold(),
         show('date'),
       ]);
 
-      expect(view).toBeInstanceOf(View);
-      expect(view.viewType).toBe('grid');
-      expect(view.entity).toBe(entity);
-      expect(view.customFields).toBeDefined();
-      expect(view.customFields?.length).toBe(2);
+      expect(page.view.viewType).toBe('entity');
+      expect(page.view.viewId).toBe('grid');
+      expect(page.view.entity.schema.name.ui?.bold).toBe(true);
+      expect(page.view.entity.schema.name.ui?.hidden).toBe(false);
+      expect(page.view.entity.schema.location.ui?.hidden).toBe(true);
+    });
+
+    it('should allow custom page options', () => {
+      const entity = ownedEntity('Product', [
+        string('name').required(),
+      ]);
+
+      const page = gridView(entity, {
+        pageName: 'All Products',
+        pagePath: 'products',
+      });
+
+      expect(page.name).toBe('All Products');
+      expect(page.path).toBe('products');
     });
   });
 
@@ -141,12 +157,12 @@ describe('Custom Views', () => {
         richtext('details'),
       ]);
 
-      const view = customGridView(entity, [
+      const customFields = [
         show('name'),
         show('date'),
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       expect(customized.schema.name.ui?.hidden).toBe(false);
       expect(customized.schema.date.ui?.hidden).toBe(false);
@@ -161,13 +177,13 @@ describe('Custom Views', () => {
         string('location'),
       ]);
 
-      const view = customGridView(entity, [
+      const customFields = [
         show('name').bold().large().alignCenter(),
         show('date').alignLeft(),
         show('location').alignRight(),
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       expect(customized.schema.name.ui?.bold).toBe(true);
       expect(customized.schema.name.ui?.large).toBe(true);
@@ -182,11 +198,11 @@ describe('Custom Views', () => {
         number('price'),
       ]);
 
-      const view = customGridView(entity, [
+      const customFields = [
         show('name').bold(),
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       // Original entity should not be modified
       expect(entity.schema.name.ui?.bold).toBeUndefined();
@@ -203,11 +219,11 @@ describe('Custom Views', () => {
         number('price'),
       ]);
 
-      const view = customGridView(entity, [
+      const customFields = [
         show('name').bold(),
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       // Should preserve original label and add new metadata
       expect(customized.schema.name.ui?.label).toBe('Product Name');
@@ -220,11 +236,11 @@ describe('Custom Views', () => {
       ]);
 
       const colorFn = (val: string) => val === 'done' ? 'green' : 'red';
-      const view = customGridView(entity, [
+      const customFields = [
         show('status').color(colorFn),
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       expect(customized.schema.status.ui?.color).toBe(colorFn);
     });
@@ -235,11 +251,11 @@ describe('Custom Views', () => {
       ]);
 
       const prefixFn = (val: number) => val > 100 ? '$$' : '$';
-      const view = customGridView(entity, [
+      const customFields = [
         show('price').prefix(prefixFn).suffix(' USD'),
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       expect(customized.schema.price.ui?.prefix).toBe(prefixFn);
       expect(customized.schema.price.ui?.suffix).toBe(' USD');
@@ -255,15 +271,15 @@ describe('Custom Views', () => {
         richtext('details'),
       ]);
 
-      const view = customGridView(entity, [
+      const customFields = [
         show('name').large().bold(),
         hgroup(null, [
           show('date').alignLeft(),
           show('location').alignRight(),
         ]),
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       // Name should be visible and styled
       expect(customized.schema.name.ui?.hidden).toBe(false);
@@ -288,7 +304,7 @@ describe('Custom Views', () => {
         string('category'),
       ]);
 
-      const view = customGridView(entity, [
+      const customFields = [
         show('title').bold(),
         hgroup(null, [
           show('author'),
@@ -296,9 +312,9 @@ describe('Custom Views', () => {
             show('publishedAt'),
           ]),
         ]),
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       expect(customized.schema.title.ui?.hidden).toBe(false);
       expect(customized.schema.author.ui?.hidden).toBe(false);
@@ -314,19 +330,17 @@ describe('Custom Views', () => {
         number('price'),
       ]);
 
-      const view = gridView(entity);
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity);
 
       expect(customized).toBe(entity);
     });
 
-    it('should return original entity for list view', () => {
+    it('should return original entity for undefined custom fields', () => {
       const entity = ownedEntity('Task', [
         string('title'),
       ]);
 
-      const view = listView(entity);
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, undefined);
 
       expect(customized).toBe(entity);
     });
@@ -339,8 +353,7 @@ describe('Custom Views', () => {
         number('price'),
       ]);
 
-      const view = customGridView(entity, []);
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, []);
 
       // All fields should be hidden
       expect(customized.schema.name.ui?.hidden).toBe(true);
@@ -352,12 +365,12 @@ describe('Custom Views', () => {
         string('name'),
       ]);
 
-      const view = customGridView(entity, [
+      const customFields = [
         show('name').bold(),
         show('nonexistent').large(), // This field doesn't exist
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       // Should only apply to existing fields
       expect(customized.schema.name.ui?.bold).toBe(true);
@@ -369,12 +382,12 @@ describe('Custom Views', () => {
         string('name'),
       ]);
 
-      const view = customGridView(entity, [
+      const customFields = [
         show('name').bold(),
         show('name').large(), // Second customization to same field
-      ]);
+      ];
 
-      const customized = view.getCustomizedEntity();
+      const customized = getCustomizedEntity(entity, customFields);
 
       // Both customizations should be applied
       expect(customized.schema.name.ui?.bold).toBe(true);
