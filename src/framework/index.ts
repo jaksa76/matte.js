@@ -2,6 +2,10 @@
 export { Matte } from './framework';
 export type { MatteOptions } from './framework';
 
+// Server
+export { Server } from './server';
+export type { ServerOptions } from './server';
+
 // Entity definitions
 export { entity, ownedEntity, t, field, string, number, date, richtext, file, boolean, group, hgroup } from './entities';
 export type { EntityDefinition, EntitySchema, EntitySchemaDefinition, FieldType, FieldDefinition, UIMetadata, FieldGroup } from './entities';
