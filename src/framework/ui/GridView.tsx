@@ -70,11 +70,11 @@ export function GridView({ entity, apiUrl, onSelect, onEdit, onCreate }: GridVie
   }
 
   return (
-    <div className="grid-view-container">
+    <div className="grid-view-container" data-testid="grid-view">
       <div className="grid-view-header">
         <h1 className="grid-view-title">{entity.name}s</h1>
         {onCreate && (
-          <button onClick={onCreate} className="btn btn-primary">
+          <button onClick={onCreate} className="btn btn-primary" data-testid="btn-create">
             <Plus size={16} />
             <span>Create New {entity.name}</span>
           </button>
@@ -133,7 +133,8 @@ export function GridView({ entity, apiUrl, onSelect, onEdit, onCreate }: GridVie
               <div className="grid-card-actions">
                 {onSelect && (
                   <button 
-                    onClick={() => onSelect(item)} 
+                    onClick={() => onSelect(item)}
+                    data-testid="btn-view"
                     className="btn btn-secondary btn-sm"
                     title="View"
                   >
@@ -143,7 +144,8 @@ export function GridView({ entity, apiUrl, onSelect, onEdit, onCreate }: GridVie
                 )}
                 {onEdit && (
                   <button 
-                    onClick={() => onEdit(item)} 
+                    onClick={() => onEdit(item)}
+                    data-testid="btn-edit"
                     className="btn btn-info btn-sm"
                     title="Edit"
                   >
@@ -152,7 +154,8 @@ export function GridView({ entity, apiUrl, onSelect, onEdit, onCreate }: GridVie
                   </button>
                 )}
                 <button 
-                  onClick={() => handleDelete(item.id)} 
+                  onClick={() => handleDelete(item.id)}
+                  data-testid="btn-delete"
                   className="btn btn-danger btn-sm"
                   title="Delete"
                 >

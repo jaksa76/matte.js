@@ -11,18 +11,18 @@ export interface DetailViewProps {
 
 export function DetailView({ entity, item, onEdit, onBack }: DetailViewProps) {
   return (
-    <div className="detail-view-container">
+    <div className="detail-view-container" data-testid="detail-view">
       <div className="detail-view-header">
         <h1 className="detail-view-title">{entity.name} Details</h1>
         <div>
           {onBack && (
-            <button onClick={onBack} className="btn btn-secondary">
+            <button onClick={onBack} className="btn btn-secondary" data-testid="btn-back">
               <ArrowLeft size={16} />
               <span>Back</span>
             </button>
           )}
           {onEdit && (
-            <button onClick={onEdit} className="btn btn-primary">
+            <button onClick={onEdit} className="btn btn-primary" data-testid="btn-edit">
               <Pencil size={16} />
               <span>Edit</span>
             </button>

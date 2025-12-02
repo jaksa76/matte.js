@@ -23944,6 +23944,7 @@ Check the top-level render call using <` + parentName + ">.";
     }
     return /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
       className: "list-view-container",
+      "data-testid": "list-view",
       children: [
         /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
           className: "list-view-header",
@@ -23958,6 +23959,7 @@ Check the top-level render call using <` + parentName + ">.";
             onCreate && /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
               onClick: onCreate,
               className: "btn btn-primary",
+              "data-testid": "btn-create",
               children: [
                 /* @__PURE__ */ jsx_dev_runtime.jsxDEV(Plus, {
                   size: 16
@@ -24165,6 +24167,7 @@ Check the top-level render call using <` + parentName + ">.";
     }
     return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
       className: "grid-view-container",
+      "data-testid": "grid-view",
       children: [
         /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
           className: "grid-view-header",
@@ -24179,6 +24182,7 @@ Check the top-level render call using <` + parentName + ">.";
             onCreate && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
               onClick: onCreate,
               className: "btn btn-primary",
+              "data-testid": "btn-create",
               children: [
                 /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(Plus, {
                   size: 16
@@ -24252,6 +24256,7 @@ Check the top-level render call using <` + parentName + ">.";
                 children: [
                   onSelect && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
                     onClick: () => onSelect(item),
+                    "data-testid": "btn-view",
                     className: "btn btn-secondary btn-sm",
                     title: "View",
                     children: [
@@ -24265,6 +24270,7 @@ Check the top-level render call using <` + parentName + ">.";
                   }, undefined, true, undefined, this),
                   onEdit && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
                     onClick: () => onEdit(item),
+                    "data-testid": "btn-edit",
                     className: "btn btn-info btn-sm",
                     title: "Edit",
                     children: [
@@ -24278,6 +24284,7 @@ Check the top-level render call using <` + parentName + ">.";
                   }, undefined, true, undefined, this),
                   /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
                     onClick: () => handleDelete(item.id),
+                    "data-testid": "btn-delete",
                     className: "btn btn-danger btn-sm",
                     title: "Delete",
                     children: [
@@ -24313,6 +24320,7 @@ Check the top-level render call using <` + parentName + ">.";
   function DetailView({ entity, item, onEdit, onBack }) {
     return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
       className: "detail-view-container",
+      "data-testid": "detail-view",
       children: [
         /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("div", {
           className: "detail-view-header",
@@ -24329,6 +24337,7 @@ Check the top-level render call using <` + parentName + ">.";
                 onBack && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("button", {
                   onClick: onBack,
                   className: "btn btn-secondary",
+                  "data-testid": "btn-back",
                   children: [
                     /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(ArrowLeft, {
                       size: 16
@@ -24341,6 +24350,7 @@ Check the top-level render call using <` + parentName + ">.";
                 onEdit && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV("button", {
                   onClick: onEdit,
                   className: "btn btn-primary",
+                  "data-testid": "btn-edit",
                   children: [
                     /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(Pencil, {
                       size: 16
@@ -24573,6 +24583,7 @@ Check the top-level render call using <` + parentName + ">.";
               children: [
                 /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("button", {
                   type: "submit",
+                  "data-testid": "btn-save",
                   disabled: submitting,
                   className: "btn btn-primary",
                   children: [
@@ -24586,6 +24597,7 @@ Check the top-level render call using <` + parentName + ">.";
                 }, undefined, true, undefined, this),
                 onCancel && /* @__PURE__ */ jsx_dev_runtime4.jsxDEV("button", {
                   type: "button",
+                  "data-testid": "btn-cancel",
                   onClick: onCancel,
                   className: "btn btn-secondary",
                   children: [
@@ -24646,6 +24658,8 @@ Check the top-level render call using <` + parentName + ">.";
     };
     if (field.type === "enum") {
       return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("select", {
+        name: fieldName,
+        "data-testid": `select-${fieldName}`,
         value: value || "",
         onChange: (e) => onChange(e.target.value),
         className: baseClasses.join(" "),
@@ -24665,6 +24679,8 @@ Check the top-level render call using <` + parentName + ">.";
     }
     if (field.type === "number") {
       return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+        name: fieldName,
+        "data-testid": `input-${fieldName}`,
         type: "number",
         value: value || "",
         onChange: (e) => onChange(parseFloat(e.target.value)),
@@ -24679,6 +24695,8 @@ Check the top-level render call using <` + parentName + ">.";
     if (field.type === "date") {
       const dateValue = value ? new Date(value).toISOString().split("T")[0] : "";
       return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+        name: fieldName,
+        "data-testid": `input-${fieldName}`,
         type: "date",
         value: dateValue,
         onChange: (e) => onChange(e.target.value ? new Date(e.target.value).toISOString() : null),
@@ -24689,6 +24707,8 @@ Check the top-level render call using <` + parentName + ">.";
     }
     if (field.type === "richtext") {
       return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("textarea", {
+        name: fieldName,
+        "data-testid": `textarea-${fieldName}`,
         value: value || "",
         onChange: (e) => onChange(e.target.value),
         rows: 6,
@@ -24700,6 +24720,8 @@ Check the top-level render call using <` + parentName + ">.";
     }
     if (field.type === "boolean") {
       return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+        name: fieldName,
+        "data-testid": `checkbox-${fieldName}`,
         type: "checkbox",
         checked: value || false,
         onChange: (e) => onChange(e.target.checked),
@@ -24710,6 +24732,8 @@ Check the top-level render call using <` + parentName + ">.";
     }
     if (field.type === "file" && field.isArray) {
       return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+        name: fieldName,
+        "data-testid": `file-${fieldName}`,
         type: "file",
         multiple: true,
         onChange: (e) => {
@@ -24723,6 +24747,8 @@ Check the top-level render call using <` + parentName + ">.";
     }
     if (field.type === "file") {
       return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+        name: fieldName,
+        "data-testid": `file-${fieldName}`,
         type: "file",
         onChange: (e) => onChange(e.target.files?.[0]?.name || null),
         className: baseClasses.join(" "),
@@ -24731,6 +24757,8 @@ Check the top-level render call using <` + parentName + ">.";
       }, undefined, false, undefined, this));
     }
     return wrapValue(/* @__PURE__ */ jsx_dev_runtime4.jsxDEV("input", {
+      name: fieldName,
+      "data-testid": `input-${fieldName}`,
       type: "text",
       value: value || "",
       onChange: (e) => onChange(e.target.value),

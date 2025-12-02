@@ -70,11 +70,11 @@ export function ListView({ entity, apiUrl, onSelect, onEdit, onCreate }: ListVie
   }
 
   return (
-    <div className="list-view-container">
+    <div className="list-view-container" data-testid="list-view">
       <div className="list-view-header">
         <h1 className="list-view-title">{entity.name}s</h1>
         {onCreate && (
-          <button onClick={onCreate} className="btn btn-primary">
+          <button onClick={onCreate} className="btn btn-primary" data-testid="btn-create">
             <Plus size={16} />
             <span>Create New {entity.name}</span>
           </button>

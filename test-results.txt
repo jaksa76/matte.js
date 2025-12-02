@@ -1,0 +1,80 @@
+$ playwright test
+
+Running 18 tests using 1 worker
+
+  ✓   1 [chromium] › tests/e2e/app.spec.ts:9:3 › Landing Page › should display landing page with all entities (172ms)
+  ✓   2 [chromium] › tests/e2e/app.spec.ts:27:3 › Landing Page › should navigate to entity pages from landing (277ms)
+  ✓   3 [chromium] › tests/e2e/app.spec.ts:42:3 › Project Entity - Grid View › should display empty grid initially (754ms)
+  ✓   4 [chromium] › tests/e2e/app.spec.ts:52:3 › Project Entity - Grid View › should create a new project with all fields (2.1s)
+  ✓   5 [chromium] › tests/e2e/app.spec.ts:99:3 › Project Entity - Grid View › should edit an existing project (3.1s)
+  ✓   6 [chromium] › tests/e2e/app.spec.ts:131:3 › Project Entity - Grid View › should delete a project (2.0s)
+  ✓   7 [chromium] › tests/e2e/app.spec.ts:162:3 › Project Entity - Grid View › should validate required fields (902ms)
+  ✓   8 [chromium] › tests/e2e/app.spec.ts:186:3 › Task Entity - Multiple Customized Fields › should create task with all field types (2.0s)
+  ✓   9 [chromium] › tests/e2e/app.spec.ts:223:3 › Task Entity - Multiple Customized Fields › should display task status correctly (2.5s)
+  ✓  10 [chromium] › tests/e2e/app.spec.ts:251:3 › Customer Entity - Grouped Fields › should create customer with grouped information (2.1s)
+  ✓  11 [chromium] › tests/e2e/app.spec.ts:286:3 › Customer Entity - Grouped Fields › should handle collapsible groups (825ms)
+  ✘  12 [chromium] › tests/e2e/app.spec.ts:309:3 › Product Entity - Complex Fields › should create product with pricing and inventory (7.0s)
+  ✓  13 [chromium] › tests/e2e/app.spec.ts:347:3 › Product Entity - Complex Fields › should handle boolean flags correctly (2.1s)
+  ✓  14 [chromium] › tests/e2e/app.spec.ts:375:3 › Product Entity - Complex Fields › should handle number fields with prefix/suffix (2.0s)
+  ✓  15 [chromium] › tests/e2e/app.spec.ts:403:3 › Multi-Entity Navigation › should navigate between different entities (517ms)
+  ✘  16 [chromium] › tests/e2e/app.spec.ts:433:3 › Multi-Entity Navigation › should maintain separate data for each entity (7.8s)
+  ✓  17 [chromium] › tests/e2e/app.spec.ts:469:3 › API Integration › should create and retrieve via API (1.3s)
+  ✓  18 [chromium] › tests/e2e/app.spec.ts:495:3 › API Integration › should handle API errors gracefully (8ms)
+
+
+  1) [chromium] › tests/e2e/app.spec.ts:309:3 › Product Entity - Complex Fields › should create product with pricing and inventory 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('WH-001').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('WH-001').first()[22m
+
+
+      342 |     
+      343 |     // Verify (check for SKU which was filled successfully)
+    > 344 |     await expect(page.getByText('WH-001').first()).toBeVisible();
+          |                                                    ^
+      345 |   });
+      346 |
+      347 |   test('should handle boolean flags correctly', async ({ page }) => {
+        at /workspaces/matte.js/tests/e2e/app.spec.ts:344:52
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/app-Product-Entity---Compl-e3a20--with-pricing-and-inventory-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/app-Product-Entity---Compl-e3a20--with-pricing-and-inventory-chromium/error-context.md
+
+  2) [chromium] › tests/e2e/app.spec.ts:433:3 › Multi-Entity Navigation › should maintain separate data for each entity 
+
+    TimeoutError: page.waitForSelector: Timeout 5000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('.form-view-container') to be visible[22m
+
+
+      460 |     // Verify task page shows only task
+      461 |     await page.goto('/task');
+    > 462 |     await page.waitForSelector('.form-view-container', { timeout: 5000 });
+          |                ^
+      463 |     await expect(page.getByText('Test Task')).toBeVisible();
+      464 |     await expect(page.getByText('Test Project')).not.toBeVisible();
+      465 |   });
+        at /workspaces/matte.js/tests/e2e/app.spec.ts:462:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/app-Multi-Entity-Navigatio-53451-parate-data-for-each-entity-chromium/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/app-Multi-Entity-Navigatio-53451-parate-data-for-each-entity-chromium/error-context.md
+
+  2 failed
+    [chromium] › tests/e2e/app.spec.ts:309:3 › Product Entity - Complex Fields › should create product with pricing and inventory 
+    [chromium] › tests/e2e/app.spec.ts:433:3 › Multi-Entity Navigation › should maintain separate data for each entity 
+  16 passed (40.0s)
+error: script "test:e2e" exited with code 1

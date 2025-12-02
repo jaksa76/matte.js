@@ -141,7 +141,8 @@ export function FormView({ entity, initialData, apiUrl, onSuccess, onCancel }: F
 
         <div className="form-actions">
           <button 
-            type="submit" 
+            type="submit"
+            data-testid="btn-save"
             disabled={submitting}
             className="btn btn-primary"
           >
@@ -150,7 +151,8 @@ export function FormView({ entity, initialData, apiUrl, onSuccess, onCancel }: F
           </button>
           {onCancel && (
             <button 
-              type="button" 
+              type="button"
+              data-testid="btn-cancel"
               onClick={onCancel}
               className="btn btn-secondary"
             >
@@ -210,7 +212,9 @@ function renderField(
 
   if (field.type === 'enum') {
     return wrapValue(
-      <select 
+      <select
+        name={fieldName}
+        data-testid={`select-${fieldName}`}
         value={value || ''} 
         onChange={(e) => onChange(e.target.value)}
         className={baseClasses.join(' ')}
@@ -228,6 +232,8 @@ function renderField(
   if (field.type === 'number') {
     return wrapValue(
       <input
+        name={fieldName}
+        data-testid={`input-${fieldName}`}
         type="number"
         value={value || ''}
         onChange={(e) => onChange(parseFloat(e.target.value))}
@@ -245,6 +251,8 @@ function renderField(
     const dateValue = value ? new Date(value).toISOString().split('T')[0] : '';
     return wrapValue(
       <input
+        name={fieldName}
+        data-testid={`input-${fieldName}`}
         type="date"
         value={dateValue}
         onChange={(e) => onChange(e.target.value ? new Date(e.target.value).toISOString() : null)}
@@ -258,6 +266,8 @@ function renderField(
   if (field.type === 'richtext') {
     return wrapValue(
       <textarea
+        name={fieldName}
+        data-testid={`textarea-${fieldName}`}
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         rows={6}
@@ -272,6 +282,8 @@ function renderField(
   if (field.type === 'boolean') {
     return wrapValue(
       <input
+        name={fieldName}
+        data-testid={`checkbox-${fieldName}`}
         type="checkbox"
         checked={value || false}
         onChange={(e) => onChange(e.target.checked)}
@@ -285,6 +297,8 @@ function renderField(
   if (field.type === 'file' && field.isArray) {
     return wrapValue(
       <input
+        name={fieldName}
+        data-testid={`file-${fieldName}`}
         type="file"
         multiple
         onChange={(e) => {
@@ -301,6 +315,8 @@ function renderField(
   if (field.type === 'file') {
     return wrapValue(
       <input
+        name={fieldName}
+        data-testid={`file-${fieldName}`}
         type="file"
         onChange={(e) => onChange(e.target.files?.[0]?.name || null)}
         className={baseClasses.join(' ')}
@@ -313,6 +329,8 @@ function renderField(
   // Default: string input
   return wrapValue(
     <input
+      name={fieldName}
+      data-testid={`input-${fieldName}`}
       type="text"
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
