@@ -1,5 +1,3 @@
-import { EntityRegistry } from './registry';
-import { PageRegistry } from './page-registry';
 import { SQLiteAdapter } from './database';
 import { RepositoryFactory } from './repository';
 import { APIServer } from './api';
@@ -15,6 +13,8 @@ export interface MatteOptions {
 }
 
 export class Matte {
+  private entities = new Map<string, EntityDefinition>();
+  private pages = new Map<string, Page>();
   private db: SQLiteAdapter;
   private repositoryFactory: RepositoryFactory;
   private apiServer: APIServer;
@@ -26,7 +26,7 @@ export class Matte {
     this.db = new SQLiteAdapter(options.dbPath);
     this.repositoryFactory = new RepositoryFactory(this.db);
     this.apiServer = new APIServer();
-    this.server = new Server(this.apiServer, { port: options.port });
+    this.server = new Server(this.apiServer, this.entities, this.pages, { port: options.port });
     this.defaultView = options.defaultView || 'grid';
   }
 
@@ -38,17 +38,17 @@ export class Matte {
   register(pageOrEntity: Page | EntityDefinition): void {
     if (this.isPage(pageOrEntity)) {
       // Register the page
-      PageRegistry.register(pageOrEntity);
+      this.pages.set(pageOrEntity.id, pageOrEntity);
       
       // Extract and register the entity from the view
       const view = pageOrEntity.view;
       if (view.viewType === 'entity' || view.viewType === 'instance') {
-        EntityRegistry.register(view.entity);
+        this.entities.set(view.entity.name, view.entity);
       }
     } else {
       // Create a default page for the entity
       const entity = pageOrEntity;
-      EntityRegistry.register(entity);
+      this.entities.set(entity.name, entity);
       
       // Create default page with configured default view
       const view = createEntityView(this.defaultView, entity, {
@@ -62,7 +62,7 @@ export class Matte {
         view
       );
       
-      PageRegistry.register(page);
+      this.pages.set(page.id, page);
     }
   }
 
@@ -76,7 +76,7 @@ export class Matte {
     await this.db.initialize();
 
     // Get all registered entities
-    const entities = EntityRegistry.getAll();
+    const entities = Array.from(this.entities.values());
 
     // Create tables for all entities
     for (const entity of entities) {
@@ -107,7 +107,7 @@ export class Matte {
   }
 
   getRepository<T = any>(entityName: string): any {
-    const entity = EntityRegistry.get(entityName);
+    const entity = this.entities.get(entityName);
     if (!entity) {
       throw new Error(`Entity ${entityName} not found`);
     }

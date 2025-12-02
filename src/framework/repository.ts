@@ -1,6 +1,9 @@
 import type { EntityDefinition } from './entities';
 import type { DatabaseAdapter } from './database';
 
+/**
+ * Generic repository interface for CRUD operations.
+ */
 export interface Repository<T = any> {
   create(data: Partial<T>, ownerId?: string): Promise<T>;
   findById(id: string): Promise<T | null>;
@@ -9,6 +12,9 @@ export interface Repository<T = any> {
   delete(id: string): Promise<void>;
 }
 
+/**
+ * EntityRepository implements the Repository interface for a specific entity.
+ */
 export class EntityRepository<T = any> implements Repository<T> {
   private tableName: string;
 

@@ -1,6 +1,8 @@
 import { describe, test, expect, beforeEach } from 'bun:test';
 import { t, entity, ownedEntity, field, string, number, richtext, boolean, date } from '../../src/framework/entities';
-import { EntityRegistry } from '../../src/framework/registry';
+import type { EntityDefinition } from '../../src/framework/entities';
+
+let testRegistry: Map<string, EntityDefinition>;
 
 describe('Field Types', () => {
   describe('StringField', () => {
@@ -135,10 +137,6 @@ describe('Field Types', () => {
 });
 
 describe('Entity Definitions', () => {
-  beforeEach(() => {
-    EntityRegistry.clear();
-  });
-
   test('creates basic entity', () => {
     const def = entity('User', [
       string('name').required(),
@@ -162,17 +160,15 @@ describe('Entity Definitions', () => {
     expect(def.fieldOrder).toEqual(['title', 'status']);
   });
 
-  test('registers entity in registry', () => {
+  test('uses entity definition', () => {
     const def = entity('Product', [
       string('name').required(),
       number('price').min(0).required(),
     ]);
 
-    EntityRegistry.register(def);
-
-    const registered = EntityRegistry.get('Product');
-    expect(registered).toBeDefined();
-    expect(registered?.name).toBe('Product');
+    expect(def.name).toBe('Product');
+    expect(def.schema.name.isRequired).toBe(true);
+    expect(def.schema.price.isRequired).toBe(true);
   });
 
   test('supports complex schema', () => {
@@ -195,19 +191,19 @@ describe('Entity Definitions', () => {
 
 describe('Entity Registry', () => {
   beforeEach(() => {
-    EntityRegistry.clear();
+    testRegistry = new Map<string, EntityDefinition>();
   });
 
   test('registers and retrieves entity', () => {
     const def = entity('User', [string('name')]);
-    EntityRegistry.register(def);
+    testRegistry.set(def.name, def);
     
-    const retrieved = EntityRegistry.get('User');
+    const retrieved = testRegistry.get('User');
     expect(retrieved).toBe(def);
   });
 
   test('returns undefined for non-existent entity', () => {
-    const retrieved = EntityRegistry.get('NonExistent');
+    const retrieved = testRegistry.get('NonExistent');
     expect(retrieved).toBeUndefined();
   });
 
@@ -216,11 +212,11 @@ describe('Entity Registry', () => {
     const product = entity('Product', [string('name')]);
     const task = ownedEntity('Task', [string('title')]);
 
-    EntityRegistry.register(user);
-    EntityRegistry.register(product);
-    EntityRegistry.register(task);
+    testRegistry.set(user.name, user);
+    testRegistry.set(product.name, product);
+    testRegistry.set(task.name, task);
 
-    const all = EntityRegistry.getAll();
+    const all = Array.from(testRegistry.values());
     expect(all.length).toBe(3);
     expect(all.map(e => e.name).sort()).toEqual(['Product', 'Task', 'User']);
   });
@@ -229,13 +225,13 @@ describe('Entity Registry', () => {
     const user = entity('User', [string('name')]);
     const product = entity('Product', [string('name')]);
 
-    EntityRegistry.register(user);
-    EntityRegistry.register(product);
+    testRegistry.set(user.name, user);
+    testRegistry.set(product.name, product);
 
-    expect(EntityRegistry.getAll().length).toBe(2);
+    expect(testRegistry.size).toBe(2);
 
-    EntityRegistry.clear();
+    testRegistry.clear();
 
-    expect(EntityRegistry.getAll().length).toBe(0);
+    expect(testRegistry.size).toBe(0);
   });
 });

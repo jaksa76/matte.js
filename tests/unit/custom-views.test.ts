@@ -1,13 +1,10 @@
 import { describe, it, expect, beforeEach } from 'bun:test';
-import { EntityRegistry } from '../../src/framework/registry';
-import { PageRegistry } from '../../src/framework/page-registry';
 import { ownedEntity, string, number, date, richtext, hgroup } from '../../src/framework/entities';
 import { listView, gridView, customGridView, show, FieldSelector, getCustomizedEntity } from '../../src/framework/views';
 
 describe('Custom Views', () => {
   beforeEach(() => {
-    EntityRegistry.clear();
-    PageRegistry.clear();
+    // No setup needed
   });
 
   describe('FieldSelector', () => {

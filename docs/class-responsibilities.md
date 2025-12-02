@@ -6,6 +6,7 @@ This document provides an overview of all classes in the Matte.js framework and 
 
 ### `Matte` (framework.ts)
 - Main entry point and facade for the framework
+- Maintains entity and page registries using `Map<string, EntityDefinition>` and `Map<string, Page>`
 - Registers entities and pages
 - Initializes database and creates tables
 - Creates repositories and registers API routes
@@ -15,12 +16,14 @@ This document provides an overview of all classes in the Matte.js framework and 
 
 ### `Server` (server.ts)
 - Handles HTTP server operations
+- Receives entity and page Maps from `Matte` class
 - Bundles and serves client-side React code (client.tsx, landing-client.tsx)
 - Routes HTTP requests to API or UI components
 - Serves static assets (JavaScript bundles, CSS)
 - Renders HTML pages (landing page and entity pages)
 - Manages server lifecycle (start/stop)
 - Serves as the HTTP layer for the framework
+- Provides helper methods for page filtering and sorting
 
 ## Entity & Schema System
 
@@ -74,19 +77,6 @@ This document provides an overview of all classes in the Matte.js framework and 
 - Handles CORS headers
 - Manages route pattern matching (including :id parameters)
 - Centralizes error handling for API
-
-## View & Navigation System
-
-### `EntityRegistry` (registry.ts)
-- Central registry for all entity definitions
-- Stores and retrieves entity metadata
-- Singleton pattern for global access
-
-### `PageRegistry` (page-registry.ts)
-- Central registry for application pages
-- Manages page metadata (path, name, icon, order)
-- Provides navigation page filtering
-- Supports page lookup by ID or path
 
 ## Helper Functions (not classes)
 

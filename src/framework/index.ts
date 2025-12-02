@@ -17,10 +17,6 @@ export type { View, EntityView, InstanceView, Page, BaseView } from './view-syst
 // View helpers
 export { listView, gridView, customGridView, detailView, formView, show, FieldSelector, getCustomizedEntity } from './views';
 
-// Registries
-export { EntityRegistry } from './registry';
-export { PageRegistry } from './page-registry';
-
 // Database
 export { SQLiteAdapter } from './database';
 export type { DatabaseAdapter } from './database';

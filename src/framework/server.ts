@@ -1,11 +1,14 @@
-import { EntityRegistry } from './registry';
-import { PageRegistry } from './page-registry';
 import type { APIServer } from './api';
+import type { EntityDefinition } from './entities';
+import type { Page } from './view-system';
 
 export interface ServerOptions {
   port?: number;
 }
 
+/**
+ * Server class to handle HTTP requests, serve API and UI components.
+ */
 export class Server {
   private port: number;
   private server?: any;
@@ -15,6 +18,8 @@ export class Server {
 
   constructor(
     private apiServer: APIServer,
+    private entities: Map<string, EntityDefinition>,
+    private pages: Map<string, Page>,
     options: ServerOptions = {}
   ) {
     this.port = options.port || 3000;
@@ -65,7 +70,7 @@ export class Server {
 
         // Serve page routes - check if path matches a registered page
         const path = url.pathname.substring(1); // Remove leading slash
-        const page = PageRegistry.getByPath(path);
+        const page = Array.from(self.pages.values()).find(p => p.path === path);
         if (page) {
           return new Response(self.renderHTML(), {
             headers: { 'Content-Type': 'text/html' },
@@ -77,8 +82,8 @@ export class Server {
     });
 
     console.log(`🚀 Server running at http://localhost:${this.server.port}`);
-    console.log(`📊 Registered entities: ${EntityRegistry.getAll().map(e => e.name).join(', ')}`);
-    console.log(`📄 Registered pages: ${PageRegistry.getAll().map(p => p.name).join(', ')}`);
+    console.log(`📊 Registered entities: ${Array.from(this.entities.values()).map(e => e.name).join(', ')}`);
+    console.log(`📄 Registered pages: ${Array.from(this.pages.values()).map(p => p.name).join(', ')}`);
   }
 
   stop(): void {
@@ -129,8 +134,21 @@ export class Server {
     this.cssBundle = mainCss + '\n\n' + landingCss;
   }
 
+  private getNavigationPages(): Page[] {
+    return Array.from(this.pages.values())
+      .filter(p => p.showInNav !== false)
+      .sort((a, b) => {
+        if (a.order !== undefined && b.order !== undefined) {
+          return a.order - b.order;
+        }
+        if (a.order !== undefined) return -1;
+        if (b.order !== undefined) return 1;
+        return a.name.localeCompare(b.name);
+      });
+  }
+
   private renderLandingPage(): string {
-    const pages = PageRegistry.getNavigationPages();
+    const pages = this.getNavigationPages();
     
     return `<!DOCTYPE html>
 <html>
@@ -153,7 +171,14 @@ export class Server {
   }
 
   private renderHTML(): string {
-    const pages = PageRegistry.getAll();
+    const pages = Array.from(this.pages.values()).sort((a, b) => {
+      if (a.order !== undefined && b.order !== undefined) {
+        return a.order - b.order;
+      }
+      if (a.order !== undefined) return -1;
+      if (b.order !== undefined) return 1;
+      return a.name.localeCompare(b.name);
+    });
     
     return `<!DOCTYPE html>
 <html>

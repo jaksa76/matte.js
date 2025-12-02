@@ -1,6 +1,5 @@
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from 'bun:test';
 import { Matte } from '../../src/framework/framework';
-import { EntityRegistry } from '../../src/framework/registry';
 import { t, ownedEntity, field, string, richtext, date, number, boolean } from '../../src/framework/entities';
 
 describe('Integration Tests', () => {
@@ -9,9 +8,6 @@ describe('Integration Tests', () => {
   const testPort = 3001;
 
   beforeAll(async () => {
-    // Clear registry and define entities once
-    EntityRegistry.clear();
-
     // Define test entities
     const Task = ownedEntity('Task', [
       string('title').required(),
