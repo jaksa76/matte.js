@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { EntityDefinition } from '../entities';
 import { Plus, Eye, Pencil, Trash2, RefreshCw } from 'lucide-react';
+import { EntityStub } from './EntityStub';
 import './styles.css';
 
 export interface ListViewProps {
@@ -15,17 +16,12 @@ export function ListView({ entity, apiUrl, onSelect, onEdit, onCreate }: ListVie
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchItems();
-  }, [apiUrl]);
+  const [stub] = useState(() => new EntityStub(entity, apiUrl));
 
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const response = await fetch(apiUrl);
-      if (!response.ok) throw new Error('Failed to fetch items');
-      const data = await response.json();
+      const data = await stub.fetchAll();
       setItems(data);
       setError(null);
     } catch (err: any) {
@@ -35,12 +31,15 @@ export function ListView({ entity, apiUrl, onSelect, onEdit, onCreate }: ListVie
     }
   };
 
+  useEffect(() => {
+    fetchItems();
+  }, [apiUrl]);
+
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this item?')) return;
 
     try {
-      const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete item');
+      await stub.delete(id);
       await fetchItems();
     } catch (err: any) {
       alert(`Error: ${err.message}`);

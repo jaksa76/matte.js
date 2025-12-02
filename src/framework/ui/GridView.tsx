@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { EntityDefinition } from '../entities';
 import { Plus, Eye, Pencil, Trash2, RefreshCw } from 'lucide-react';
+import { EntityStub } from './EntityStub';
 import './styles.css';
 
 export interface GridViewProps {
@@ -15,18 +16,13 @@ export function GridView({ entity, apiUrl, onSelect, onEdit, onCreate }: GridVie
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchItems();
-  }, [apiUrl]);
+  const [stub] = useState(() => new EntityStub(entity, apiUrl));
 
   const fetchItems = async () => {
     try {
       setLoading(true);
-      const response = await fetch(apiUrl);
-      if (!response.ok) throw new Error('Failed to fetch items');
-      const data = await response.json();
-      setItems(Array.isArray(data) ? data : []);
+      const data = await stub.fetchAll();
+      setItems(data);
       setError(null);
     } catch (err: any) {
       setError(err.message);
@@ -35,12 +31,15 @@ export function GridView({ entity, apiUrl, onSelect, onEdit, onCreate }: GridVie
     }
   };
 
+  useEffect(() => {
+    fetchItems();
+  }, [apiUrl]);
+
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this item?')) return;
 
     try {
-      const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete item');
+      await stub.delete(id);
       await fetchItems();
     } catch (err: any) {
       alert(`Error: ${err.message}`);

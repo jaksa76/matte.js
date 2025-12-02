@@ -23810,22 +23810,74 @@ Check the top-level render call using <` + parentName + ">.";
     ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
   ];
   var X = createLucideIcon("x", __iconNode8);
+  // src/framework/ui/EntityStub.tsx
+  class EntityStub {
+    entity;
+    apiUrl;
+    constructor(entity, apiUrl) {
+      this.entity = entity;
+      this.apiUrl = apiUrl;
+    }
+    async fetchAll() {
+      const response = await fetch(this.apiUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    }
+    async fetchById(id) {
+      const response = await fetch(`${this.apiUrl}/${id}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch: ${response.statusText}`);
+      }
+      return await response.json();
+    }
+    async create(data) {
+      const response = await fetch(this.apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Failed to create");
+      }
+      return await response.json();
+    }
+    async update(id, data) {
+      const response = await fetch(`${this.apiUrl}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Failed to update");
+      }
+      return await response.json();
+    }
+    async delete(id) {
+      const response = await fetch(`${this.apiUrl}/${id}`, {
+        method: "DELETE"
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete item");
+      }
+    }
+  }
+
   // src/framework/ui/ListView.tsx
   var jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
   function ListView({ entity, apiUrl, onSelect, onEdit, onCreate }) {
     const [items, setItems] = import_react3.useState([]);
     const [loading, setLoading] = import_react3.useState(true);
     const [error, setError] = import_react3.useState(null);
-    import_react3.useEffect(() => {
-      fetchItems();
-    }, [apiUrl]);
+    const [stub] = import_react3.useState(() => new EntityStub(entity, apiUrl));
     const fetchItems = async () => {
       try {
         setLoading(true);
-        const response = await fetch(apiUrl);
-        if (!response.ok)
-          throw new Error("Failed to fetch items");
-        const data = await response.json();
+        const data = await stub.fetchAll();
         setItems(data);
         setError(null);
       } catch (err) {
@@ -23834,13 +23886,14 @@ Check the top-level render call using <` + parentName + ">.";
         setLoading(false);
       }
     };
+    import_react3.useEffect(() => {
+      fetchItems();
+    }, [apiUrl]);
     const handleDelete = async (id) => {
       if (!confirm("Are you sure you want to delete this item?"))
         return;
       try {
-        const response = await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
-        if (!response.ok)
-          throw new Error("Failed to delete item");
+        await stub.delete(id);
         await fetchItems();
       } catch (err) {
         alert(`Error: ${err.message}`);
@@ -24041,17 +24094,12 @@ Check the top-level render call using <` + parentName + ">.";
     const [items, setItems] = import_react4.useState([]);
     const [loading, setLoading] = import_react4.useState(true);
     const [error, setError] = import_react4.useState(null);
-    import_react4.useEffect(() => {
-      fetchItems();
-    }, [apiUrl]);
+    const [stub] = import_react4.useState(() => new EntityStub(entity, apiUrl));
     const fetchItems = async () => {
       try {
         setLoading(true);
-        const response = await fetch(apiUrl);
-        if (!response.ok)
-          throw new Error("Failed to fetch items");
-        const data = await response.json();
-        setItems(Array.isArray(data) ? data : []);
+        const data = await stub.fetchAll();
+        setItems(data);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -24059,13 +24107,14 @@ Check the top-level render call using <` + parentName + ">.";
         setLoading(false);
       }
     };
+    import_react4.useEffect(() => {
+      fetchItems();
+    }, [apiUrl]);
     const handleDelete = async (id) => {
       if (!confirm("Are you sure you want to delete this item?"))
         return;
       try {
-        const response = await fetch(`${apiUrl}/${id}`, { method: "DELETE" });
-        if (!response.ok)
-          throw new Error("Failed to delete item");
+        await stub.delete(id);
         await fetchItems();
       } catch (err) {
         alert(`Error: ${err.message}`);
@@ -24697,26 +24746,68 @@ Check the top-level render call using <` + parentName + ">.";
   // src/framework/ui/MultiEntityApp.tsx
   var import_react7 = __toESM(require_react(), 1);
   var jsx_dev_runtime6 = __toESM(require_jsx_dev_runtime(), 1);
-  // src/framework/ui/ViewRenderer.tsx
+  // src/framework/ui/view-registry.ts
+  class ViewComponentRegistry {
+    entityViews = new Map;
+    instanceViews = new Map;
+    registerEntityView(viewId, component) {
+      this.entityViews.set(viewId, component);
+    }
+    registerInstanceView(viewId, component) {
+      this.instanceViews.set(viewId, component);
+    }
+    getEntityView(viewId) {
+      return this.entityViews.get(viewId);
+    }
+    getInstanceView(viewId) {
+      return this.instanceViews.get(viewId);
+    }
+    hasEntityView(viewId) {
+      return this.entityViews.has(viewId);
+    }
+    hasInstanceView(viewId) {
+      return this.instanceViews.has(viewId);
+    }
+    getEntityViewIds() {
+      return Array.from(this.entityViews.keys());
+    }
+    getInstanceViewIds() {
+      return Array.from(this.instanceViews.keys());
+    }
+    getAllEntityViews() {
+      return new Map(this.entityViews);
+    }
+    getAllInstanceViews() {
+      return new Map(this.instanceViews);
+    }
+  }
+  var viewRegistry = new ViewComponentRegistry;
+  // src/framework/ui/components.tsx
   var jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
+  // src/framework/ui/ViewRenderer.tsx
+  var jsx_dev_runtime8 = __toESM(require_jsx_dev_runtime(), 1);
+  viewRegistry.registerEntityView("grid", GridView);
+  viewRegistry.registerEntityView("list", ListView);
+  viewRegistry.registerInstanceView("detail", DetailView);
+  viewRegistry.registerInstanceView("form", FormView);
   function ViewRenderer({ page }) {
     const view = page.view;
     if (view.viewType === "entity") {
-      return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(EntityViewRenderer, {
+      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(EntityViewRenderer, {
         view
       }, undefined, false, undefined, this);
     } else if (view.viewType === "instance") {
-      return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(InstanceViewRenderer, {
+      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(InstanceViewRenderer, {
         view
       }, undefined, false, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
       className: "view-error",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("h2", {
+        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("h2", {
           children: "Unknown View Type"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("p", {
           children: [
             'View type "',
             view.viewType,
@@ -24758,61 +24849,57 @@ Check the top-level render call using <` + parentName + ">.";
     const renderCollectionView = () => {
       const viewId = view.viewId;
       const componentName = view.componentName || viewId;
-      switch (componentName) {
-        case "grid":
-          return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(GridView, {
-            entity,
-            apiUrl,
-            onSelect: handleSelect,
-            onEdit: handleEdit,
-            onCreate: handleCreate
-          }, undefined, false, undefined, this);
-        case "list":
-          return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(ListView, {
-            entity,
-            apiUrl,
-            onSelect: handleSelect,
-            onEdit: handleEdit,
-            onCreate: handleCreate
-          }, undefined, false, undefined, this);
-        default:
-          return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
-            className: "view-error",
-            children: [
-              /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("h2", {
-                children: "Unknown Entity View"
-              }, undefined, false, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
-                children: [
-                  'View component "',
-                  componentName,
-                  '" is not registered.'
-                ]
-              }, undefined, true, undefined, this),
-              /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
-                children: "Available views: grid, list"
-              }, undefined, false, undefined, this)
-            ]
-          }, undefined, true, undefined, this);
+      const ViewComponent = viewRegistry.getEntityView(componentName);
+      if (!ViewComponent) {
+        const availableViews = viewRegistry.getEntityViewIds();
+        return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
+          className: "view-error",
+          children: [
+            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("h2", {
+              children: "Unknown Entity View"
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("p", {
+              children: [
+                'View component "',
+                componentName,
+                '" is not registered.'
+              ]
+            }, undefined, true, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("p", {
+              children: [
+                "Available views: ",
+                availableViews.join(", ")
+              ]
+            }, undefined, true, undefined, this)
+          ]
+        }, undefined, true, undefined, this);
       }
+      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(ViewComponent, {
+        entity,
+        apiUrl,
+        ...view.metadata,
+        onSelect: handleSelect,
+        onEdit: handleEdit,
+        onCreate: handleCreate
+      }, undefined, false, undefined, this);
     };
-    return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
       className: "entity-app",
       children: [
         mode === "list" && renderCollectionView(),
-        mode === "detail" && selectedItem && /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(DetailView, {
+        mode === "detail" && selectedItem && /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(DetailView, {
           entity,
           item: selectedItem,
           onEdit: () => setMode("edit"),
           onBack: handleBack
         }, undefined, false, undefined, this),
-        mode === "create" && /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(FormView, {
+        mode === "create" && /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(FormView, {
           entity,
           apiUrl,
           onSuccess: handleSuccess,
           onCancel: handleCancel
         }, undefined, false, undefined, this),
-        mode === "edit" && selectedItem && /* @__PURE__ */ jsx_dev_runtime7.jsxDEV(FormView, {
+        mode === "edit" && selectedItem && /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(FormView, {
           entity,
           initialData: selectedItem,
           apiUrl,
@@ -24826,20 +24913,20 @@ Check the top-level render call using <` + parentName + ">.";
     const entity = view.entity;
     const viewId = view.viewId;
     const componentName = view.componentName || viewId;
-    return /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
       className: "view-error",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("h2", {
+        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("h2", {
           children: "Instance View"
         }, undefined, false, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("p", {
           children: [
             'Instance views ("',
             componentName,
             '") require additional routing context.'
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime7.jsxDEV("p", {
+        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("p", {
           children: "Instance views are typically rendered as part of an EntityView workflow."
         }, undefined, false, undefined, this)
       ]
@@ -24850,7 +24937,7 @@ Check the top-level render call using <` + parentName + ">.";
   }
 
   // src/framework/ui/MultiPageApp.tsx
-  var jsx_dev_runtime8 = __toESM(require_jsx_dev_runtime(), 1);
+  var jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
   function MultiPageApp({ pages }) {
     const [collapsed, setCollapsed] = import_react9.useState(false);
     const [currentPageId, setCurrentPageId] = import_react9.useState("");
@@ -24885,28 +24972,28 @@ Check the top-level render call using <` + parentName + ">.";
     const currentPage = pages.find((p) => p.id === currentPageId);
     const navPages = pages.filter((p) => p.showInNav !== false);
     if (!currentPage) {
-      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
+      return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
         className: "multi-entity-app",
-        children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
+        children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
           className: "loading-container",
           children: "Loading..."
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
       className: "multi-entity-app",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("nav", {
+        /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("nav", {
           className: `entity-nav ${collapsed ? "collapsed" : ""}`,
           children: [
-            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
               className: "nav-header",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("h1", {
+                /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("h1", {
                   className: "nav-title",
                   children: collapsed ? "M" : "Matte.js"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("button", {
+                /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("button", {
                   className: "nav-toggle",
                   onClick: () => setCollapsed(!collapsed),
                   "aria-label": collapsed ? "Expand navigation" : "Collapse navigation",
@@ -24914,22 +25001,22 @@ Check the top-level render call using <` + parentName + ">.";
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("ul", {
+            /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("ul", {
               className: "nav-list",
               children: navPages.map((page) => {
                 const isActive = currentPageId === page.id;
-                return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("li", {
+                return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("li", {
                   className: "nav-item",
-                  children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("button", {
+                  children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("button", {
                     className: `nav-link ${isActive ? "active" : ""}`,
                     onClick: () => handleNavigate(page.id),
                     title: page.name,
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("span", {
                         className: "nav-icon",
                         children: page.icon || "\uD83D\uDCCB"
                       }, undefined, false, undefined, this),
-                      !collapsed && /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("span", {
+                      !collapsed && /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("span", {
                         className: "nav-label",
                         children: page.name
                       }, undefined, false, undefined, this)
@@ -24940,9 +25027,9 @@ Check the top-level render call using <` + parentName + ">.";
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("main", {
+        /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("main", {
           className: `entity-content ${collapsed ? "nav-collapsed" : ""}`,
-          children: /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(ViewRenderer, {
+          children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(ViewRenderer, {
             page: currentPage
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this)
@@ -24951,12 +25038,12 @@ Check the top-level render call using <` + parentName + ">.";
   }
 
   // src/framework/ui/client.tsx
-  var jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
+  var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
   var config = window.MATTE_CONFIG;
   if (config && config.pages) {
     const root = import_client.default.createRoot(document.getElementById("root"));
-    root.render(/* @__PURE__ */ jsx_dev_runtime9.jsxDEV(import_react10.default.StrictMode, {
-      children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(MultiPageApp, {
+    root.render(/* @__PURE__ */ jsx_dev_runtime10.jsxDEV(import_react10.default.StrictMode, {
+      children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(MultiPageApp, {
         pages: config.pages
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this));

@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import type { Page, EntityView, InstanceView } from '../view-system';
 import { ListView, GridView, DetailView, FormView } from './index';
+import { viewRegistry } from './view-registry';
 import './styles.css';
+
+// Register built-in views
+viewRegistry.registerEntityView('grid', GridView);
+viewRegistry.registerEntityView('list', ListView);
+viewRegistry.registerInstanceView('detail', DetailView);
+viewRegistry.registerInstanceView('form', FormView);
 
 type ViewMode = 'list' | 'detail' | 'create' | 'edit';
 
@@ -75,37 +82,31 @@ function EntityViewRenderer({ view }: { view: EntityView }) {
     const viewId = view.viewId;
     const componentName = view.componentName || viewId;
 
-    // Default built-in views
-    switch (componentName) {
-      case 'grid':
-        return (
-          <GridView
-            entity={entity}
-            apiUrl={apiUrl}
-            onSelect={handleSelect}
-            onEdit={handleEdit}
-            onCreate={handleCreate}
-          />
-        );
-      case 'list':
-        return (
-          <ListView
-            entity={entity}
-            apiUrl={apiUrl}
-            onSelect={handleSelect}
-            onEdit={handleEdit}
-            onCreate={handleCreate}
-          />
-        );
-      default:
-        return (
-          <div className="view-error">
-            <h2>Unknown Entity View</h2>
-            <p>View component "{componentName}" is not registered.</p>
-            <p>Available views: grid, list</p>
-          </div>
-        );
+    // Look up view component in registry
+    const ViewComponent = viewRegistry.getEntityView(componentName);
+
+    if (!ViewComponent) {
+      const availableViews = viewRegistry.getEntityViewIds();
+      return (
+        <div className="view-error">
+          <h2>Unknown Entity View</h2>
+          <p>View component "{componentName}" is not registered.</p>
+          <p>Available views: {availableViews.join(', ')}</p>
+        </div>
+      );
     }
+
+    // Render the view component with standard props
+    return (
+      <ViewComponent
+        entity={entity}
+        apiUrl={apiUrl}
+        {...view.metadata}
+        onSelect={handleSelect}
+        onEdit={handleEdit}
+        onCreate={handleCreate}
+      />
+    );
   };
 
   return (
