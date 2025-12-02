@@ -23651,7 +23651,7 @@ Check the top-level render call using <` + parentName + ">.";
   // src/framework/ui/MultiPageApp.tsx
   var import_react9 = __toESM(require_react(), 1);
 
-  // src/framework/ui/ViewRenderer.tsx
+  // src/framework/ui/ViewDispatcher.tsx
   var import_react8 = __toESM(require_react(), 1);
 
   // src/framework/ui/ListView.tsx
@@ -24812,20 +24812,20 @@ Check the top-level render call using <` + parentName + ">.";
   var viewRegistry = new ViewComponentRegistry;
   // src/framework/ui/components.tsx
   var jsx_dev_runtime7 = __toESM(require_jsx_dev_runtime(), 1);
-  // src/framework/ui/ViewRenderer.tsx
+  // src/framework/ui/ViewDispatcher.tsx
   var jsx_dev_runtime8 = __toESM(require_jsx_dev_runtime(), 1);
   viewRegistry.registerEntityView("grid", GridView);
   viewRegistry.registerEntityView("list", ListView);
   viewRegistry.registerInstanceView("detail", DetailView);
   viewRegistry.registerInstanceView("form", FormView);
-  function ViewRenderer({ page }) {
+  function ViewDispatcher({ page }) {
     const view = page.view;
     if (view.viewType === "entity") {
-      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(EntityViewRenderer, {
+      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(EntityViewDispatcher, {
         view
       }, page.id, false, undefined, this);
     } else if (view.viewType === "instance") {
-      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(InstanceViewRenderer, {
+      return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(InstanceViewDispatcher, {
         view
       }, page.id, false, undefined, this);
     }
@@ -24845,7 +24845,7 @@ Check the top-level render call using <` + parentName + ">.";
       ]
     }, undefined, true, undefined, this);
   }
-  function EntityViewRenderer({ view }) {
+  function EntityViewDispatcher({ view }) {
     const [mode, setMode] = import_react8.useState("list");
     const [selectedItem, setSelectedItem] = import_react8.useState(null);
     const entity = view.entity;
@@ -24937,7 +24937,7 @@ Check the top-level render call using <` + parentName + ">.";
       ]
     }, undefined, true, undefined, this);
   }
-  function InstanceViewRenderer({ view }) {
+  function InstanceViewDispatcher({ view }) {
     const entity = view.entity;
     const viewId = view.viewId;
     const componentName = view.componentName || viewId;
@@ -25057,7 +25057,7 @@ Check the top-level render call using <` + parentName + ">.";
         }, undefined, true, undefined, this),
         /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("main", {
           className: `entity-content ${collapsed ? "nav-collapsed" : ""}`,
-          children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(ViewRenderer, {
+          children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(ViewDispatcher, {
             page: currentPage
           }, undefined, false, undefined, this)
         }, undefined, false, undefined, this)

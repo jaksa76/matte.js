@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { EntityDefinition } from '../entities';
 import type { Page, View } from '../view-system';
-import { ViewRenderer } from './ViewRenderer';
+import { ViewDispatcher } from './ViewDispatcher';
 import './styles.css';
 
 export interface MultiPageAppProps {
@@ -92,7 +92,7 @@ export function MultiPageApp({ pages }: MultiPageAppProps) {
         </ul>
       </nav>
       <main className={`entity-content ${collapsed ? 'nav-collapsed' : ''}`}>
-        <ViewRenderer page={currentPage} />
+        <ViewDispatcher page={currentPage} />
       </main>
     </div>
   );

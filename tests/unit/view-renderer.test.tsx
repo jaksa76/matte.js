@@ -2,7 +2,7 @@ import { describe, it, expect } from 'bun:test';
 import type { Page } from '../../src/framework/view-system';
 import { ownedEntity, string } from '../../src/framework/entities';
 
-describe('ViewRenderer Key Prop', () => {
+describe('ViewDispatcher Key Prop', () => {
   it('should use page.id as key for entity views', () => {
     const ProjectEntity = ownedEntity('Project', [
       string('name').required(),
@@ -38,7 +38,7 @@ describe('ViewRenderer Key Prop', () => {
     // Different page IDs should result in different component instances
     expect(projectPage1.id).not.toBe(projectPage2.id);
     
-    // This ensures React will remount the EntityViewRenderer when page changes
+    // This ensures React will remount the EntityViewDispatcher when page changes
     // even if it's the same entity, the page.id is different
   });
 
@@ -80,7 +80,7 @@ describe('ViewRenderer Key Prop', () => {
     // Different pages must have different IDs
     expect(projectPage.id).not.toBe(taskPage.id);
     
-    // This ensures React will remount EntityViewRenderer when switching entities
-    // The key prop in ViewRenderer uses page.id to force remount
+    // This ensures React will remount EntityViewDispatcher when switching entities
+    // The key prop in ViewDispatcher uses page.id to force remount
   });
 });

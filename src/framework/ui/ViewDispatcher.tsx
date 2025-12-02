@@ -12,23 +12,23 @@ viewRegistry.registerInstanceView('form', FormView);
 
 type ViewMode = 'list' | 'detail' | 'create' | 'edit';
 
-export interface ViewRendererProps {
+export interface ViewDispatcherProps {
   page: Page;
 }
 
 /**
- * ViewRenderer component handles rendering different view types
+ * ViewDispatcher component handles rendering different view types
  * and manages the state for entity/instance views
  */
-export function ViewRenderer({ page }: ViewRendererProps) {
+export function ViewDispatcher({ page }: ViewDispatcherProps) {
   const view = page.view;
 
   if (view.viewType === 'entity') {
     // Use page.id as key to force component remount when navigating between different pages
     // This ensures state (mode, selectedItem) is reset when switching entities
-    return <EntityViewRenderer key={page.id} view={view} />;
+    return <EntityViewDispatcher key={page.id} view={view} />;
   } else if (view.viewType === 'instance') {
-    return <InstanceViewRenderer key={page.id} view={view} />;
+    return <InstanceViewDispatcher key={page.id} view={view} />;
   }
 
   return (
@@ -42,7 +42,7 @@ export function ViewRenderer({ page }: ViewRendererProps) {
 /**
  * Renders EntityView (views that display collections)
  */
-function EntityViewRenderer({ view }: { view: EntityView }) {
+function EntityViewDispatcher({ view }: { view: EntityView }) {
   const [mode, setMode] = useState<ViewMode>('list');
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
@@ -149,7 +149,7 @@ function EntityViewRenderer({ view }: { view: EntityView }) {
 /**
  * Renders InstanceView (views that display a single instance)
  */
-function InstanceViewRenderer({ view }: { view: InstanceView }) {
+function InstanceViewDispatcher({ view }: { view: InstanceView }) {
   const entity = view.entity;
   const viewId = view.viewId;
   const componentName = view.componentName || viewId;

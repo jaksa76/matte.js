@@ -235,11 +235,11 @@ export function ChartView({ entity, apiUrl, chartType }) {
 }
 ```
 
-### Step 2: Register in ViewRenderer
+### Step 2: Register in ViewDispatcher
 
 ```tsx
-// src/framework/ui/ViewRenderer.tsx
-function EntityViewRenderer({ view }: { view: EntityView }) {
+// src/framework/ui/ViewDispatcher.tsx
+function EntityViewDispatcher({ view }: { view: EntityView }) {
   // ...
   switch (componentName) {
     case 'grid':
@@ -398,13 +398,13 @@ The helper functions maintain backward compatibility while using the new archite
 ## Troubleshooting
 
 ### "Unknown Entity View" Error
-The view component isn't registered in ViewRenderer. Add it to the switch statement.
+The view component isn't registered in ViewDispatcher. Add it to the switch statement.
 
 ### Page Not Appearing in Navigation
 Check `showInNav` is not set to `false` in page options.
 
 ### Wrong View Rendering
-Check the `viewId` matches a registered view component in ViewRenderer.
+Check the `viewId` matches a registered view component in ViewDispatcher.
 
 ### Path Conflicts
 Ensure each page has a unique path. Use `PageRegistry.getByPath()` to check.

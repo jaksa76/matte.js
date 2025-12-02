@@ -5,7 +5,7 @@ export { FormView } from './FormView';
 export { EntityApp } from './EntityApp';
 export { MultiEntityApp } from './MultiEntityApp';
 export { MultiPageApp } from './MultiPageApp';
-export { ViewRenderer } from './ViewRenderer';
+export { ViewDispatcher } from './ViewDispatcher';
 export { viewRegistry } from './view-registry';
 export { EntityStub } from './EntityStub';
 export { LoadingSpinner, ErrorDisplay, EmptyState, ActionButtons } from './components';
@@ -16,7 +16,7 @@ export type { FormViewProps } from './FormView';
 export type { EntityAppProps } from './EntityApp';
 export type { MultiEntityAppProps } from './MultiEntityApp';
 export type { MultiPageAppProps } from './MultiPageApp';
-export type { ViewRendererProps } from './ViewRenderer';
+export type { ViewDispatcherProps } from './ViewDispatcher';
 export type { LoadingSpinnerProps, ErrorDisplayProps, EmptyStateProps, ActionButtonsProps } from './components';
 
 

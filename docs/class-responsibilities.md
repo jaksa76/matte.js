@@ -6,26 +6,24 @@ This document provides an overview of all classes in the Matte.js framework and 
 
 ### `Matte` (framework.ts)
 - Main entry point and facade for the framework
+- Provides methods to register entities and pages
 - Maintains entity and page registries using `Map<string, EntityDefinition>` and `Map<string, Page>`
-- Registers entities and pages
-- Initializes database and creates tables
-- Creates repositories and registers API routes
 - Delegates server operations to the `Server` class
-- Provides access to repositories via `getRepository()`
-- Manages overall framework lifecycle
+- Delegates database operations to `RepositoryFactory`
 
 ### `Server` (server.ts)
 - Handles HTTP server operations
 - Receives entity and page Maps from `Matte` class
 - Bundles and serves client-side React code (client.tsx, landing-client.tsx)
-- Routes HTTP requests to API or UI components
-- Serves static assets (JavaScript bundles, CSS)
-- Renders HTML pages (landing page and entity pages)
-- Manages server lifecycle (start/stop)
-- Serves as the HTTP layer for the framework
-- Provides helper methods for page filtering and sorting
+- Uses Api and ViewSystem to route requests appropriately
 
 ## Entity & Schema System
+
+### `EntityDefinition` (entities.ts)
+- Defines the schema for an entity
+- Contains fields, ownership info, and metadata
+- Used to generate database tables and API routes
+- Supports field customization for views
 
 ### `StringField`, `NumberField`, `DateField`, `EnumField`, `RichTextField`, `FileField`, `BooleanField`, `FieldGroup` (entities.ts)
 - Define field types with validation rules and defaults
@@ -80,13 +78,6 @@ This document provides an overview of all classes in the Matte.js framework and 
 
 ## Helper Functions (not classes)
 
-### Factory Functions (view-system.ts)
-- `createEntityView`, `createInstanceView`, `createPage` - Factory functions for creating view objects
-
-### High-Level View Helpers (views.ts)
-- `listView`, `gridView`, `detailView`, `formView` - High-level view creation helpers
-- `getCustomizedEntity` - Applies field customizations to entities
-
 ### Entity Definition Functions (entities.ts)
 - `entity()`, `ownedEntity()` - Create entity definitions
 
@@ -96,18 +87,6 @@ This document provides an overview of all classes in the Matte.js framework and 
 ### Group Helpers (entities.ts)
 - `group()`, `hgroup()` - Organize fields in groups
 
-## Architecture
-
-The framework follows a layered architecture:
-
-```
-Entities → Database → Repository → API
-                ↓
-              Matte (facade/orchestrator)
-                ↓
-              Server (HTTP layer)
-                ↓
-           UI Components
-```
-
-The `Matte` class serves as the central facade and orchestrator, coordinating entity registration, database initialization, and repository/API setup. It delegates all HTTP and serving concerns to the `Server` class, which handles bundling, routing, and serving both API endpoints and UI components. This separation keeps the framework concerns distinct from the server concerns.
+### High-Level View Helpers (views.ts)
+- `listView`, `gridView`, `detailView`, `formView` - High-level view creation helpers
+- `getCustomizedEntity` - Applies field customizations to entities
