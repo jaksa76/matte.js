@@ -11,8 +11,8 @@ export { entity, ownedEntity, t, field, string, number, date, richtext, file, bo
 export type { EntityDefinition, EntitySchema, EntitySchemaDefinition, FieldType, FieldDefinition, UIMetadata, FieldGroup } from './entities';
 
 // View system
-export { createEntityView, createInstanceView, createPage } from './view-system';
-export type { View, EntityView, InstanceView, Page, BaseView } from './view-system';
+export { createEntityDisplay, createInstanceDisplay, createPage } from './view-system';
+export type { Display, EntityDisplay, InstanceDisplay, Page, BaseDisplay } from './view-system';
 
 // View helpers
 export { listView, gridView, customGridView, detailView, formView, show, FieldSelector, getCustomizedEntity } from './views';

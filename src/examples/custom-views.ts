@@ -4,7 +4,7 @@
 
 import { 
   Matte, 
-  createEntityView, 
+  createEntityDisplay, 
   createPage,
   listView,
   gridView,
@@ -56,9 +56,9 @@ const productListPage = listView(Product, {
 app.register(productGridPage);
 app.register(productListPage);
 
-// Example 4: Create a custom view with specific configuration
+// Example 4: Create a custom display with specific configuration
 // (This would be for a future custom view component)
-const customAnalyticsView = createEntityView('analytics', Order, {
+const customAnalyticsView = createEntityDisplay('analytics', Order, {
   displayName: 'Order Analytics',
   metadata: {
     chartType: 'bar',
@@ -82,7 +82,7 @@ const analyticsPage = createPage(
 app.register(analyticsPage);
 
 // Example 5: Page that shouldn't appear in navigation
-const hiddenReportView = createEntityView('grid', Order, {
+const hiddenReportView = createEntityDisplay('grid', Order, {
   displayName: 'Hidden Report',
 });
 

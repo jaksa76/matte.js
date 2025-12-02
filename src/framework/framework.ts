@@ -3,8 +3,8 @@ import { RepositoryFactory } from './repository';
 import { APIServer } from './api';
 import { Server } from './server';
 import type { EntityDefinition } from './entities';
-import type { Page, View, EntityView } from './view-system';
-import { createPage, createEntityView } from './view-system';
+import type { Page, Display, EntityDisplay } from './view-system';
+import { createPage, createEntityDisplay } from './view-system';
 
 export interface MatteOptions {
   dbPath?: string;
@@ -40,10 +40,10 @@ export class Matte {
       // Register the page
       this.pages.set(pageOrEntity.id, pageOrEntity);
       
-      // Extract and register the entity from the view
-      const view = pageOrEntity.view;
-      if (view.viewType === 'entity' || view.viewType === 'instance') {
-        this.entities.set(view.entity.name, view.entity);
+      // Extract and register the entity from the display
+      const display = pageOrEntity.display;
+      if (display.displayType === 'entity' || display.displayType === 'instance') {
+        this.entities.set(display.entity.name, display.entity);
       }
     } else {
       // Create a default page for the entity
@@ -51,7 +51,7 @@ export class Matte {
       this.entities.set(entity.name, entity);
       
       // Create default page with configured default view
-      const view = createEntityView(this.defaultView, entity, {
+      const display = createEntityDisplay(this.defaultView, entity, {
         displayName: `${entity.name} ${this.defaultView === 'grid' ? 'Grid' : 'List'}`,
       });
       
@@ -59,7 +59,7 @@ export class Matte {
         `${entity.name}-${this.defaultView}`,
         entity.name,
         this.toKebabCase(entity.name),
-        view
+        display
       );
       
       this.pages.set(page.id, page);
@@ -67,7 +67,7 @@ export class Matte {
   }
 
   private isPage(obj: any): obj is Page {
-    return obj && typeof obj === 'object' && 'id' in obj && 'path' in obj && 'view' in obj;
+    return obj && typeof obj === 'object' && 'id' in obj && 'path' in obj && 'display' in obj;
   }
 
   async start(): Promise<void> {

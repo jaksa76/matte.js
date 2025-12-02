@@ -11,7 +11,7 @@ import {
   enum as enumField,
   date,
 } from '../framework/entities';
-import { createEntityView, createPage } from '../framework/view-system';
+import { createEntityDisplay, createPage } from '../framework/view-system';
 import { 
   viewRegistry, 
   useEntityData,
@@ -177,7 +177,7 @@ export function kanbanView(entity: EntityDefinition, options?: {
   pagePath?: string;
   statusField?: string;
 }): any {
-  const view = createEntityView('kanban', entity, {
+  const display = createEntityDisplay('kanban', entity, {
     displayName: options?.pageName || `${entity.name} Board`,
     metadata: {
       statusField: options?.statusField || 'status',
@@ -188,7 +188,7 @@ export function kanbanView(entity: EntityDefinition, options?: {
     `${entity.name}-kanban`,
     options?.pageName || `${entity.name} Board`,
     options?.pagePath || toKebabCase(entity.name),
-    view
+    display
   );
 }
 
@@ -220,7 +220,7 @@ const Task = ownedEntity("Task", [
 //   'task-board',
 //   'Tasks',
 //   'tasks',
-//   createEntityView('kanban', Task, {
+//   createEntityDisplay('kanban', Task, {
 //     metadata: { statusField: 'status' }
 //   })
 // );

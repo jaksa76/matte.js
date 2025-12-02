@@ -1,59 +1,59 @@
 import type { EntityDefinition } from './entities';
 
 /**
- * Base interface for all views
+ * Base interface for all displays
  */
-export interface BaseView {
+export interface BaseDisplay {
   /**
-   * Unique identifier for the view type (e.g., 'grid', 'list', 'detail', 'form', 'custom-chart')
+   * Unique identifier for the display type (e.g., 'grid', 'list', 'detail', 'form', 'custom-chart')
    */
-  viewId: string;
+  displayId: string;
 
   /**
-   * Human-readable name for the view
+   * Human-readable name for the display
    */
   displayName?: string;
 
   /**
    * Optional component name/path for client-side rendering
-   * If not provided, the viewId will be used to look up the component
+   * If not provided, the displayId will be used to look up the component
    */
   componentName?: string;
 
   /**
-   * Additional metadata that can be passed to the view component
+   * Additional metadata that can be passed to the display component
    */
   metadata?: Record<string, any>;
 }
 
 /**
- * View that displays a single entity instance (e.g., Detail view, Form view)
+ * Display that shows a single entity instance (e.g., Detail view, Form view)
  */
-export interface InstanceView extends BaseView {
-  viewType: 'instance';
+export interface InstanceDisplay extends BaseDisplay {
+  displayType: 'instance';
   
   /**
-   * The entity this view displays
+   * The entity this display shows
    */
   entity: EntityDefinition;
 }
 
 /**
- * View that displays a collection of entity instances (e.g., List view, Grid view)
+ * Display that shows a collection of entity instances (e.g., List view, Grid view)
  */
-export interface EntityView extends BaseView {
-  viewType: 'entity';
+export interface EntityDisplay extends BaseDisplay {
+  displayType: 'entity';
   
   /**
-   * The entity this view displays
+   * The entity this display shows
    */
   entity: EntityDefinition;
 }
 
 /**
- * Union type for all views
+ * Union type for all displays
  */
-export type View = InstanceView | EntityView;
+export type Display = InstanceDisplay | EntityDisplay;
 
 /**
  * A page represents a navigation target in the application
@@ -75,9 +75,9 @@ export interface Page {
   path: string;
 
   /**
-   * The view to display on this page
+   * The display to show on this page
    */
-  view: View;
+  display: Display;
 
   /**
    * Optional icon for navigation menu
@@ -96,20 +96,20 @@ export interface Page {
 }
 
 /**
- * Factory function to create an EntityView
+ * Factory function to create an EntityDisplay
  */
-export function createEntityView(
-  viewId: string,
+export function createEntityDisplay(
+  displayId: string,
   entity: EntityDefinition,
   options?: {
     displayName?: string;
     componentName?: string;
     metadata?: Record<string, any>;
   }
-): EntityView {
+): EntityDisplay {
   return {
-    viewType: 'entity',
-    viewId,
+    displayType: 'entity',
+    displayId,
     entity,
     displayName: options?.displayName,
     componentName: options?.componentName,
@@ -118,20 +118,20 @@ export function createEntityView(
 }
 
 /**
- * Factory function to create an InstanceView
+ * Factory function to create an InstanceDisplay
  */
-export function createInstanceView(
-  viewId: string,
+export function createInstanceDisplay(
+  displayId: string,
   entity: EntityDefinition,
   options?: {
     displayName?: string;
     componentName?: string;
     metadata?: Record<string, any>;
   }
-): InstanceView {
+): InstanceDisplay {
   return {
-    viewType: 'instance',
-    viewId,
+    displayType: 'instance',
+    displayId,
     entity,
     displayName: options?.displayName,
     componentName: options?.componentName,
@@ -146,7 +146,7 @@ export function createPage(
   id: string,
   name: string,
   path: string,
-  view: View,
+  display: Display,
   options?: {
     icon?: string;
     showInNav?: boolean;
@@ -157,7 +157,7 @@ export function createPage(
     id,
     name,
     path,
-    view,
+    display,
     icon: options?.icon,
     showInNav: options?.showInNav ?? true,
     order: options?.order,

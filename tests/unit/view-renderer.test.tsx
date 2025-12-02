@@ -13,9 +13,9 @@ describe('ViewDispatcher Key Prop', () => {
       id: 'project-grid',
       name: 'Project',
       path: 'project',
-      view: {
-        viewType: 'entity',
-        viewId: 'grid',
+      display: {
+        displayType: 'entity',
+        displayId: 'grid',
         entity: ProjectEntity,
         displayName: 'Project Grid',
       },
@@ -26,9 +26,9 @@ describe('ViewDispatcher Key Prop', () => {
       id: 'project-list',
       name: 'Project',
       path: 'project-list',
-      view: {
-        viewType: 'entity',
-        viewId: 'list',
+      display: {
+        displayType: 'entity',
+        displayId: 'list',
         entity: ProjectEntity,
         displayName: 'Project List',
       },
@@ -55,9 +55,9 @@ describe('ViewDispatcher Key Prop', () => {
       id: 'project-grid',
       name: 'Project',
       path: 'project',
-      view: {
-        viewType: 'entity',
-        viewId: 'grid',
+      display: {
+        displayType: 'entity',
+        displayId: 'grid',
         entity: ProjectEntity,
         displayName: 'Project Grid',
       },
@@ -68,9 +68,9 @@ describe('ViewDispatcher Key Prop', () => {
       id: 'task-grid',
       name: 'Task',
       path: 'task',
-      view: {
-        viewType: 'entity',
-        viewId: 'grid',
+      display: {
+        displayType: 'entity',
+        displayId: 'grid',
         entity: TaskEntity,
         displayName: 'Task Grid',
       },

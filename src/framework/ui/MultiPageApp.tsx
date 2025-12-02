@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { EntityDefinition } from '../entities';
-import type { Page, View } from '../view-system';
+import type { Page, Display } from '../view-system';
 import { ViewDispatcher } from './ViewDispatcher';
 import './styles.css';
 

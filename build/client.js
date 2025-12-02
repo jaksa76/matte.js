@@ -24819,36 +24819,36 @@ Check the top-level render call using <` + parentName + ">.";
   viewRegistry.registerInstanceView("detail", DetailView);
   viewRegistry.registerInstanceView("form", FormView);
   function ViewDispatcher({ page }) {
-    const view = page.view;
-    if (view.viewType === "entity") {
+    const display = page.display;
+    if (display.displayType === "entity") {
       return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(EntityViewDispatcher, {
-        view
+        display
       }, page.id, false, undefined, this);
-    } else if (view.viewType === "instance") {
+    } else if (display.displayType === "instance") {
       return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(InstanceViewDispatcher, {
-        view
+        display
       }, page.id, false, undefined, this);
     }
     return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
       className: "view-error",
       children: [
         /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("h2", {
-          children: "Unknown View Type"
+          children: "Unknown Display Type"
         }, undefined, false, undefined, this),
         /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("p", {
           children: [
-            'View type "',
-            view.viewType,
+            'Display type "',
+            display.displayType,
             '" is not supported.'
           ]
         }, undefined, true, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
-  function EntityViewDispatcher({ view }) {
+  function EntityViewDispatcher({ display }) {
     const [mode, setMode] = import_react8.useState("list");
     const [selectedItem, setSelectedItem] = import_react8.useState(null);
-    const entity = view.entity;
+    const entity = display.entity;
     const apiUrl = `/api/${toKebabCase2(entity.name)}`;
     const handleSelect = (item) => {
       setSelectedItem(item);
@@ -24875,8 +24875,8 @@ Check the top-level render call using <` + parentName + ">.";
       setSelectedItem(null);
     };
     const renderCollectionView = () => {
-      const viewId = view.viewId;
-      const componentName = view.componentName || viewId;
+      const displayId = display.displayId;
+      const componentName = display.componentName || displayId;
       const ViewComponent = viewRegistry.getEntityView(componentName);
       if (!ViewComponent) {
         const availableViews = viewRegistry.getEntityViewIds();
@@ -24905,7 +24905,7 @@ Check the top-level render call using <` + parentName + ">.";
       return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(ViewComponent, {
         entity,
         apiUrl,
-        ...view.metadata,
+        ...display.metadata,
         onSelect: handleSelect,
         onEdit: handleEdit,
         onCreate: handleCreate
@@ -24937,10 +24937,10 @@ Check the top-level render call using <` + parentName + ">.";
       ]
     }, undefined, true, undefined, this);
   }
-  function InstanceViewDispatcher({ view }) {
-    const entity = view.entity;
-    const viewId = view.viewId;
-    const componentName = view.componentName || viewId;
+  function InstanceViewDispatcher({ display }) {
+    const entity = display.entity;
+    const displayId = display.displayId;
+    const componentName = display.componentName || displayId;
     return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
       className: "view-error",
       children: [
@@ -24955,7 +24955,7 @@ Check the top-level render call using <` + parentName + ">.";
           ]
         }, undefined, true, undefined, this),
         /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("p", {
-          children: "Instance views are typically rendered as part of an EntityView workflow."
+          children: "Instance views are typically rendered as part of an EntityDisplay workflow."
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);

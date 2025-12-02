@@ -92,9 +92,9 @@ describe('Custom Views', () => {
       ]);
 
       const page = listView(entity);
-      expect(page.view.viewType).toBe('entity');
-      expect(page.view.viewId).toBe('list');
-      expect(page.view.entity).toBe(entity);
+      expect(page.display.displayType).toBe('entity');
+      expect(page.display.displayId).toBe('list');
+      expect(page.display.entity).toBe(entity);
       expect(page.path).toBe('task');
     });
 
@@ -105,9 +105,9 @@ describe('Custom Views', () => {
       ]);
 
       const page = gridView(entity);
-      expect(page.view.viewType).toBe('entity');
-      expect(page.view.viewId).toBe('grid');
-      expect(page.view.entity).toBe(entity);
+      expect(page.display.displayType).toBe('entity');
+      expect(page.display.displayId).toBe('grid');
+      expect(page.display.entity).toBe(entity);
       expect(page.path).toBe('product');
     });
 
@@ -123,11 +123,11 @@ describe('Custom Views', () => {
         show('date'),
       ]);
 
-      expect(page.view.viewType).toBe('entity');
-      expect(page.view.viewId).toBe('grid');
-      expect(page.view.entity.schema.name.ui?.bold).toBe(true);
-      expect(page.view.entity.schema.name.ui?.hidden).toBe(false);
-      expect(page.view.entity.schema.location.ui?.hidden).toBe(true);
+      expect(page.display.displayType).toBe('entity');
+      expect(page.display.displayId).toBe('grid');
+      expect(page.display.entity.schema.name.ui?.bold).toBe(true);
+      expect(page.display.entity.schema.name.ui?.hidden).toBe(false);
+      expect(page.display.entity.schema.location.ui?.hidden).toBe(true);
     });
 
     it('should allow custom page options', () => {

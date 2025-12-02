@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Page, EntityView, InstanceView } from '../view-system';
+import type { Page, EntityDisplay, InstanceDisplay } from '../view-system';
 import { ListView, GridView, DetailView, FormView } from './index';
 import { viewRegistry } from './view-registry';
 import './styles.css';
@@ -21,32 +21,32 @@ export interface ViewDispatcherProps {
  * and manages the state for entity/instance views
  */
 export function ViewDispatcher({ page }: ViewDispatcherProps) {
-  const view = page.view;
+  const display = page.display;
 
-  if (view.viewType === 'entity') {
+  if (display.displayType === 'entity') {
     // Use page.id as key to force component remount when navigating between different pages
     // This ensures state (mode, selectedItem) is reset when switching entities
-    return <EntityViewDispatcher key={page.id} view={view} />;
-  } else if (view.viewType === 'instance') {
-    return <InstanceViewDispatcher key={page.id} view={view} />;
+    return <EntityViewDispatcher key={page.id} display={display} />;
+  } else if (display.displayType === 'instance') {
+    return <InstanceViewDispatcher key={page.id} display={display} />;
   }
 
   return (
     <div className="view-error">
-      <h2>Unknown View Type</h2>
-      <p>View type "{(view as any).viewType}" is not supported.</p>
+      <h2>Unknown Display Type</h2>
+      <p>Display type "{(display as any).displayType}" is not supported.</p>
     </div>
   );
 }
 
 /**
- * Renders EntityView (views that display collections)
+ * Renders EntityDisplay (displays that show collections)
  */
-function EntityViewDispatcher({ view }: { view: EntityView }) {
+function EntityViewDispatcher({ display }: { display: EntityDisplay }) {
   const [mode, setMode] = useState<ViewMode>('list');
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
-  const entity = view.entity;
+  const entity = display.entity;
   const apiUrl = `/api/${toKebabCase(entity.name)}`;
 
   const handleSelect = (item: any) => {
@@ -79,10 +79,10 @@ function EntityViewDispatcher({ view }: { view: EntityView }) {
     setSelectedItem(null);
   };
 
-  // Render the appropriate view based on viewId
+  // Render the appropriate view based on displayId
   const renderCollectionView = () => {
-    const viewId = view.viewId;
-    const componentName = view.componentName || viewId;
+    const displayId = display.displayId;
+    const componentName = display.componentName || displayId;
 
     // Look up view component in registry
     const ViewComponent = viewRegistry.getEntityView(componentName);
@@ -103,7 +103,7 @@ function EntityViewDispatcher({ view }: { view: EntityView }) {
       <ViewComponent
         entity={entity}
         apiUrl={apiUrl}
-        {...view.metadata}
+        {...display.metadata}
         onSelect={handleSelect}
         onEdit={handleEdit}
         onCreate={handleCreate}
@@ -147,12 +147,12 @@ function EntityViewDispatcher({ view }: { view: EntityView }) {
 }
 
 /**
- * Renders InstanceView (views that display a single instance)
+ * Renders InstanceDisplay (displays that show a single instance)
  */
-function InstanceViewDispatcher({ view }: { view: InstanceView }) {
-  const entity = view.entity;
-  const viewId = view.viewId;
-  const componentName = view.componentName || viewId;
+function InstanceViewDispatcher({ display }: { display: InstanceDisplay }) {
+  const entity = display.entity;
+  const displayId = display.displayId;
+  const componentName = display.componentName || displayId;
 
   // For now, instance views would need additional context (which instance to show)
   // This is a placeholder implementation
@@ -160,7 +160,7 @@ function InstanceViewDispatcher({ view }: { view: InstanceView }) {
     <div className="view-error">
       <h2>Instance View</h2>
       <p>Instance views ("{componentName}") require additional routing context.</p>
-      <p>Instance views are typically rendered as part of an EntityView workflow.</p>
+      <p>Instance views are typically rendered as part of an EntityDisplay workflow.</p>
     </div>
   );
 }

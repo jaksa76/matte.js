@@ -1,7 +1,7 @@
 import type { EntityDefinition, UIMetadata } from './entities';
 import { FieldGroup } from './entities';
-import type { EntityView, InstanceView, Page } from './view-system';
-import { createEntityView, createInstanceView, createPage } from './view-system';
+import type { EntityDisplay, InstanceDisplay, Page } from './view-system';
+import { createEntityDisplay, createInstanceDisplay, createPage } from './view-system';
 
 /**
  * Helper function to get entity with custom field configurations applied
@@ -168,7 +168,7 @@ export function listView(entity: EntityDefinition, options?: {
     ? getCustomizedEntity(entity, options.customFields)
     : entity;
     
-  const view = createEntityView('list', entityForView, {
+  const display = createEntityDisplay('list', entityForView, {
     displayName: options?.pageName || `${entity.name} List`,
   });
 
@@ -176,7 +176,7 @@ export function listView(entity: EntityDefinition, options?: {
     `${entity.name}-list`,
     options?.pageName || entity.name,
     options?.pagePath || toKebabCase(entity.name),
-    view
+    display
   );
 }
 
@@ -192,7 +192,7 @@ export function gridView(entity: EntityDefinition, options?: {
     ? getCustomizedEntity(entity, options.customFields)
     : entity;
     
-  const view = createEntityView('grid', entityForView, {
+  const display = createEntityDisplay('grid', entityForView, {
     displayName: options?.pageName || `${entity.name} Grid`,
   });
 
@@ -200,7 +200,7 @@ export function gridView(entity: EntityDefinition, options?: {
     `${entity.name}-grid`,
     options?.pageName || entity.name,
     options?.pagePath || toKebabCase(entity.name),
-    view
+    display
   );
 }
 
@@ -216,31 +216,31 @@ export function customGridView(
 }
 
 /**
- * Create a detail view (InstanceView) for an entity
+ * Create a detail view (InstanceDisplay) for an entity
  */
 export function detailView(entity: EntityDefinition, options?: {
   customFields?: FieldSelector[];
-}): InstanceView {
+}): InstanceDisplay {
   const entityForView = options?.customFields 
     ? getCustomizedEntity(entity, options.customFields)
     : entity;
     
-  return createInstanceView('detail', entityForView, {
+  return createInstanceDisplay('detail', entityForView, {
     displayName: `${entity.name} Detail`,
   });
 }
 
 /**
- * Create a form view (InstanceView) for an entity
+ * Create a form view (InstanceDisplay) for an entity
  */
 export function formView(entity: EntityDefinition, options?: {
   customFields?: FieldSelector[];
-}): InstanceView {
+}): InstanceDisplay {
   const entityForView = options?.customFields 
     ? getCustomizedEntity(entity, options.customFields)
     : entity;
     
-  return createInstanceView('form', entityForView, {
+  return createInstanceDisplay('form', entityForView, {
     displayName: `${entity.name} Form`,
   });
 }
