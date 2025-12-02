@@ -364,7 +364,8 @@ describe('Integration Tests', () => {
       const html = await res.text();
       expect(html).toContain('<!DOCTYPE html>');
       expect(html).toContain('Matte.js');
-      expect(html).toContain('Available Pages');
+      expect(html).toContain('MATTE_LANDING_CONFIG');
+      expect(html).toContain('/landing.js');
       expect(html).toContain('Task');
       expect(html).toContain('Note');
     });

@@ -22,6 +22,7 @@ export class Matte {
   private initialized = false;
   private server?: any; // Store server reference for cleanup
   private clientBundle?: string; // Cache the bundled client code
+  private landingBundle?: string; // Cache the bundled landing page code
   private cssBundle?: string; // Cache the CSS
 
   constructor(options: MatteOptions = {}) {
@@ -112,6 +113,13 @@ export class Matte {
           });
         }
 
+        // Serve landing page JS bundle
+        if (url.pathname === '/landing.js') {
+          return new Response(self.landingBundle, {
+            headers: { 'Content-Type': 'application/javascript' },
+          });
+        }
+
         // Serve CSS
         if (url.pathname === '/styles.css') {
           return new Response(self.cssBundle, {
@@ -164,7 +172,6 @@ export class Matte {
       minify: false,
       target: 'browser',
       format: 'iife',
-      globalName: 'MatteUI',
       external: [],
     });
 
@@ -173,11 +180,29 @@ export class Matte {
       throw new Error('Failed to build client bundle');
     }
 
-    // Read the bundled file
+    // Bundle the landing page
+    const landingResult = await Bun.build({
+      entrypoints: ['./src/framework/ui/landing-client.tsx'],
+      outdir: './build',
+      minify: false,
+      target: 'browser',
+      format: 'iife',
+      external: [],
+    });
+
+    if (!landingResult.success) {
+      console.error('Landing build errors:', landingResult.logs);
+      throw new Error('Failed to build landing page bundle');
+    }
+
+    // Read the bundled files
     this.clientBundle = await Bun.file('./build/client.js').text();
+    this.landingBundle = await Bun.file('./build/landing-client.js').text();
     
-    // Read the CSS file
-    this.cssBundle = await Bun.file('./src/framework/ui/styles.css').text();
+    // Read and combine CSS files
+    const mainCss = await Bun.file('./src/framework/ui/styles.css').text();
+    const landingCss = await Bun.file('./src/framework/ui/LandingPage.css').text();
+    this.cssBundle = mainCss + '\n\n' + landingCss;
   }
 
   private renderLandingPage(): string {
@@ -190,97 +215,15 @@ export class Matte {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Matte.js</title>
   <link rel="stylesheet" href="/styles.css">
-  <style>
-    .landing-page {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 60px 20px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-    .landing-header {
-      text-align: center;
-      margin-bottom: 50px;
-    }
-    .landing-title {
-      font-size: 48px;
-      font-weight: 700;
-      margin: 0 0 10px 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .landing-subtitle {
-      font-size: 18px;
-      color: #666;
-      margin: 0;
-    }
-    .pages-section {
-      margin-top: 40px;
-    }
-    .pages-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .page-card {
-      background: white;
-      border: 2px solid #e1e4e8;
-      border-radius: 8px;
-      padding: 24px;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.2s ease;
-      display: block;
-    }
-    .page-card:hover {
-      border-color: #667eea;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-    }
-    .page-card-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin: 0 0 8px 0;
-      color: #24292e;
-    }
-    .page-card-info {
-      font-size: 14px;
-      color: #666;
-      margin: 0;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #666;
-    }
-  </style>
 </head>
 <body>
-  <div class="landing-page">
-    <div class="landing-header">
-      <h1 class="landing-title">Matte.js</h1>
-      <p class="landing-subtitle">Full-stack entity management framework</p>
-    </div>
-    <div class="pages-section">
-      <h2>Available Pages</h2>
-      ${pages.length > 0 ? `
-      <div class="pages-grid">
-        ${pages.map(p => `
-        <a href="/${p.path}" class="page-card">
-          <h3 class="page-card-title">${p.icon || '📋'} ${p.name}</h3>
-          <p class="page-card-info">${p.view.viewId} view</p>
-        </a>
-        `).join('')}
-      </div>
-      ` : `
-      <div class="empty-state">
-        <p>No pages registered yet.</p>
-      </div>
-      `}
-    </div>
-  </div>
+  <div id="root"></div>
+  <script>
+    window.MATTE_LANDING_CONFIG = {
+      pages: ${JSON.stringify(pages)}
+    };
+  </script>
+  <script src="/landing.js"></script>
 </body>
 </html>`;
   }
