@@ -24823,11 +24823,11 @@ Check the top-level render call using <` + parentName + ">.";
     if (view.viewType === "entity") {
       return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(EntityViewRenderer, {
         view
-      }, undefined, false, undefined, this);
+      }, page.id, false, undefined, this);
     } else if (view.viewType === "instance") {
       return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV(InstanceViewRenderer, {
         view
-      }, undefined, false, undefined, this);
+      }, page.id, false, undefined, this);
     }
     return /* @__PURE__ */ jsx_dev_runtime8.jsxDEV("div", {
       className: "view-error",

@@ -496,6 +496,137 @@ test.describe('API Integration', () => {
   });
 });
 
+test.describe('Data Persistence', () => {
+  test('should persist entities across navigation', async ({ page }) => {
+    // Create a project
+    await page.goto('/project');
+    await page.waitForLoadState('networkidle');
+    
+    await createProject(page, {
+      name: 'Persistence Test Project',
+      code: 'PTP-001',
+      status: 'active',
+      priority: 'high',
+    });
+    
+    await page.waitForTimeout(1000);
+    
+    // Verify project is visible
+    await expect(page.getByText('Persistence Test Project').first()).toBeVisible();
+    
+    // Navigate to a different entity
+    await page.goto('/task');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // Navigate back to projects
+    await page.goto('/project');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // Verify project is still there
+    await expect(page.getByText('Persistence Test Project').first()).toBeVisible();
+  });
+
+  test('should persist entities after page reload', async ({ page }) => {
+    // Create a task
+    await page.goto('/task');
+    await page.waitForLoadState('networkidle');
+    
+    await createTask(page, {
+      title: 'Persistence Test Task',
+      status: 'todo',
+      priority: 'high',
+      type: 'feature',
+    });
+    
+    await page.waitForTimeout(1000);
+    
+    // Verify task is visible
+    await expect(page.getByText('Persistence Test Task').first()).toBeVisible();
+    
+    // Reload the page
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // Verify task is still there
+    await expect(page.getByText('Persistence Test Task').first()).toBeVisible();
+  });
+
+  test('should refetch data when navigating back to a page', async ({ page }) => {
+    // Navigate to product page
+    await page.goto('/product');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // Count how many products exist now
+    const initialCards = await page.locator('.grid-card').count();
+    
+    // Create a product via API directly (simulating external change)
+    const response = await page.request.post('http://localhost:3002/api/product', {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Owner-Id': 'test-user',
+      },
+      data: {
+        name: 'Background Created Product',
+        sku: 'BG-001',
+        price: 99.99,
+      },
+    });
+    
+    expect(response.status()).toBe(201);
+    
+    // Navigate away and back
+    await page.goto('/customer');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    await page.goto('/product');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    
+    // The page should have refetched and show the new product
+    const newCards = await page.locator('.grid-card').count();
+    expect(newCards).toBe(initialCards + 1);
+    
+    // And we should see the new product
+    await expect(page.getByText('Background Created Product').first()).toBeVisible();
+  });
+
+  test('should reset view mode when navigating between pages', async ({ page }) => {
+    // Go to project page and start creating a project
+    await page.goto('/project');
+    await page.waitForLoadState('networkidle');
+    
+    const createButton = page.locator('[data-testid="btn-create"]');
+    await createButton.click();
+    
+    // Wait for form view to appear
+    await page.waitForSelector('.form-view-container', { timeout: 5000 });
+    await expect(page.locator('.form-view-container')).toBeVisible();
+    
+    // Now navigate to a different entity WITHOUT saving
+    await page.goto('/task');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // Should show the grid view (not form view)
+    await expect(page.locator('[data-testid="grid-view"]')).toBeVisible();
+    await expect(page.locator('.form-view-container')).not.toBeVisible();
+    
+    // Navigate back to project
+    await page.goto('/project');
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(500);
+    
+    // Should show grid view again (state was reset)
+    await expect(page.locator('[data-testid="grid-view"]')).toBeVisible();
+    await expect(page.locator('.form-view-container')).not.toBeVisible();
+  });
+});
+
 // ============================================================================
 // Helper Functions
 // ============================================================================

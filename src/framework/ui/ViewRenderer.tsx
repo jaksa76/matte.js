@@ -24,9 +24,11 @@ export function ViewRenderer({ page }: ViewRendererProps) {
   const view = page.view;
 
   if (view.viewType === 'entity') {
-    return <EntityViewRenderer view={view} />;
+    // Use page.id as key to force component remount when navigating between different pages
+    // This ensures state (mode, selectedItem) is reset when switching entities
+    return <EntityViewRenderer key={page.id} view={view} />;
   } else if (view.viewType === 'instance') {
-    return <InstanceViewRenderer view={view} />;
+    return <InstanceViewRenderer key={page.id} view={view} />;
   }
 
   return (
