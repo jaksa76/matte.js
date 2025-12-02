@@ -23690,7 +23690,7 @@ Check the top-level render call using <` + parentName + ">.";
                   /* @__PURE__ */ jsx_dev_runtime.jsxDEV("p", {
                     className: "page-card-info",
                     children: [
-                      page.view.viewId,
+                      page.display.displayId,
                       " view"
                     ]
                   }, undefined, true, undefined, this)

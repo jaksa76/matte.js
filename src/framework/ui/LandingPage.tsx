@@ -21,7 +21,7 @@ export function LandingPage({ pages }: LandingPageProps) {
                 <h3 className="page-card-title">
                   {page.icon || '📋'} {page.name}
                 </h3>
-                <p className="page-card-info">{page.view.viewId} view</p>
+                <p className="page-card-info">{page.display.displayId} view</p>
               </a>
             ))}
           </div>
