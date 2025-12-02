@@ -1,24 +1,25 @@
 - authentication (username/password)
 - user registration
-- different types of enties (Private, Public, Signleton)
-- relationships between entities
+- different types of enties (Private, Shared, Singleton)
+- relationships between entities (one-to-one, one-to-many, many-to-many)
 - composition of entities
-- shorthands for common fields (name, image, etc)
-- user preferences
-- application settings
-- operations and computed fields
-- query API and static methods
-- services involving multiple entities
+- mobile friendly design
+- shorthands for common fields (name, image, email etc)
+- user preferences (one instance per user)
+- application settings (singleton)
+- custom operations on entities and computed fields
+- custom pages
+- query API for fetching entities
+- static methods on entity types
+- services involving multiple types of entities
+- paging, filtering, sorting
 - scheduled tasks
 - additional authentication types (OIDC)
-- paging, filtering, sorting
 - header, footer
-- custom pages
 - custom widgets
 - theming / styling
-- mobile friendly design
 - i18n / localization
 - more field types
-- more view types (calendar, kanban, map, etc)
+- more view types (calendar, kanban, map, news feed, etc)
 - import/export data
 - observability (logs, metrics, tracing)
