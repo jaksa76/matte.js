@@ -23645,11 +23645,11 @@ Check the top-level render call using <` + parentName + ">.";
   });
 
   // src/framework/ui/client.tsx
-  var import_react10 = __toESM(require_react(), 1);
+  var import_react11 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
 
   // src/framework/ui/MultiPageApp.tsx
-  var import_react9 = __toESM(require_react(), 1);
+  var import_react10 = __toESM(require_react(), 1);
 
   // src/framework/ui/ViewDispatcher.tsx
   var import_react8 = __toESM(require_react(), 1);
@@ -24964,12 +24964,165 @@ Check the top-level render call using <` + parentName + ">.";
     return str.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, "");
   }
 
-  // src/framework/ui/MultiPageApp.tsx
+  // src/framework/ui/LoginDialog.tsx
+  var import_react9 = __toESM(require_react(), 1);
   var jsx_dev_runtime9 = __toESM(require_jsx_dev_runtime(), 1);
+  function LoginDialog({ onClose, onSuccess }) {
+    const [username, setUsername] = import_react9.useState("");
+    const [password, setPassword] = import_react9.useState("");
+    const [error, setError] = import_react9.useState("");
+    const [loading, setLoading] = import_react9.useState(false);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setError("");
+      setLoading(true);
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, password })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          onSuccess(data.username);
+          onClose();
+        } else {
+          const data = await response.json();
+          setError(data.error || "Login failed");
+        }
+      } catch (err) {
+        setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+      className: "dialog-overlay",
+      onClick: onClose,
+      children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+        className: "dialog",
+        onClick: (e) => e.stopPropagation(),
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+            className: "dialog-header",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("h2", {
+                children: "Login"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("button", {
+                className: "dialog-close",
+                onClick: onClose,
+                "aria-label": "Close",
+                children: "✕"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("form", {
+            onSubmit: handleSubmit,
+            className: "dialog-content",
+            children: [
+              error && /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+                className: "error-message",
+                children: error
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+                className: "form-group",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("label", {
+                    htmlFor: "username",
+                    children: "Username"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("input", {
+                    id: "username",
+                    type: "text",
+                    value: username,
+                    onChange: (e) => setUsername(e.currentTarget.value),
+                    required: true,
+                    autoFocus: true,
+                    disabled: loading
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+                className: "form-group",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("label", {
+                    htmlFor: "password",
+                    children: "Password"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("input", {
+                    id: "password",
+                    type: "password",
+                    value: password,
+                    onChange: (e) => setPassword(e.currentTarget.value),
+                    required: true,
+                    disabled: loading
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+                className: "dialog-actions",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("button", {
+                    type: "button",
+                    onClick: onClose,
+                    disabled: loading,
+                    children: "Cancel"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("button", {
+                    type: "submit",
+                    className: "primary",
+                    disabled: loading,
+                    children: loading ? "Logging in..." : "Login"
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    }, undefined, false, undefined, this);
+  }
+
+  // src/framework/ui/MultiPageApp.tsx
+  var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
   function MultiPageApp({ pages }) {
-    const [collapsed, setCollapsed] = import_react9.useState(false);
-    const [currentPageId, setCurrentPageId] = import_react9.useState("");
-    import_react9.useEffect(() => {
+    const [collapsed, setCollapsed] = import_react10.useState(false);
+    const [currentPageId, setCurrentPageId] = import_react10.useState("");
+    const [showLoginDialog, setShowLoginDialog] = import_react10.useState(false);
+    const [authenticated, setAuthenticated] = import_react10.useState(false);
+    const [username, setUsername] = import_react10.useState("");
+    import_react10.useEffect(() => {
+      checkSession();
+    }, []);
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        if (response.ok) {
+          const data = await response.json();
+          setAuthenticated(data.authenticated);
+          setUsername(data.username || "");
+        }
+      } catch (err) {
+        console.error("Failed to check session:", err);
+      }
+    };
+    const handleLogout = async () => {
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+        setAuthenticated(false);
+        setUsername("");
+      } catch (err) {
+        console.error("Logout failed:", err);
+      }
+    };
+    const handleLoginSuccess = (loggedInUsername) => {
+      setAuthenticated(true);
+      setUsername(loggedInUsername);
+    };
+    import_react10.useEffect(() => {
       const path = window.location.pathname.substring(1);
       const pageFromPath = pages.find((p) => p.path === path);
       if (pageFromPath) {
@@ -24979,7 +25132,7 @@ Check the top-level render call using <` + parentName + ">.";
         window.history.replaceState({}, "", `/${pages[0].path}`);
       }
     }, [pages]);
-    import_react9.useEffect(() => {
+    import_react10.useEffect(() => {
       const handlePopState = () => {
         const path = window.location.pathname.substring(1);
         const pageFromPath = pages.find((p) => p.path === path);
@@ -25000,28 +25153,28 @@ Check the top-level render call using <` + parentName + ">.";
     const currentPage = pages.find((p) => p.id === currentPageId);
     const navPages = pages.filter((p) => p.showInNav !== false);
     if (!currentPage) {
-      return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+      return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
         className: "multi-entity-app",
-        children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+        children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
           className: "loading-container",
           children: "Loading..."
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this);
     }
-    return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+    return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
       className: "multi-entity-app",
       children: [
-        /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("nav", {
+        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("nav", {
           className: `entity-nav ${collapsed ? "collapsed" : ""}`,
           children: [
-            /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("div", {
+            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
               className: "nav-header",
               children: [
-                /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("h1", {
+                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("h1", {
                   className: "nav-title",
                   children: collapsed ? "M" : "Matte.js"
                 }, undefined, false, undefined, this),
-                /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("button", {
+                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("button", {
                   className: "nav-toggle",
                   onClick: () => setCollapsed(!collapsed),
                   "aria-label": collapsed ? "Expand navigation" : "Collapse navigation",
@@ -25029,22 +25182,22 @@ Check the top-level render call using <` + parentName + ">.";
                 }, undefined, false, undefined, this)
               ]
             }, undefined, true, undefined, this),
-            /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("ul", {
+            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("ul", {
               className: "nav-list",
               children: navPages.map((page) => {
                 const isActive = currentPageId === page.id;
-                return /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("li", {
+                return /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("li", {
                   className: "nav-item",
-                  children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("button", {
+                  children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("button", {
                     className: `nav-link ${isActive ? "active" : ""}`,
                     onClick: () => handleNavigate(page.id),
                     title: page.name,
                     children: [
-                      /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("span", {
+                      /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
                         className: "nav-icon",
                         children: page.icon || "\uD83D\uDCCB"
                       }, undefined, false, undefined, this),
-                      !collapsed && /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("span", {
+                      !collapsed && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("span", {
                         className: "nav-label",
                         children: page.name
                       }, undefined, false, undefined, this)
@@ -25052,26 +25205,57 @@ Check the top-level render call using <` + parentName + ">.";
                   }, undefined, true, undefined, this)
                 }, page.id, false, undefined, this);
               })
+            }, undefined, false, undefined, this),
+            /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+              className: "nav-footer",
+              children: authenticated ? /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                className: "auth-info",
+                children: [
+                  !collapsed && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
+                    className: "username",
+                    title: username,
+                    children: [
+                      "\uD83D\uDC64 ",
+                      username
+                    ]
+                  }, undefined, true, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("button", {
+                    className: "logout-button",
+                    onClick: handleLogout,
+                    title: "Logout",
+                    children: collapsed ? "\uD83D\uDEAA" : "Logout"
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("button", {
+                className: "login-button",
+                onClick: () => setShowLoginDialog(true),
+                title: "Login",
+                children: collapsed ? "\uD83D\uDD11" : "Login"
+              }, undefined, false, undefined, this)
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
-        /* @__PURE__ */ jsx_dev_runtime9.jsxDEV("main", {
+        /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("main", {
           className: `entity-content ${collapsed ? "nav-collapsed" : ""}`,
-          children: /* @__PURE__ */ jsx_dev_runtime9.jsxDEV(ViewDispatcher, {
+          children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(ViewDispatcher, {
             page: currentPage
           }, undefined, false, undefined, this)
+        }, undefined, false, undefined, this),
+        showLoginDialog && /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(LoginDialog, {
+          onClose: () => setShowLoginDialog(false),
+          onSuccess: handleLoginSuccess
         }, undefined, false, undefined, this)
       ]
     }, undefined, true, undefined, this);
   }
 
   // src/framework/ui/client.tsx
-  var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
+  var jsx_dev_runtime11 = __toESM(require_jsx_dev_runtime(), 1);
   var config = window.MATTE_CONFIG;
   if (config && config.pages) {
     const root = import_client.default.createRoot(document.getElementById("root"));
-    root.render(/* @__PURE__ */ jsx_dev_runtime10.jsxDEV(import_react10.default.StrictMode, {
-      children: /* @__PURE__ */ jsx_dev_runtime10.jsxDEV(MultiPageApp, {
+    root.render(/* @__PURE__ */ jsx_dev_runtime11.jsxDEV(import_react11.default.StrictMode, {
+      children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(MultiPageApp, {
         pages: config.pages
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this));

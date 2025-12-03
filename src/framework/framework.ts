@@ -2,6 +2,7 @@ import { SQLiteAdapter } from './database';
 import { RepositoryFactory } from './repository';
 import { APIServer } from './api';
 import { Server } from './server';
+import { AuthManager } from './auth';
 import type { EntityDefinition } from './entities';
 import type { Page, Display, EntityDisplay } from './view-system';
 import { createPage, createEntityDisplay } from './view-system';
@@ -21,12 +22,14 @@ export class Matte {
   private server: Server;
   private defaultView: 'grid' | 'list';
   private initialized = false;
+  public auth: AuthManager;
 
   constructor(options: MatteOptions = {}) {
     this.db = new SQLiteAdapter(options.dbPath);
     this.repositoryFactory = new RepositoryFactory(this.db);
     this.apiServer = new APIServer();
-    this.server = new Server(this.apiServer, this.entities, this.pages, { port: options.port });
+    this.auth = new AuthManager();
+    this.server = new Server(this.apiServer, this.entities, this.pages, this.auth, { port: options.port });
     this.defaultView = options.defaultView || 'grid';
   }
 

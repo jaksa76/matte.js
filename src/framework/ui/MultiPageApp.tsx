@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { EntityDefinition } from '../entities';
 import type { Page, Display } from '../view-system';
 import { ViewDispatcher } from './ViewDispatcher';
+import { LoginDialog } from './LoginDialog';
 import './styles.css';
 
 export interface MultiPageAppProps {
@@ -11,6 +12,42 @@ export interface MultiPageAppProps {
 export function MultiPageApp({ pages }: MultiPageAppProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [currentPageId, setCurrentPageId] = useState<string>('');
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [username, setUsername] = useState<string>('');
+
+  // Check session status on mount
+  useEffect(() => {
+    checkSession();
+  }, []);
+
+  const checkSession = async () => {
+    try {
+      const response = await fetch('/api/auth/session');
+      if (response.ok) {
+        const data = await response.json();
+        setAuthenticated(data.authenticated);
+        setUsername(data.username || '');
+      }
+    } catch (err) {
+      console.error('Failed to check session:', err);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      setAuthenticated(false);
+      setUsername('');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
+  };
+
+  const handleLoginSuccess = (loggedInUsername: string) => {
+    setAuthenticated(true);
+    setUsername(loggedInUsername);
+  };
 
   // Initialize current page from URL or use first page
   useEffect(() => {
@@ -90,10 +127,42 @@ export function MultiPageApp({ pages }: MultiPageAppProps) {
             );
           })}
         </ul>
+        <div className="nav-footer">
+          {authenticated ? (
+            <div className="auth-info">
+              {!collapsed && (
+                <div className="username" title={username}>
+                  👤 {username}
+                </div>
+              )}
+              <button 
+                className="logout-button"
+                onClick={handleLogout}
+                title="Logout"
+              >
+                {collapsed ? '🚪' : 'Logout'}
+              </button>
+            </div>
+          ) : (
+            <button 
+              className="login-button"
+              onClick={() => setShowLoginDialog(true)}
+              title="Login"
+            >
+              {collapsed ? '🔑' : 'Login'}
+            </button>
+          )}
+        </div>
       </nav>
       <main className={`entity-content ${collapsed ? 'nav-collapsed' : ''}`}>
         <ViewDispatcher page={currentPage} />
       </main>
+      {showLoginDialog && (
+        <LoginDialog
+          onClose={() => setShowLoginDialog(false)}
+          onSuccess={handleLoginSuccess}
+        />
+      )}
     </div>
   );
 }

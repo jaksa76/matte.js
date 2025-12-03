@@ -1,4 +1,5 @@
 import type { Repository } from './repository';
+import type { AuthManager } from './auth';
 import type { EntityDefinition } from './entities';
 
 export interface APIRoute {
@@ -170,7 +171,7 @@ export class APIServer {
     }
   }
 
-  async handle(req: Request): Promise<Response> {
+  async handle(req: Request, authManager: AuthManager): Promise<Response> {
     const url = new URL(req.url);
     const method = req.method;
     const pathname = url.pathname;
@@ -179,12 +180,25 @@ export class APIServer {
     const headers = new Headers({
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-Owner-Id',
+      'Access-Control-Allow-Headers': 'Content-Type, X-Owner-Id, Cookie',
     });
 
     // Handle OPTIONS preflight
     if (method === 'OPTIONS') {
       return new Response(null, { headers });
+    }
+
+    // Extract and validate session
+    const cookie = req.headers.get('Cookie');
+    const token = this.extractTokenFromCookie(cookie);
+    const username = token ? authManager.validateSession(token) : null;
+
+    // Clone request with username header if authenticated
+    let modifiedReq = req;
+    if (username) {
+      const newHeaders = new Headers(req.headers);
+      newHeaders.set('X-Owner-Id', username);
+      modifiedReq = new Request(req, { headers: newHeaders });
     }
 
     const methodRoutes = this.routes.get(method);
@@ -220,7 +234,7 @@ export class APIServer {
     }
 
     try {
-      const response = await handler(req);
+      const response = await handler(modifiedReq);
       
       // Add CORS headers to response
       const responseHeaders = new Headers(response.headers);
@@ -239,5 +253,12 @@ export class APIServer {
         headers: { ...Object.fromEntries(headers), 'Content-Type': 'application/json' },
       });
     }
+  }
+
+  private extractTokenFromCookie(cookie: string | null): string | null {
+    if (!cookie) return null;
+
+    const match = cookie.match(/matte_session=([^;]+)/);
+    return match ? match[1] : null;
   }
 }

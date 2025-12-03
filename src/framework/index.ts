@@ -2,6 +2,10 @@
 export { Matte } from './framework';
 export type { MatteOptions } from './framework';
 
+// Authentication
+export { AuthManager } from './auth';
+export type { AuthSession } from './auth';
+
 // Server
 export { Server } from './server';
 export type { ServerOptions } from './server';

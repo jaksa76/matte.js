@@ -1,4 +1,5 @@
 import type { APIServer } from './api';
+import type { AuthManager } from './auth';
 import type { EntityDefinition } from './entities';
 import type { Page } from './view-system';
 
@@ -20,6 +21,7 @@ export class Server {
     private apiServer: APIServer,
     private entities: Map<string, EntityDefinition>,
     private pages: Map<string, Page>,
+    private authManager: AuthManager,
     options: ServerOptions = {}
   ) {
     this.port = options.port || 3000;
@@ -35,9 +37,14 @@ export class Server {
       async fetch(req) {
         const url = new URL(req.url);
         
+        // Handle auth API endpoints
+        if (url.pathname.startsWith('/api/auth/')) {
+          return await self.handleAuthRequest(req);
+        }
+
         // Serve API requests
         if (url.pathname.startsWith('/api/')) {
-          return await self.apiServer.handle(req);
+          return await self.apiServer.handle(req, self.authManager);
         }
 
         // Serve client JS bundle
@@ -91,6 +98,97 @@ export class Server {
       this.server.stop();
       this.server = undefined;
     }
+  }
+
+  private async handleAuthRequest(req: Request): Promise<Response> {
+    const url = new URL(req.url);
+    const pathname = url.pathname;
+
+    // Add CORS headers
+    const headers = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Content-Type': 'application/json',
+    };
+
+    // Handle OPTIONS preflight
+    if (req.method === 'OPTIONS') {
+      return new Response(null, { headers });
+    }
+
+    // POST /api/auth/login
+    if (pathname === '/api/auth/login' && req.method === 'POST') {
+      try {
+        const { username, password } = await req.json();
+        const token = this.authManager.login(username, password);
+
+        if (!token) {
+          return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+            status: 401,
+            headers,
+          });
+        }
+
+        return new Response(JSON.stringify({ token, username }), {
+          status: 200,
+          headers: {
+            ...headers,
+            'Set-Cookie': `matte_session=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`,
+          },
+        });
+      } catch (error: any) {
+        return new Response(JSON.stringify({ error: 'Invalid request' }), {
+          status: 400,
+          headers,
+        });
+      }
+    }
+
+    // POST /api/auth/logout
+    if (pathname === '/api/auth/logout' && req.method === 'POST') {
+      const cookie = req.headers.get('Cookie');
+      const token = this.extractTokenFromCookie(cookie);
+
+      if (token) {
+        this.authManager.logout(token);
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: {
+          ...headers,
+          'Set-Cookie': 'matte_session=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict',
+        },
+      });
+    }
+
+    // GET /api/auth/session
+    if (pathname === '/api/auth/session' && req.method === 'GET') {
+      const cookie = req.headers.get('Cookie');
+      const token = this.extractTokenFromCookie(cookie);
+      const username = token ? this.authManager.validateSession(token) : null;
+
+      return new Response(JSON.stringify({
+        authenticated: !!username,
+        username: username || undefined,
+      }), {
+        status: 200,
+        headers,
+      });
+    }
+
+    return new Response(JSON.stringify({ error: 'Not found' }), {
+      status: 404,
+      headers,
+    });
+  }
+
+  private extractTokenFromCookie(cookie: string | null): string | null {
+    if (!cookie) return null;
+
+    const match = cookie.match(/matte_session=([^;]+)/);
+    return match ? match[1] : null;
   }
 
   private async buildClient(): Promise<void> {
