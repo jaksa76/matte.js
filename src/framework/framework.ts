@@ -44,19 +44,25 @@ export class Matte {
    * - If a Page is provided, it's registered directly
    * - If an EntityDefinition is provided, a default page is created with the configured default view
    */
-  register(pageOrEntity: Page | EntityDefinition): void {
-    if (this.isPage(pageOrEntity)) {
+  register(pageOrEntity: Page | EntityDefinition | any): void {
+    // Handle EntityBuilder - call build() to get the definition
+    let actualEntity = pageOrEntity;
+    if (typeof pageOrEntity === 'object' && 'build' in pageOrEntity && typeof pageOrEntity.build === 'function') {
+      actualEntity = pageOrEntity.build();
+    }
+    
+    if (this.isPage(actualEntity)) {
       // Register the page
-      this.pages.set(pageOrEntity.id, pageOrEntity);
+      this.pages.set(actualEntity.id, actualEntity);
       
       // Extract and register the entity from the display
-      const display = pageOrEntity.display;
+      const display = actualEntity.display;
       if (display.displayType === 'entity' || display.displayType === 'instance') {
         this.entities.set(display.entity.name, display.entity);
       }
     } else {
       // Create a default page for the entity
-      const entity = pageOrEntity;
+      const entity = actualEntity;
       this.entities.set(entity.name, entity);
       
       // Create default page with configured default view
@@ -93,7 +99,7 @@ export class Matte {
       
       // Create repository and register API routes
       const repository = this.repositoryFactory.create(entity);
-      this.apiServer.addEntityRoutes(entity, repository);
+      this.apiServer.addEntityRoutes(entity, repository, this.auth);
     }
 
     this.initialized = true;

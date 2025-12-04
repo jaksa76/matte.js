@@ -1,6 +1,6 @@
 import type { Repository } from './repository';
 import type { AuthManager } from './auth';
-import type { EntityDefinition } from './entities';
+import type { EntityDefinition, AccessLevel } from './entities';
 
 export interface APIRoute {
   method: string;
@@ -8,14 +8,84 @@ export interface APIRoute {
   handler: (req: Request) => Promise<Response>;
 }
 
+interface AuthContext {
+  isAuthenticated: boolean;
+  username: string | null;
+}
+
 export class APIGenerator {
   private routes: APIRoute[] = [];
 
   constructor(
     private entity: EntityDefinition,
-    private repository: Repository
+    private repository: Repository,
+    private authManager?: AuthManager
   ) {
     this.generateRoutes();
+  }
+  
+  private extractAuthContext(req: Request): AuthContext {
+    const cookie = req.headers.get('Cookie');
+    const token = this.extractTokenFromCookie(cookie);
+    let username = token && this.authManager ? this.authManager.validateSession(token) : null;
+    
+    // Fallback to X-Owner-Id header for backward compatibility (mainly for testing)
+    if (!username) {
+      username = req.headers.get('X-Owner-Id');
+    }
+    
+    return {
+      isAuthenticated: !!username,
+      username,
+    };
+  }
+  
+  private extractTokenFromCookie(cookie: string | null): string | null {
+    if (!cookie) return null;
+    const match = cookie.match(/matte_session=([^;]+)/);
+    return match ? match[1] : null;
+  }
+  
+  private checkReadAccess(authContext: AuthContext, ownerId?: string): boolean {
+    const readLevel = this.entity.readLevel || 'unauthenticated';
+    
+    switch (readLevel) {
+      case 'unauthenticated':
+        return true;
+      case 'authenticated':
+        return authContext.isAuthenticated;
+      case 'owner':
+        return authContext.isAuthenticated && authContext.username === ownerId;
+      default:
+        return false;
+    }
+  }
+  
+  private checkWriteAccess(authContext: AuthContext, ownerId?: string, isCreate = false): boolean {
+    const writeLevel = this.entity.writeLevel || 'unauthenticated';
+    
+    switch (writeLevel) {
+      case 'unauthenticated':
+        return true;
+      case 'authenticated':
+        return authContext.isAuthenticated;
+      case 'owner':
+        // For CREATE operations, just check if user is authenticated (they'll own what they create)
+        if (isCreate) {
+          return authContext.isAuthenticated;
+        }
+        // For UPDATE/DELETE operations, check if user is the owner
+        return authContext.isAuthenticated && authContext.username === ownerId;
+      default:
+        return false;
+    }
+  }
+  
+  private accessDeniedResponse(): Response {
+    return new Response(JSON.stringify({ error: 'Access denied' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   private generateRoutes(): void {
@@ -26,6 +96,27 @@ export class APIGenerator {
       method: 'GET',
       path: basePath,
       handler: async (req: Request) => {
+        const authContext = this.extractAuthContext(req);
+        const readLevel = this.entity.readLevel || 'unauthenticated';
+        
+        // For owner-level read access, must be authenticated and we filter by owner
+        if (readLevel === 'owner') {
+          if (!authContext.isAuthenticated) {
+            return this.accessDeniedResponse();
+          }
+          
+          // Automatically filter by owner
+          const items = await this.repository.findAll({ ownerId: authContext.username });
+          return new Response(JSON.stringify(items), {
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        
+        // For authenticated or unauthenticated, check general access
+        if (!this.checkReadAccess(authContext)) {
+          return this.accessDeniedResponse();
+        }
+        
         const url = new URL(req.url);
         const filters: Record<string, any> = {};
         
@@ -46,6 +137,7 @@ export class APIGenerator {
       method: 'GET',
       path: `${basePath}/:id`,
       handler: async (req: Request) => {
+        const authContext = this.extractAuthContext(req);
         const url = new URL(req.url);
         const id = url.pathname.split('/').pop();
         
@@ -64,6 +156,12 @@ export class APIGenerator {
             headers: { 'Content-Type': 'application/json' },
           });
         }
+        
+        // Check read access
+        const ownerId = (item as any).ownerId;
+        if (!this.checkReadAccess(authContext, ownerId)) {
+          return this.accessDeniedResponse();
+        }
 
         return new Response(JSON.stringify(item), {
           headers: { 'Content-Type': 'application/json' },
@@ -76,10 +174,17 @@ export class APIGenerator {
       method: 'POST',
       path: basePath,
       handler: async (req: Request) => {
+        const authContext = this.extractAuthContext(req);
+        
+        // Check write access (isCreate = true)
+        if (!this.checkWriteAccess(authContext, undefined, true)) {
+          return this.accessDeniedResponse();
+        }
+        
         const data = await req.json();
         
-        // Extract owner_id from headers or data
-        const ownerId = req.headers.get('X-Owner-Id') || data.ownerId || 'default-user';
+        // Extract owner_id from context or data
+        const ownerId = authContext.username || data.ownerId || 'default-user';
         
         try {
           const item = await this.repository.create(data, ownerId);
@@ -101,6 +206,7 @@ export class APIGenerator {
       method: 'PUT',
       path: `${basePath}/:id`,
       handler: async (req: Request) => {
+        const authContext = this.extractAuthContext(req);
         const url = new URL(req.url);
         const id = url.pathname.split('/').pop();
         
@@ -109,6 +215,20 @@ export class APIGenerator {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
           });
+        }
+
+        // First fetch the item to check ownership
+        const existing = await this.repository.findById(id);
+        if (!existing) {
+          return new Response(JSON.stringify({ error: 'Not found' }), {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        
+        const ownerId = (existing as any).ownerId;
+        if (!this.checkWriteAccess(authContext, ownerId)) {
+          return this.accessDeniedResponse();
         }
 
         const data = await req.json();
@@ -132,6 +252,7 @@ export class APIGenerator {
       method: 'DELETE',
       path: `${basePath}/:id`,
       handler: async (req: Request) => {
+        const authContext = this.extractAuthContext(req);
         const url = new URL(req.url);
         const id = url.pathname.split('/').pop();
         
@@ -140,6 +261,20 @@ export class APIGenerator {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
           });
+        }
+
+        // First fetch the item to check ownership
+        const existing = await this.repository.findById(id);
+        if (!existing) {
+          return new Response(JSON.stringify({ error: 'Not found' }), {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+        
+        const ownerId = (existing as any).ownerId;
+        if (!this.checkWriteAccess(authContext, ownerId)) {
+          return this.accessDeniedResponse();
         }
 
         await this.repository.delete(id);
@@ -159,9 +294,11 @@ export class APIGenerator {
 
 export class APIServer {
   private routes: Map<string, Map<string, (req: Request) => Promise<Response>>> = new Map();
+  private authManager?: AuthManager;
 
-  addEntityRoutes(entity: EntityDefinition, repository: Repository): void {
-    const generator = new APIGenerator(entity, repository);
+  addEntityRoutes(entity: EntityDefinition, repository: Repository, authManager?: AuthManager): void {
+    this.authManager = authManager;
+    const generator = new APIGenerator(entity, repository, authManager);
     
     for (const route of generator.getRoutes()) {
       if (!this.routes.has(route.method)) {

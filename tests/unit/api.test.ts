@@ -353,14 +353,14 @@ describe('APIServer', () => {
       expect(response.status).toBe(204);
     });
 
-    test('returns 204 even for non-existent ID', async () => {
+    test('returns 404 for non-existent ID', async () => {
       const req = new Request('http://localhost/api/user/non-existent', {
         method: 'DELETE',
       });
 
       const response = await server.handle(req);
 
-      expect(response.status).toBe(204);
+      expect(response.status).toBe(404);
     });
   });
 

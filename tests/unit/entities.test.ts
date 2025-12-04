@@ -142,7 +142,7 @@ describe('Entity Definitions', () => {
       string('name').required(),
       string('email').required(),
       number('age'),
-    ]);
+    ]).build();
 
     expect(def.name).toBe('User');
     expect(def.owned).toBe(false);
@@ -153,7 +153,7 @@ describe('Entity Definitions', () => {
     const def = ownedEntity('Task', [
       string('title').required(),
       field('status', t.enum(['open', 'done']).default('open')),
-    ]);
+    ]).build();
 
     expect(def.name).toBe('Task');
     expect(def.owned).toBe(true);
@@ -164,7 +164,7 @@ describe('Entity Definitions', () => {
     const def = entity('Product', [
       string('name').required(),
       number('price').min(0).required(),
-    ]);
+    ]).build();
 
     expect(def.name).toBe('Product');
     expect(def.schema.name.isRequired).toBe(true);
@@ -181,7 +181,7 @@ describe('Entity Definitions', () => {
       number('viewCount').min(0).default(0),
       string('tags'),
       boolean('featured').default(false),
-    ]);
+    ]).build();
 
     expect(def.fieldOrder.length).toBe(8);
     expect(def.schema.status._default).toBe('draft');
@@ -195,7 +195,7 @@ describe('Entity Registry', () => {
   });
 
   test('registers and retrieves entity', () => {
-    const def = entity('User', [string('name')]);
+    const def = entity('User', [string('name')]).build();
     testRegistry.set(def.name, def);
     
     const retrieved = testRegistry.get('User');
@@ -208,9 +208,9 @@ describe('Entity Registry', () => {
   });
 
   test('gets all entities', () => {
-    const user = entity('User', [string('name')]);
-    const product = entity('Product', [string('name')]);
-    const task = ownedEntity('Task', [string('title')]);
+    const user = entity('User', [string('name')]).build();
+    const product = entity('Product', [string('name')]).build();
+    const task = ownedEntity('Task', [string('title')]).build();
 
     testRegistry.set(user.name, user);
     testRegistry.set(product.name, product);
@@ -222,8 +222,8 @@ describe('Entity Registry', () => {
   });
 
   test('clears all entities', () => {
-    const user = entity('User', [string('name')]);
-    const product = entity('Product', [string('name')]);
+    const user = entity('User', [string('name')]).build();
+    const product = entity('Product', [string('name')]).build();
 
     testRegistry.set(user.name, user);
     testRegistry.set(product.name, product);

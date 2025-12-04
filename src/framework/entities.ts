@@ -809,12 +809,18 @@ export interface EntitySchema {
 
 export type EntitySchemaDefinition = (FieldDefinition | FieldBuilder<any> | FieldGroup)[];
 
+export type AccessLevel = 'unauthenticated' | 'authenticated' | 'owner';
+export type Lifecycle = 'default' | 'instancePerUser' | 'singleton';
+
 export interface EntityDefinition {
   name: string;
   schema: EntitySchema;
   owned: boolean;
   fieldOrder: string[]; // Field order is always preserved
   groups?: FieldGroup[]; // Groups for organizing fields
+  readLevel?: AccessLevel;
+  writeLevel?: AccessLevel;
+  lifecycle?: Lifecycle;
 }
 
 // Helper to convert array schema to object schema
@@ -845,11 +851,92 @@ function normalizeSchema(schemaDefinition: EntitySchemaDefinition): { schema: En
   return { schema, fieldOrder, groups };
 }
 
-// Entity definition functions
+// Validation function for entity definitions
+export function validateEntityDefinition(definition: EntityDefinition): void {
+  const { readLevel = 'unauthenticated', writeLevel = 'unauthenticated', lifecycle = 'default' } = definition;
+  
+  // Access level hierarchy: unauthenticated < authenticated < owner
+  const levels: Record<AccessLevel, number> = {
+    unauthenticated: 0,
+    authenticated: 1,
+    owner: 2,
+  };
+  
+  // Check lifecycle constraints first
+  // instancePerUser cannot have unauthenticated readLevel
+  if (lifecycle === 'instancePerUser' && readLevel === 'unauthenticated') {
+    throw new Error(
+      `Entity ${definition.name} with lifecycle 'instancePerUser' cannot have readLevel 'unauthenticated'`
+    );
+  }
+  
+  // singleton cannot have owner readLevel or writeLevel
+  if (lifecycle === 'singleton' && (readLevel === 'owner' || writeLevel === 'owner')) {
+    throw new Error(
+      `Entity ${definition.name} with lifecycle 'singleton' cannot have readLevel or writeLevel set to 'owner'`
+    );
+  }
+  
+  // writeLevel must not exceed readLevel
+  if (levels[writeLevel] < levels[readLevel]) {
+    throw new Error(
+      `Invalid access levels for ${definition.name}: writeLevel (${writeLevel}) must not be more permissive than readLevel (${readLevel})`
+    );
+  }
+}
+
+// Entity builder class
+class EntityBuilder implements EntityDefinition {
+  private definition: EntityDefinition;
+  
+  constructor(definition: EntityDefinition) {
+    this.definition = definition;
+  }
+  
+  // Expose EntityDefinition properties
+  get name() { return this.definition.name; }
+  get schema() { return this.definition.schema; }
+  get owned() { return this.definition.owned; }
+  get fieldOrder() { return this.definition.fieldOrder; }
+  get groups() { return this.definition.groups; }
+  get readLevel() { return this.definition.readLevel; }
+  get writeLevel() { return this.definition.writeLevel; }
+  get lifecycle() { return this.definition.lifecycle; }
+  
+  readLevel(level: AccessLevel): this {
+    this.definition.readLevel = level;
+    return this;
+  }
+  
+  writeLevel(level: AccessLevel): this {
+    this.definition.writeLevel = level;
+    return this;
+  }
+  
+  lifecycle(mode: Lifecycle): this {
+    this.definition.lifecycle = mode;
+    return this;
+  }
+  
+  build(): EntityDefinition {
+    // Validate before returning
+    validateEntityDefinition(this.definition);
+    return this.definition;
+  }
+}
+
+// Entity definition functions with builder support
+type EntityOrBuilder = EntityDefinition & {
+  readLevel(level: AccessLevel): EntityBuilder;
+  writeLevel(level: AccessLevel): EntityBuilder;
+  lifecycle(mode: Lifecycle): EntityBuilder;
+  build(): EntityDefinition;
+};
+
 export function ownedEntity(
   name: string, 
   schemaDefinition: EntitySchemaDefinition
-): EntityDefinition {
+): EntityOrBuilder {
   const { schema, fieldOrder, groups } = normalizeSchema(schemaDefinition);
   
   const definition: EntityDefinition = {
@@ -858,15 +945,18 @@ export function ownedEntity(
     owned: true,
     fieldOrder,
     groups: groups.length > 0 ? groups : undefined,
+    readLevel: 'unauthenticated',
+    writeLevel: 'unauthenticated',
+    lifecycle: 'default',
   };
   
-  return definition;
+  return new EntityBuilder(definition) as any;
 }
 
 export function entity(
   name: string, 
   schemaDefinition: EntitySchemaDefinition
-): EntityDefinition {
+): EntityOrBuilder {
   const { schema, fieldOrder, groups } = normalizeSchema(schemaDefinition);
   
   const definition: EntityDefinition = {
@@ -875,7 +965,39 @@ export function entity(
     owned: false,
     fieldOrder,
     groups: groups.length > 0 ? groups : undefined,
+    readLevel: 'unauthenticated',
+    writeLevel: 'unauthenticated',
+    lifecycle: 'default',
   };
   
-  return definition;
+  return new EntityBuilder(definition) as any;
+}
+
+// Shorthand helpers for common entity types
+export function privateEntity(
+  name: string,
+  schemaDefinition: EntitySchemaDefinition
+): EntityOrBuilder {
+  return ownedEntity(name, schemaDefinition)
+    .readLevel('owner')
+    .writeLevel('owner') as any;
+}
+
+export function sharedEntity(
+  name: string,
+  schemaDefinition: EntitySchemaDefinition
+): EntityOrBuilder {
+  return entity(name, schemaDefinition)
+    .readLevel('unauthenticated')
+    .writeLevel('authenticated') as any;
+}
+
+export function singletonEntity(
+  name: string,
+  schemaDefinition: EntitySchemaDefinition
+): EntityOrBuilder {
+  return entity(name, schemaDefinition)
+    .lifecycle('singleton')
+    .readLevel('authenticated')
+    .writeLevel('authenticated') as any;
 }

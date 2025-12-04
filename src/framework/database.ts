@@ -30,8 +30,12 @@ export class SQLiteAdapter implements DatabaseAdapter {
     // Add ID column
     columns.push('id TEXT PRIMARY KEY');
 
-    // Add owner column for owned entities
-    if (entity.owned) {
+    // Add owner column for owned entities, instancePerUser lifecycle, or owner-level access
+    const needsOwner = entity.owned || 
+                       entity.lifecycle === 'instancePerUser' ||
+                       entity.readLevel === 'owner' ||
+                       entity.writeLevel === 'owner';
+    if (needsOwner) {
       columns.push('owner_id TEXT NOT NULL');
     }
 
@@ -57,7 +61,7 @@ export class SQLiteAdapter implements DatabaseAdapter {
     this.db.run(createTableSQL);
 
     // Create indexes
-    if (entity.owned) {
+    if (needsOwner) {
       this.db.run(`CREATE INDEX IF NOT EXISTS idx_${tableName}_owner ON ${this.quoteIdentifier(tableName)}(${this.quoteIdentifier('owner_id')})`);
     }
   }

@@ -26,10 +26,36 @@ export class EntityRepository<T = any> implements Repository<T> {
   }
 
   async create(data: Partial<T>, ownerId?: string): Promise<T> {
+    const lifecycle = this.entity.lifecycle || 'default';
+    
+    // For instancePerUser lifecycle, check if user already has an instance
+    if (lifecycle === 'instancePerUser') {
+      if (!ownerId) {
+        throw new Error(`Entity ${this.entity.name} with lifecycle 'instancePerUser' requires an owner_id`);
+      }
+      
+      const existing = await this.db.findAll(this.tableName, { owner_id: ownerId });
+      if (existing.length > 0) {
+        throw new Error(`User ${ownerId} already has an instance of ${this.entity.name}`);
+      }
+    }
+    
+    // For singleton lifecycle, check if instance exists
+    if (lifecycle === 'singleton') {
+      const existing = await this.db.findAll(this.tableName);
+      if (existing.length > 0) {
+        throw new Error(`Singleton entity ${this.entity.name} already has an instance`);
+      }
+    }
+    
     const record: Record<string, any> = {};
 
-    // Add owner if entity is owned
-    if (this.entity.owned) {
+    // Add owner if entity is owned, instancePerUser, or has owner-level access
+    const needsOwner = this.entity.owned || 
+                       lifecycle === 'instancePerUser' ||
+                       this.entity.readLevel === 'owner' ||
+                       this.entity.writeLevel === 'owner';
+    if (needsOwner) {
       if (!ownerId) {
         throw new Error(`Entity ${this.entity.name} requires an owner_id`);
       }
@@ -59,8 +85,21 @@ export class EntityRepository<T = any> implements Repository<T> {
   }
 
   async findAll(filters?: Record<string, any>): Promise<T[]> {
-    const snakeFilters = filters ? this.toSnakeCaseObject(filters) : undefined;
-    const records = await this.db.findAll(this.tableName, snakeFilters);
+    const lifecycle = this.entity.lifecycle || 'default';
+    let snakeFilters: Record<string, any> = {};
+    
+    // Convert filters to snake_case
+    if (filters) {
+      snakeFilters = this.toSnakeCaseObject(filters);
+    }
+    
+    const records = await this.db.findAll(this.tableName, Object.keys(snakeFilters).length > 0 ? snakeFilters : undefined);
+    
+    // For singleton, return at most one instance
+    if (lifecycle === 'singleton') {
+      return records.slice(0, 1).map(r => this.toCamelCase(r));
+    }
+    
     return records.map(r => this.toCamelCase(r));
   }
 
