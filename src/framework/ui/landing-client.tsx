@@ -9,6 +9,7 @@ declare global {
   interface Window {
     MATTE_LANDING_CONFIG: {
       pages: any[];
+      appName: string;
     };
   }
 }
@@ -55,7 +56,8 @@ function LandingApp() {
   return (
     <>
       <LandingPage 
-        pages={config.pages} 
+        pages={config.pages}
+        appName={config.appName}
         authenticated={authenticated}
         username={username}
         onLoginClick={() => setShowLoginDialog(true)}

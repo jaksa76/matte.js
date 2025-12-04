@@ -25088,7 +25088,7 @@ Check the top-level render call using <` + parentName + ">.";
 
   // src/framework/ui/MultiPageApp.tsx
   var jsx_dev_runtime10 = __toESM(require_jsx_dev_runtime(), 1);
-  function MultiPageApp({ pages }) {
+  function MultiPageApp({ pages, appName }) {
     const [collapsed, setCollapsed] = import_react10.useState(false);
     const [currentPageId, setCurrentPageId] = import_react10.useState("");
     const [showLoginDialog, setShowLoginDialog] = import_react10.useState(false);
@@ -25179,7 +25179,7 @@ Check the top-level render call using <` + parentName + ">.";
                 }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("h1", {
                   className: "nav-title",
-                  children: collapsed ? "M" : "Matte.js"
+                  children: collapsed ? appName.charAt(0) : appName
                 }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("button", {
                   className: "nav-toggle",
@@ -25263,7 +25263,8 @@ Check the top-level render call using <` + parentName + ">.";
     const root = import_client.default.createRoot(document.getElementById("root"));
     root.render(/* @__PURE__ */ jsx_dev_runtime11.jsxDEV(import_react11.default.StrictMode, {
       children: /* @__PURE__ */ jsx_dev_runtime11.jsxDEV(MultiPageApp, {
-        pages: config.pages
+        pages: config.pages,
+        appName: config.appName
       }, undefined, false, undefined, this)
     }, undefined, false, undefined, this));
   }

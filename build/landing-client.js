@@ -23650,7 +23650,7 @@ Check the top-level render call using <` + parentName + ">.";
 
   // src/framework/ui/LandingPage.tsx
   var jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
-  function LandingPage({ pages, authenticated, username, onLoginClick, onLogoutClick }) {
+  function LandingPage({ pages, appName, authenticated, username, onLoginClick, onLogoutClick }) {
     return /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
       className: "landing-page",
       children: [
@@ -23659,7 +23659,7 @@ Check the top-level render call using <` + parentName + ">.";
           children: [
             /* @__PURE__ */ jsx_dev_runtime.jsxDEV("h1", {
               className: "landing-title",
-              children: "Matte.js"
+              children: appName
             }, undefined, false, undefined, this),
             /* @__PURE__ */ jsx_dev_runtime.jsxDEV("p", {
               className: "landing-subtitle",
@@ -23893,6 +23893,7 @@ Check the top-level render call using <` + parentName + ">.";
       children: [
         /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(LandingPage, {
           pages: config.pages,
+          appName: config.appName,
           authenticated,
           username,
           onLoginClick: () => setShowLoginDialog(true),

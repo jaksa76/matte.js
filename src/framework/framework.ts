@@ -11,6 +11,7 @@ export interface MatteOptions {
   dbPath?: string;
   port?: number;
   defaultView?: 'grid' | 'list';
+  appName?: string;
 }
 
 export class Matte {
@@ -23,14 +24,19 @@ export class Matte {
   private defaultView: 'grid' | 'list';
   private initialized = false;
   public auth: AuthManager;
+  public readonly appName: string;
 
-  constructor(options: MatteOptions = {}) {
-    this.db = new SQLiteAdapter(options.dbPath);
+  constructor(options: MatteOptions | string = {}) {
+    // Allow passing app name as first parameter for convenience
+    const opts = typeof options === 'string' ? { appName: options } : options;
+    
+    this.appName = opts.appName || 'Matte.js';
+    this.db = new SQLiteAdapter(opts.dbPath);
     this.repositoryFactory = new RepositoryFactory(this.db);
     this.apiServer = new APIServer();
     this.auth = new AuthManager();
-    this.server = new Server(this.apiServer, this.entities, this.pages, this.auth, { port: options.port });
-    this.defaultView = options.defaultView || 'grid';
+    this.server = new Server(this.apiServer, this.entities, this.pages, this.auth, { port: opts.port, appName: this.appName });
+    this.defaultView = opts.defaultView || 'grid';
   }
 
   /**

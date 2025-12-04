@@ -64,7 +64,7 @@ const BlogPost = ownedEntity("BlogPost", [
   file("coverImage"),
 ]);
 
-const app = new Matte();
+const app = new Matte("Simple Entities");
 app.register(Person);
 app.register(Product);
 app.register(Task);

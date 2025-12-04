@@ -3,17 +3,18 @@ import './LandingPage.css';
 
 export interface LandingPageProps {
   pages: Page[];
+  appName: string;
   authenticated: boolean;
   username: string;
   onLoginClick: () => void;
   onLogoutClick: () => void;
 }
 
-export function LandingPage({ pages, authenticated, username, onLoginClick, onLogoutClick }: LandingPageProps) {
+export function LandingPage({ pages, appName, authenticated, username, onLoginClick, onLogoutClick }: LandingPageProps) {
   return (
     <div className="landing-page">
       <div className="landing-header">
-        <h1 className="landing-title">Matte.js</h1>
+        <h1 className="landing-title">{appName}</h1>
         <p className="landing-subtitle">Full-stack entity management framework</p>
       </div>
       <div className="landing-auth-section">

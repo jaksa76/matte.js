@@ -7,9 +7,10 @@ import './styles.css';
 
 export interface MultiPageAppProps {
   pages: Page[];
+  appName: string;
 }
 
-export function MultiPageApp({ pages }: MultiPageAppProps) {
+export function MultiPageApp({ pages, appName }: MultiPageAppProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [currentPageId, setCurrentPageId] = useState<string>('');
   const [showLoginDialog, setShowLoginDialog] = useState(false);
@@ -109,7 +110,7 @@ export function MultiPageApp({ pages }: MultiPageAppProps) {
           >
             🏠
           </button>
-          <h1 className="nav-title">{collapsed ? 'M' : 'Matte.js'}</h1>
+          <h1 className="nav-title">{collapsed ? appName.charAt(0) : appName}</h1>
           <button 
             className="nav-toggle" 
             onClick={() => setCollapsed(!collapsed)}

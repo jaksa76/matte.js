@@ -8,6 +8,7 @@ declare global {
   interface Window {
     MATTE_CONFIG: {
       pages: any[];
+      appName: string;
     };
   }
 }
@@ -18,7 +19,7 @@ if (config && config.pages) {
   const root = ReactDOM.createRoot(document.getElementById('root')!);
   root.render(
     <React.StrictMode>
-      <MultiPageApp pages={config.pages} />
+      <MultiPageApp pages={config.pages} appName={config.appName} />
     </React.StrictMode>
   );
 }

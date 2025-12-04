@@ -5,6 +5,7 @@ import type { Page } from './view-system';
 
 export interface ServerOptions {
   port?: number;
+  appName?: string;
 }
 
 /**
@@ -12,6 +13,7 @@ export interface ServerOptions {
  */
 export class Server {
   private port: number;
+  private appName: string;
   private server?: any;
   private clientBundle?: string;
   private landingBundle?: string;
@@ -25,6 +27,7 @@ export class Server {
     options: ServerOptions = {}
   ) {
     this.port = options.port || 3000;
+    this.appName = options.appName || 'Matte.js';
   }
 
   async start(): Promise<void> {
@@ -253,14 +256,15 @@ export class Server {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Matte.js</title>
+  <title>${this.appName}</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <div id="root"></div>
   <script>
     window.MATTE_LANDING_CONFIG = {
-      pages: ${JSON.stringify(pages)}
+      pages: ${JSON.stringify(pages)},
+      appName: ${JSON.stringify(this.appName)}
     };
   </script>
   <script src="/landing.js"></script>
@@ -283,14 +287,15 @@ export class Server {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Matte.js - Entity Management</title>
+  <title>${this.appName}</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <div id="root"></div>
   <script>
     window.MATTE_CONFIG = {
-      pages: ${JSON.stringify(pages)}
+      pages: ${JSON.stringify(pages)},
+      appName: ${JSON.stringify(this.appName)}
     };
   </script>
   <script src="/client.js"></script>
