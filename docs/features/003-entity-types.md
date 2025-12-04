@@ -1,65 +1,76 @@
 # 003 – Entity Types: Private, Shared, Singleton
 
+# 003 – Entity Types: Private, Shared, Singleton
+
 ## Overview
-Matte entities can be scoped to control visibility, edit rights and lifecycle.
+Matte entities can be scoped to control visibility, edit rights, and lifecycle. Entities support access control levels (unauthenticated, authenticated, owner) and lifecycle modes (multiple instances, instance per user, singleton).
 
+```typescript
+import { entity, privateEntity, string, boolean } from 'matte';
 
-## Access Control
-access control is given by the matrix:
-- users: unauthenticated, authenticated, owner-only
-- operations: read, write
-
-Giving access to unauthenticated users implies access to authenticated users.
-Giving access to authenticated users implies access to owner-only users.
-So we can encode access control as a pair of levels: (read level, write level).
-readLevel(unauthenticated) < readLevel(authenticated) < readLevel(owner)
-writeLevel(unauthenticated) < writeLevel(authenticated) < writeLevel(owner)
-
-
-## Entity Lifecycles
-- lifecycle: multiple instances, instance per user, single instance
-
-
-## Example Usage
-
-```ts
-import { privateEntity, sharedEntity, singletonEntity, string, boolean, date } from 'matte';
-
+// Custom access control
 const BlogPost = entity('BlogPost', [
   string("Title"),
   string("Content"),
   boolean("Published")
 ]).readLevel('unauthenticated').writeLevel('owner');
 
-const Task = entity('Bio', [
-  string("Name"),
-  string("Biography"),
-]).readLevel('authenticated').writeLevel('owner').lifecycle('instancePerUser');
-```
-
-
-## Predefined Entity Types
-To simplify common use cases, we define shorthands for common entity types:
-- privateEntity: entity with readLevel('owner') and writeLevel('owner')
-- ownedEntity: privateEntity with readLevel('unauthenticated') and writeLevel('owner')
-- publicEntity: ownedEntity with readLevel('unauthenticated') and writeLevel('authenticated')
-
-````ts
+// Predefined shorthands
 const Task = privateEntity('Task', [
   string("Name"),
   boolean("Completed")
 ]);
 
-const WikiPage = sharedEntity('WikiPage', [
-  string("Title"),
-  string("Content"),
-]).readLevel('unauthenticated').writeLevel('authenticated');
+// Instance per user lifecycle
+const UserProfile = entity('UserProfile', [
+  string("Bio")
+]).lifecycle('instancePerUser');
 ```
 
-## Invalid Entity Configurations
-- An entity cannot have a write level higher than its read level.
-- An entity with instancePerUser lifecycle cannot have unauthenticated read level.
-- A singleton entity cannot have any owner-only access.
+Access levels enforce permissions on read/write operations. Lifecycle modes control entity instantiation (multiple, one per user, or singleton).
 
-## Future Considerations
-- Adding group-based access control.
+## Implementation Plan
+
+### Entity Definition Layer
+
+#### `src/framework/entities.ts` (MODIFY)
+- Add `readLevel?: 'unauthenticated' | 'authenticated' | 'owner'` to `EntityDefinition`
+- Add `writeLevel?: 'unauthenticated' | 'authenticated' | 'owner'` to `EntityDefinition`
+- Add `lifecycle?: 'default' | 'instancePerUser' | 'singleton'` to `EntityDefinition`
+- Add `.readLevel()`, `.writeLevel()`, `.lifecycle()` methods to entity builder
+- Update `privateEntity()` to set `readLevel('owner')` and `writeLevel('owner')`
+- Add `sharedEntity()` helper: `readLevel('unauthenticated')`, `writeLevel('authenticated')`
+- Add `singletonEntity()` helper: `lifecycle('singleton')`, `readLevel('authenticated')`
+- Add validation in entity builder to reject invalid configurations
+
+### Data Layer
+
+#### `src/framework/database.ts` (MODIFY)
+- Do not enforce access control at DB layer; handle in API/repository layers. This allows flexibiliy for migrations between different types of entities without changing DB schema.
+
+#### `src/framework/repository.ts` (MODIFY)
+- `create()`: For `instancePerUser`, check if user already has instance (return existing or error)
+- `create()`: For `singleton`, check if instance exists (return existing or error)
+- `create()`: Validate `ownerId` presence based on lifecycle and access levels
+- `findAll()`: Filter by `ownerId` for `instancePerUser` lifecycle automatically
+- `findAll()`: For singleton, return single instance or empty array
+
+### API Layer
+
+#### `src/framework/api.ts` (MODIFY)
+- `APIGenerator.generateRoutes()`: Apply access control checks before repository calls
+- Check `readLevel` in GET endpoints: verify user authentication level meets requirement
+- Check `writeLevel` in POST/PUT/DELETE endpoints: verify user authentication level meets requirement
+- Extract authentication level from request (unauthenticated, authenticated, owner)
+- Return 401/403 errors when access is denied
+- For `instancePerUser`: automatically filter to current user's instance
+- For singleton: enforce single instance semantics in create operations
+
+### Validation
+
+#### `src/framework/entities.ts` (ADD)
+- `validateEntityDefinition()` function to check:
+  - writeLevel must not exceed readLevel (owner > authenticated > unauthenticated)
+  - `instancePerUser` cannot have `unauthenticated` readLevel
+  - `singleton` cannot have `owner` readLevel or writeLevel
+  - Call during entity creation/registration
