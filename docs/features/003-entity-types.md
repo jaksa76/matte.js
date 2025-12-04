@@ -1,37 +1,65 @@
 # 003 – Entity Types: Private, Shared, Singleton
 
 ## Overview
-Matte entities can be scoped to control visibility and lifecycle:
-- Private: visible only to the owner
-- Owned: visible by all, but modifiable only by the owner
-- Shared: modifiable and visible by all authenticated users
-- Public: visible and modifiable by unauthenticated users
-- PrivateSingleton: exactly one instance per user
-- Singleton: exactly one global instance for the entire application/runtime.
-This lets you tune data isolation, caching, and synchronization semantics.
+Matte entities can be scoped to control visibility, edit rights and lifecycle.
+
+
+## Access Control
+access control is given by the matrix:
+- users: unauthenticated, authenticated, owner-only
+- operations: read, write
+
+Giving access to unauthenticated users implies access to authenticated users.
+Giving access to authenticated users implies access to owner-only users.
+So we can encode access control as a pair of levels: (read level, write level).
+readLevel(unauthenticated) < readLevel(authenticated) < readLevel(owner)
+writeLevel(unauthenticated) < writeLevel(authenticated) < writeLevel(owner)
+
+
+## Entity Lifecycles
+- lifecycle: multiple instances, instance per user, single instance
+
 
 ## Example Usage
+
 ```ts
 import { privateEntity, sharedEntity, singletonEntity, string, boolean, date } from 'matte';
 
-const Task = privateEntity('Task', [
-  string("description"),
-  boolean("completed")
-]);
+const BlogPost = entity('BlogPost', [
+  string("Title"),
+  string("Content"),
+  boolean("Published")
+]).readLevel('unauthenticated').writeLevel('owner');
 
-const ChatRoom = sharedEntity('ChatRoom', [
-  string("roomName"),
-  string("topic")
-]);
-
-const MessageOfTheDay = singletonEntity('MessageOfTheDay', [
-  string("message"),
-  date("lastUpdated")
-]);
+const Task = entity('Bio', [
+  string("Name"),
+  string("Biography"),
+]).readLevel('authenticated').writeLevel('owner').lifecycle('instancePerUser');
 ```
 
-## Clarification Questions
-1. Are Shared entities optimistic or pessimistic for concurrent writes?
-4. How is authorization enforced on Shared vs Private?
-5. Is Singleton preloaded & hot-reloaded on change?
-6. Recommended cache invalidation strategy per scope?
+
+## Predefined Entity Types
+To simplify common use cases, we define shorthands for common entity types:
+- privateEntity: entity with readLevel('owner') and writeLevel('owner')
+- ownedEntity: privateEntity with readLevel('unauthenticated') and writeLevel('owner')
+- publicEntity: ownedEntity with readLevel('unauthenticated') and writeLevel('authenticated')
+
+````ts
+const Task = privateEntity('Task', [
+  string("Name"),
+  boolean("Completed")
+]);
+
+const WikiPage = sharedEntity('WikiPage', [
+  string("Title"),
+  string("Content"),
+]).readLevel('unauthenticated').writeLevel('authenticated');
+```
+
+## Invalid Entity Configurations
+- An entity cannot have a write level higher than its read level.
+- An entity with instancePerUser lifecycle cannot have unauthenticated read level.
+- A singleton entity cannot have any owner-only access.
+
+## Future Considerations
+- Adding group-based access control.
