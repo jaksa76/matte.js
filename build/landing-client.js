@@ -23645,12 +23645,12 @@ Check the top-level render call using <` + parentName + ">.";
   });
 
   // src/framework/ui/landing-client.tsx
-  var import_react = __toESM(require_react(), 1);
+  var import_react2 = __toESM(require_react(), 1);
   var import_client = __toESM(require_client(), 1);
 
   // src/framework/ui/LandingPage.tsx
   var jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
-  function LandingPage({ pages }) {
+  function LandingPage({ pages, authenticated, username, onLoginClick, onLogoutClick }) {
     return /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
       className: "landing-page",
       children: [
@@ -23667,6 +23667,30 @@ Check the top-level render call using <` + parentName + ">.";
             }, undefined, false, undefined, this)
           ]
         }, undefined, true, undefined, this),
+        /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+          className: "landing-auth-section",
+          children: authenticated ? /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
+            className: "landing-auth-info",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime.jsxDEV("span", {
+                className: "landing-username",
+                children: [
+                  "\uD83D\uDC64 ",
+                  username
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+                className: "landing-logout-button",
+                onClick: onLogoutClick,
+                children: "Logout"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this) : /* @__PURE__ */ jsx_dev_runtime.jsxDEV("button", {
+            className: "landing-login-button",
+            onClick: onLoginClick,
+            children: "\uD83D\uDD11 Login"
+          }, undefined, false, undefined, this)
+        }, undefined, false, undefined, this),
         /* @__PURE__ */ jsx_dev_runtime.jsxDEV("div", {
           className: "pages-section",
           children: [
@@ -23708,15 +23732,184 @@ Check the top-level render call using <` + parentName + ">.";
     }, undefined, true, undefined, this);
   }
 
-  // src/framework/ui/landing-client.tsx
+  // src/framework/ui/LoginDialog.tsx
+  var import_react = __toESM(require_react(), 1);
   var jsx_dev_runtime2 = __toESM(require_jsx_dev_runtime(), 1);
+  function LoginDialog({ onClose, onSuccess }) {
+    const [username, setUsername] = import_react.useState("");
+    const [password, setPassword] = import_react.useState("");
+    const [error, setError] = import_react.useState("");
+    const [loading, setLoading] = import_react.useState(false);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setError("");
+      setLoading(true);
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ username, password })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          onSuccess(data.username);
+          onClose();
+        } else {
+          const data = await response.json();
+          setError(data.error || "Login failed");
+        }
+      } catch (err) {
+        setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    return /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+      className: "dialog-overlay",
+      onClick: onClose,
+      children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+        className: "dialog",
+        onClick: (e) => e.stopPropagation(),
+        children: [
+          /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+            className: "dialog-header",
+            children: [
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("h2", {
+                children: "Login"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+                className: "dialog-close",
+                onClick: onClose,
+                "aria-label": "Close",
+                children: "✕"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("form", {
+            onSubmit: handleSubmit,
+            className: "dialog-content",
+            children: [
+              error && /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                className: "error-message",
+                children: error
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                className: "form-group",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("label", {
+                    htmlFor: "username",
+                    children: "Username"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("input", {
+                    id: "username",
+                    type: "text",
+                    value: username,
+                    onChange: (e) => setUsername(e.currentTarget.value),
+                    required: true,
+                    autoFocus: true,
+                    disabled: loading
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                className: "form-group",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("label", {
+                    htmlFor: "password",
+                    children: "Password"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("input", {
+                    id: "password",
+                    type: "password",
+                    value: password,
+                    onChange: (e) => setPassword(e.currentTarget.value),
+                    required: true,
+                    disabled: loading
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("div", {
+                className: "dialog-actions",
+                children: [
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+                    type: "button",
+                    onClick: onClose,
+                    disabled: loading,
+                    children: "Cancel"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ jsx_dev_runtime2.jsxDEV("button", {
+                    type: "submit",
+                    className: "primary",
+                    disabled: loading,
+                    children: loading ? "Logging in..." : "Login"
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
+    }, undefined, false, undefined, this);
+  }
+
+  // src/framework/ui/landing-client.tsx
+  var jsx_dev_runtime3 = __toESM(require_jsx_dev_runtime(), 1);
+  function LandingApp() {
+    const [showLoginDialog, setShowLoginDialog] = import_react2.useState(false);
+    const [authenticated, setAuthenticated] = import_react2.useState(false);
+    const [username, setUsername] = import_react2.useState("");
+    const config = window.MATTE_LANDING_CONFIG;
+    import_react2.useEffect(() => {
+      checkSession();
+    }, []);
+    const checkSession = async () => {
+      try {
+        const response = await fetch("/api/auth/session");
+        if (response.ok) {
+          const data = await response.json();
+          setAuthenticated(data.authenticated);
+          setUsername(data.username || "");
+        }
+      } catch (err) {
+        console.error("Failed to check session:", err);
+      }
+    };
+    const handleLogout = async () => {
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+        setAuthenticated(false);
+        setUsername("");
+      } catch (err) {
+        console.error("Logout failed:", err);
+      }
+    };
+    const handleLoginSuccess = (loggedInUsername) => {
+      setAuthenticated(true);
+      setUsername(loggedInUsername);
+    };
+    return /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(jsx_dev_runtime3.Fragment, {
+      children: [
+        /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(LandingPage, {
+          pages: config.pages,
+          authenticated,
+          username,
+          onLoginClick: () => setShowLoginDialog(true),
+          onLogoutClick: handleLogout
+        }, undefined, false, undefined, this),
+        showLoginDialog && /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(LoginDialog, {
+          onClose: () => setShowLoginDialog(false),
+          onSuccess: handleLoginSuccess
+        }, undefined, false, undefined, this)
+      ]
+    }, undefined, true, undefined, this);
+  }
   var config = window.MATTE_LANDING_CONFIG;
   if (config && config.pages) {
     const root = import_client.default.createRoot(document.getElementById("root"));
-    root.render(/* @__PURE__ */ jsx_dev_runtime2.jsxDEV(import_react.default.StrictMode, {
-      children: /* @__PURE__ */ jsx_dev_runtime2.jsxDEV(LandingPage, {
-        pages: config.pages
-      }, undefined, false, undefined, this)
+    root.render(/* @__PURE__ */ jsx_dev_runtime3.jsxDEV(import_react2.default.StrictMode, {
+      children: /* @__PURE__ */ jsx_dev_runtime3.jsxDEV(LandingApp, {}, undefined, false, undefined, this)
     }, undefined, false, undefined, this));
   }
 })();

@@ -7,7 +7,53 @@
 
 .landing-header {
   text-align: center;
-  margin-bottom: 50px;
+  margin-bottom: 20px;
+}
+
+.landing-auth-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.landing-auth-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+}
+
+.landing-username {
+  font-size: 14px;
+  color: #666;
+}
+
+.landing-login-button,
+.landing-logout-button {
+  padding: 8px 16px;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  background: white;
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.landing-login-button:hover,
+.landing-logout-button:hover {
+  background: #667eea;
+  color: white;
+}
+
+.landing-logout-button {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.landing-logout-button:hover {
+  background: #dc3545;
+  color: white;
 }
 
 .landing-title {
