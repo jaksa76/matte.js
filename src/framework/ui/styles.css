@@ -68,6 +68,24 @@ body {
   padding: 20px;
   border-bottom: 1px solid var(--color-gray-200);
   min-height: 70px;
+  gap: 8px;
+}
+
+.home-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.home-button:hover {
+  background-color: var(--color-gray-100);
 }
 
 .nav-title {
@@ -77,6 +95,7 @@ body {
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
+  flex: 1;
 }
 
 .nav-toggle {

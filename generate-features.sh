@@ -17,8 +17,11 @@ count=0
 # Process each task
 for line in "${tasks[@]}"; do
     # Stop after processing 5 tasks
-    if [[ $count -ge 5 ]]; then
-        break
+    echo $count
+    if [[ $count -lt 5 ]]; then
+        echo "skipping task generation for task $line"
+        ((count++))
+        continue
     fi
     
     # Skip empty lines

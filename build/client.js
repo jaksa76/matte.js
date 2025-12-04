@@ -25170,6 +25170,13 @@ Check the top-level render call using <` + parentName + ">.";
             /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("div", {
               className: "nav-header",
               children: [
+                /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("button", {
+                  className: "home-button",
+                  onClick: () => window.location.href = "/",
+                  title: "Home",
+                  "aria-label": "Home",
+                  children: "\uD83C\uDFE0"
+                }, undefined, false, undefined, this),
                 /* @__PURE__ */ jsx_dev_runtime10.jsxDEV("h1", {
                   className: "nav-title",
                   children: collapsed ? "M" : "Matte.js"

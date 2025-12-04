@@ -101,6 +101,14 @@ export function MultiPageApp({ pages }: MultiPageAppProps) {
     <div className="multi-entity-app">
       <nav className={`entity-nav ${collapsed ? 'collapsed' : ''}`}>
         <div className="nav-header">
+          <button
+            className="home-button"
+            onClick={() => window.location.href = '/'}
+            title="Home"
+            aria-label="Home"
+          >
+            🏠
+          </button>
           <h1 className="nav-title">{collapsed ? 'M' : 'Matte.js'}</h1>
           <button 
             className="nav-toggle" 
